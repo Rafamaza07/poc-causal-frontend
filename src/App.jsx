@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
-import Layout from './components/Layout'
+import Layout from "./Components/Layout"
 import Dashboard from './pages/Dashboard'
 import EvaluarPaciente from './pages/EvaluarPaciente'
 import Historial from './pages/Historial'
