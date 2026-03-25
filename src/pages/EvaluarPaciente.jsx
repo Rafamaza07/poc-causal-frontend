@@ -34,11 +34,30 @@ export default function EvaluarPaciente() {
   const [result, setResult]       = useState(null)
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
-  const [pdfLoading, setPdfLoading] = useState(false)
-  const [pdfMsg, setPdfMsg]       = useState('')
-  const fileRef                   = useRef()
+  const [pdfLoading, setPdfLoading]       = useState(false)
+  const [pdfMsg, setPdfMsg]               = useState('')
+  const [reporteLoading, setReporteLoading] = useState(false)
+  const [reporteError, setReporteError]   = useState('')
+  const fileRef                           = useRef()
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const descargarReporte = async (id_caso) => {
+    setReporteLoading(true); setReporteError('')
+    try {
+      const res = await API.get(`/api/casos/${id_caso}/reporte-pdf`, { responseType: 'blob' })
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `reporte-${id_caso}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      setReporteError('Error al generar el reporte')
+    } finally { setReporteLoading(false) }
+  }
 
   const handlePdf = async (e) => {
     const file = e.target.files?.[0]
@@ -184,7 +203,14 @@ export default function EvaluarPaciente() {
 
       {result && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-gray-800">Resultado — {result.id_caso}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800">Resultado — {result.id_caso}</h2>
+            <button onClick={() => descargarReporte(result.id_caso)} disabled={reporteLoading}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+              {reporteLoading ? 'Generando...' : '📄 Descargar Reporte PDF'}
+            </button>
+          </div>
+          {reporteError && <p className="text-xs text-red-500">{reporteError}</p>}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-xl">
               <div className="text-4xl font-bold text-gray-800">{result.score_riesgo}</div>

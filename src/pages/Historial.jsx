@@ -15,6 +15,41 @@ const REC_LABELS = {
 }
 const INP = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
+function DescargarReporte({ idCaso }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+
+  const descargar = async () => {
+    setLoading(true); setError('')
+    try {
+      const res = await API.get(`/api/casos/${idCaso}/reporte-pdf`, { responseType: 'blob' })
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `reporte-${idCaso}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      setError('Error al generar el reporte')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="border-t border-gray-100 pt-3">
+      <div className="flex items-center gap-3">
+        <button onClick={descargar} disabled={loading}
+          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-xs px-4 py-2 rounded-lg transition-colors">
+          {loading ? 'Generando...' : '📄 Descargar Reporte PDF'}
+        </button>
+        {loading && <span className="text-xs text-gray-400">La IA está redactando el análisis...</span>}
+        {error   && <span className="text-xs text-red-500">{error}</span>}
+      </div>
+    </div>
+  )
+}
+
 function ChatIA({ idCaso }) {
   const [msgs, setMsgs]       = useState([])
   const [pregunta, setPregunta] = useState('')
@@ -295,6 +330,9 @@ export default function Historial() {
                 onGuardado={(n) => setDetalle(d => ({ ...d, notas_adicionales: n }))}
               />
             )}
+
+            {/* Reporte PDF */}
+            <DescargarReporte idCaso={detalle.id_caso} />
 
             {/* Chat IA */}
             <ChatIA idCaso={detalle.id_caso} />
