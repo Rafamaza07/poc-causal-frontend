@@ -47,9 +47,7 @@ export default function EvaluarPaciente() {
     const fd = new FormData()
     fd.append('file', file)
     try {
-      const { data } = await API.post('/api/analizar-pdf', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      const { data } = await API.post('/api/analizar-pdf', fd)
       const c = data.campos_extraidos
       setForm(f => ({
         ...f,
