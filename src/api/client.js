@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const API = axios.create({ baseURL: 'http://localhost:8000' })
+// Usamos la variable de entorno de Vite. Si no existe (en local), usa localhost.
+const API = axios.create({ 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' 
+})
 
 // Inyectar token JWT en cada request automáticamente
 API.interceptors.request.use(config => {
