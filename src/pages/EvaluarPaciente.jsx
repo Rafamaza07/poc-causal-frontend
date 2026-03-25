@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import API from '../api/client'
 
 const RISK_STYLES = {
@@ -16,7 +16,7 @@ const REC_STYLES = {
 const INP = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 const INIT = { id_caso:'', edad:'', dias_incapacidad_acumulados:'', porcentaje_pcl:'',
                tipo_enfermedad:'comun', en_tratamiento_activo:1, pronostico_medico:'reservado',
-               comorbilidades:'', requiere_reubicacion_laboral:0 }
+               comorbilidades:'', requiere_reubicacion_laboral:0, notas_adicionales:'' }
 
 function Field({ label, children, required }) {
   return (
@@ -30,11 +30,48 @@ function Field({ label, children, required }) {
 }
 
 export default function EvaluarPaciente() {
-  const [form, setForm]       = useState(INIT)
-  const [result, setResult]   = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [form, setForm]           = useState(INIT)
+  const [result, setResult]       = useState(null)
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState('')
+  const [pdfLoading, setPdfLoading] = useState(false)
+  const [pdfMsg, setPdfMsg]       = useState('')
+  const fileRef                   = useRef()
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const handlePdf = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPdfLoading(true); setPdfMsg('')
+    const fd = new FormData()
+    fd.append('file', file)
+    try {
+      const { data } = await API.post('/api/analizar-pdf', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      const c = data.campos_extraidos
+      setForm(f => ({
+        ...f,
+        id_caso:                     c.id_caso                     ?? f.id_caso,
+        edad:                        c.edad                        ?? f.edad,
+        dias_incapacidad_acumulados: c.dias_incapacidad_acumulados ?? f.dias_incapacidad_acumulados,
+        porcentaje_pcl:              c.porcentaje_pcl              ?? f.porcentaje_pcl,
+        tipo_enfermedad:             c.tipo_enfermedad             ?? f.tipo_enfermedad,
+        en_tratamiento_activo:       c.en_tratamiento_activo       ?? f.en_tratamiento_activo,
+        pronostico_medico:           c.pronostico_medico           ?? f.pronostico_medico,
+        comorbilidades:              c.comorbilidades              ?? f.comorbilidades,
+        requiere_reubicacion_laboral:c.requiere_reubicacion_laboral?? f.requiere_reubicacion_laboral,
+        notas_adicionales:           c.notas_adicionales           ?? f.notas_adicionales,
+      }))
+      setPdfMsg(`✓ PDF analizado: ${data.archivo} (${data.texto_extraido_chars} chars)`)
+    } catch (err) {
+      setPdfMsg(`✗ ${err.response?.data?.detail || 'Error al analizar el PDF'}`)
+    } finally {
+      setPdfLoading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true); setError(''); setResult(null)
@@ -59,6 +96,27 @@ export default function EvaluarPaciente() {
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Evaluar Paciente</h1>
         <p className="text-gray-500 text-sm mt-1">Ingresa los datos clínicos para obtener una recomendación</p>
+      </div>
+
+      {/* Analizar PDF */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-700">Prellenar desde historia clínica (PDF)</p>
+          <p className="text-xs text-gray-400 mt-0.5">La IA extraerá los campos automáticamente</p>
+        </div>
+        <input ref={fileRef} type="file" accept=".pdf" onChange={handlePdf}
+          className="hidden" id="pdf-input" />
+        <label htmlFor="pdf-input"
+          className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            pdfLoading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-white'
+          }`}>
+          {pdfLoading ? 'Analizando...' : '📄 Subir PDF'}
+        </label>
+        {pdfMsg && (
+          <span className={`text-xs ${pdfMsg.startsWith('✓') ? 'text-green-600' : 'text-red-500'}`}>
+            {pdfMsg}
+          </span>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -112,6 +170,11 @@ export default function EvaluarPaciente() {
                 <option value={1}>Sí</option>
               </select>
             </Field>
+            <Field label="Notas Adicionales">
+              <input type="text" value={form.notas_adicionales}
+                onChange={e => set('notas_adicionales', e.target.value)}
+                className={INP} placeholder="Observaciones clínicas..." />
+            </Field>
           </div>
           {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
           <button type="submit" disabled={loading}
@@ -141,6 +204,19 @@ export default function EvaluarPaciente() {
               </p>
             </div>
           </div>
+
+          {/* Tiempo de recuperación */}
+          {result.tiempo_recuperacion?.estimado_dias && (
+            <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 flex items-center gap-4">
+              <div className="text-3xl font-bold text-indigo-700">{result.tiempo_recuperacion.estimado_dias}</div>
+              <div>
+                <p className="text-sm font-medium text-indigo-800">días estimados de recuperación</p>
+                <p className="text-xs text-indigo-600">Rango: {result.tiempo_recuperacion.rango}</p>
+                <p className="text-xs text-indigo-500 mt-0.5">{result.tiempo_recuperacion.mensaje}</p>
+              </div>
+            </div>
+          )}
+
           {result.explicacion && (
             <div className="space-y-3">
               <div className="p-4 bg-blue-50 rounded-lg">

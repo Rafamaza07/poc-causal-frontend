@@ -2,6 +2,60 @@ import { useEffect, useState } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import API from '../api/client'
 
+function PatronesIA() {
+  const [data, setData]       = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+
+  const analizar = async () => {
+    setLoading(true); setError('')
+    try {
+      const { data: d } = await API.get('/api/analisis/patrones')
+      setData(d)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Error al analizar patrones')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-gray-800">Análisis de Patrones IA</h3>
+          <p className="text-xs text-gray-400 mt-0.5">Narrativa generada por IA sobre todos los casos</p>
+        </div>
+        <button onClick={analizar} disabled={loading}
+          className="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+          {loading ? 'Analizando...' : '🤖 Analizar'}
+        </button>
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {data && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="text-xl font-bold text-gray-800">{data.estadisticas.total_casos}</div>
+              <div className="text-xs text-gray-500">Total casos</div>
+            </div>
+            <div className="bg-red-50 rounded-lg p-3">
+              <div className="text-xl font-bold text-red-700">{data.estadisticas.casos_criticos}</div>
+              <div className="text-xs text-red-500">Críticos</div>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="text-xl font-bold text-blue-700">{data.estadisticas.score_promedio}</div>
+              <div className="text-xs text-blue-500">Score promedio</div>
+            </div>
+          </div>
+          <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+            <p className="text-xs font-semibold text-slate-600 mb-2">Análisis narrativo</p>
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.analisis_ia}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const REC_COLORS = {
   'CALIFICA_PENSION_INVALIDEZ':   '#ef4444',
   'CONTINUAR_INCAPACIDAD':        '#f59e0b',
@@ -61,6 +115,8 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      <PatronesIA />
 
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
