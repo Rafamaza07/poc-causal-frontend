@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import API from '../api/client'
+import Gauge from '../Components/Gauge'
+import { SkeletonTable } from '../Components/Skeleton'
+import { useToast } from '../Components/Toast'
 
 const RISK_STYLES = {
   BAJO:     'bg-green-100 text-green-800',
@@ -15,12 +19,149 @@ const REC_LABELS = {
 }
 const INP = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
+// ─── Timeline del caso ──────────────────────────────────────────────────────
+function TimelinePanel({ idCaso }) {
+  const [data, setData]     = useState(null)
+  const [loading, setLoad]  = useState(true)
+  const [error, setError]   = useState('')
+
+  useEffect(() => {
+    setLoad(true)
+    API.get(`/api/casos/${idCaso}/timeline`)
+      .then(r => setData(r.data))
+      .catch(() => setError('No hay historial de evaluaciones anteriores para este caso.'))
+      .finally(() => setLoad(false))
+  }, [idCaso])
+
+  if (loading) return (
+    <div className="space-y-2 animate-pulse py-2">
+      <div className="h-3 bg-gray-100 rounded w-1/3" />
+      <div className="h-24 bg-gray-100 rounded" />
+    </div>
+  )
+  if (error || !data || data.total_evaluaciones < 2) return null
+
+  const chartData = data.evolucion_score.map(e => ({ ...e, score: e.score }))
+  const hitos = data.timeline
+    .filter(t => t.hito_alcanzado)
+    .reduce((acc, t) => {
+      if (!acc.find(h => h.hito === t.hito_alcanzado))
+        acc.push({ fecha: t.fecha.slice(0, 10), hito: t.hito_alcanzado, dias: t.dias_incapacidad })
+      return acc
+    }, [])
+
+  return (
+    <div className="border-t border-gray-100 pt-4 space-y-3">
+      <p className="text-xs font-semibold text-gray-600">
+        📈 Timeline — {data.total_evaluaciones} evaluaciones
+      </p>
+      <ResponsiveContainer width="100%" height={130}>
+        <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -20 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+          <XAxis dataKey="fecha" tick={{ fontSize: 9, fill: '#9ca3af' }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#9ca3af' }} />
+          <Tooltip
+            contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 11 }}
+            formatter={v => [`${v}/100`, 'Score']}
+          />
+          <ReferenceLine y={75} stroke="#ef4444" strokeDasharray="4 2"
+            label={{ value: 'Crítico', position: 'insideTopRight', fontSize: 8, fill: '#ef4444' }} />
+          <ReferenceLine y={50} stroke="#f97316" strokeDasharray="4 2"
+            label={{ value: 'Alto', position: 'insideTopRight', fontSize: 8, fill: '#f97316' }} />
+          <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={2}
+            dot={{ r: 3, fill: '#3b82f6' }} activeDot={{ r: 5 }} />
+        </LineChart>
+      </ResponsiveContainer>
+      {hitos.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {hitos.map((h, i) => (
+            <span key={i} className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
+              ⚑ {h.hito}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Comparar desde historial ────────────────────────────────────────────────
+function CompararDesdeHistorial({ idCasoActual, onClose }) {
+  const toast = useToast()
+  const [idOtro, setIdOtro]     = useState('')
+  const [result, setResult]     = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+
+  const comparar = async () => {
+    if (!idOtro.trim()) return
+    setLoading(true); setError(''); setResult(null)
+    try {
+      const { data } = await API.post('/api/comparar-por-id', {
+        id_caso_1: idCasoActual,
+        id_caso_2: idOtro.trim(),
+      })
+      setResult(data)
+      toast('Comparación completada', 'info')
+    } catch (e) {
+      const msg = e.response?.data?.detail || 'Error al comparar'
+      setError(msg)
+      toast(msg, 'error')
+    } finally { setLoading(false) }
+  }
+
+  const scoreColor = (s) =>
+    s >= 75 ? 'text-red-600' : s >= 50 ? 'text-orange-500' : s >= 25 ? 'text-amber-500' : 'text-green-600'
+
+  return (
+    <div className="border-t border-gray-100 pt-3 space-y-3">
+      <p className="text-xs font-semibold text-gray-600">⚖️ Comparar con otro caso</p>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={idOtro}
+          onChange={e => setIdOtro(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') comparar() }}
+          placeholder="ID del otro caso..."
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button onClick={comparar} disabled={loading || !idOtro.trim()}
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+          {loading ? '...' : 'Comparar'}
+        </button>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs px-2">✕</button>
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {result && (
+        <div className="space-y-2">
+          <div className="bg-slate-800 text-white rounded-lg px-3 py-2 text-xs text-center font-medium">
+            Caso más crítico: <span className="text-yellow-300">{result.mas_critico}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[result.detalle_paciente_1, result.detalle_paciente_2].map((p, i) => p && (
+              <div key={i} className={`rounded-lg border p-3 text-center ${
+                result.mas_critico === p.id_caso ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+              }`}>
+                <p className="text-xs font-semibold text-gray-700 mb-1">{p.id_caso}</p>
+                <p className={`text-xl font-bold ${scoreColor(p.score_riesgo)}`}>{p.score_riesgo}</p>
+                <p className="text-xs text-gray-500">{p.nivel_riesgo}</p>
+                <p className="text-xs text-gray-600 mt-1 leading-tight">{p.recomendacion?.replace(/_/g,' ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Descargar Reporte PDF ────────────────────────────────────────────────────
 function DescargarReporte({ idCaso }) {
+  const toast = useToast()
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
 
   const descargar = async () => {
-    setLoading(true); setError('')
+    setLoading(true)
     try {
       const res = await API.get(`/api/casos/${idCaso}/reporte-pdf`, { responseType: 'blob' })
       const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
@@ -31,30 +172,27 @@ function DescargarReporte({ idCaso }) {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
+      toast('Reporte PDF descargado', 'success')
     } catch {
-      setError('Error al generar el reporte')
+      toast('Error al generar el reporte', 'error')
     } finally { setLoading(false) }
   }
 
   return (
-    <div className="border-t border-gray-100 pt-3">
-      <div className="flex items-center gap-3">
-        <button onClick={descargar} disabled={loading}
-          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-xs px-4 py-2 rounded-lg transition-colors">
-          {loading ? 'Generando...' : '📄 Descargar Reporte PDF'}
-        </button>
-        {loading && <span className="text-xs text-gray-400">La IA está redactando el análisis...</span>}
-        {error   && <span className="text-xs text-red-500">{error}</span>}
-      </div>
-    </div>
+    <button onClick={descargar} disabled={loading}
+      className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+      {loading ? 'Generando...' : '📄 Reporte PDF'}
+      {loading && <span className="text-slate-300 text-xs">IA redactando...</span>}
+    </button>
   )
 }
 
+// ─── Chat IA ──────────────────────────────────────────────────────────────────
 function ChatIA({ idCaso }) {
-  const [msgs, setMsgs]       = useState([])
-  const [pregunta, setPregunta] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef             = useRef()
+  const [msgs, setMsgs]           = useState([])
+  const [pregunta, setPregunta]   = useState('')
+  const [loading, setLoading]     = useState(false)
+  const bottomRef                 = useRef()
 
   const enviar = async () => {
     const q = pregunta.trim()
@@ -71,8 +209,6 @@ function ChatIA({ idCaso }) {
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
   }
-
-  const onKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
@@ -98,14 +234,10 @@ function ChatIA({ idCaso }) {
         <div ref={bottomRef} />
       </div>
       <div className="flex gap-2">
-        <input
-          type="text"
-          value={pregunta}
-          onChange={e => setPregunta(e.target.value)}
-          onKeyDown={onKey}
+        <input type="text" value={pregunta} onChange={e => setPregunta(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
           placeholder="Escribe una pregunta..."
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
         <button onClick={enviar} disabled={loading || !pregunta.trim()}
           className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
           Enviar
@@ -115,73 +247,93 @@ function ChatIA({ idCaso }) {
   )
 }
 
+// ─── Editar Notas ─────────────────────────────────────────────────────────────
 function EditarNotas({ idCaso, notasIniciales, onGuardado }) {
-  const [notas, setNotas]     = useState(notasIniciales || '')
-  const [saving, setSaving]   = useState(false)
-  const [msg, setMsg]         = useState('')
+  const toast = useToast()
+  const [notas, setNotas]   = useState(notasIniciales || '')
+  const [saving, setSaving] = useState(false)
 
   const guardar = async () => {
-    setSaving(true); setMsg('')
+    setSaving(true)
     try {
       await API.patch(`/api/historial/${idCaso}`, { notas_adicionales: notas })
-      setMsg('Guardado')
       onGuardado(notas)
+      toast('Notas guardadas', 'success')
     } catch {
-      setMsg('Error al guardar')
+      toast('Error al guardar', 'error')
     } finally { setSaving(false) }
   }
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
       <p className="text-xs font-semibold text-gray-600">✏️ Editar notas (Admin)</p>
-      <textarea
-        value={notas}
-        onChange={e => setNotas(e.target.value)}
-        rows={3}
+      <textarea value={notas} onChange={e => setNotas(e.target.value)} rows={3}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        placeholder="Notas adicionales..."
-      />
-      <div className="flex items-center gap-3">
-        <button onClick={guardar} disabled={saving}
-          className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white text-xs px-4 py-1.5 rounded-lg transition-colors">
-          {saving ? 'Guardando...' : 'Guardar'}
-        </button>
-        {msg && <span className={`text-xs ${msg === 'Guardado' ? 'text-green-600' : 'text-red-500'}`}>{msg}</span>}
-      </div>
+        placeholder="Notas adicionales..." />
+      <button onClick={guardar} disabled={saving}
+        className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white text-xs px-4 py-1.5 rounded-lg transition-colors">
+        {saving ? 'Guardando...' : 'Guardar'}
+      </button>
     </div>
   )
 }
 
+// ─── Página principal ─────────────────────────────────────────────────────────
 export default function Historial() {
-  const [casos, setCasos]           = useState([])
-  const [loading, setLoading]       = useState(true)
-  const [busqueda, setBusqueda]     = useState('')
+  const toast = useToast()
+  const [casos, setCasos]               = useState([])
+  const [loading, setLoading]           = useState(true)
+  const [busqueda, setBusqueda]         = useState('')
   const [filtroRiesgo, setFiltroRiesgo] = useState('')
-  const [filtroRec, setFiltroRec]   = useState('')
-  const [detalle, setDetalle]       = useState(null)
-  const [, setLoadingDet] = useState(false)
+  const [filtroRec, setFiltroRec]       = useState('')
+  const [detalle, setDetalle]           = useState(null)
+  const [showComparar, setShowComparar] = useState(false)
+  const [exportando, setExportando]     = useState(false)
 
   const user = (() => { try { return JSON.parse(localStorage.getItem('user')) } catch { return null } })()
-  const puedeEditar = user?.permisos?.includes('editar_caso')
+  const puedeEditar   = user?.permisos?.includes('editar_caso')
+  const puedeExportar = user?.permisos?.includes('exportar')
 
   const cargar = () => {
     setLoading(true)
     const params = new URLSearchParams({ limite: 50 })
-    if (busqueda) params.append('busqueda', busqueda)
+    if (busqueda)     params.append('busqueda',     busqueda)
     if (filtroRiesgo) params.append('nivel_riesgo', filtroRiesgo)
-    if (filtroRec) params.append('recomendacion', filtroRec)
-    API.get(`/api/historial?${params}`).then(r => setCasos(r.data.casos||[])).finally(() => setLoading(false))
+    if (filtroRec)    params.append('recomendacion', filtroRec)
+    API.get(`/api/historial?${params}`)
+      .then(r => setCasos(r.data.casos || []))
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => { cargar() }, [])
 
   const verDetalle = async (id_caso) => {
-    setLoadingDet(true)
+    setShowComparar(false)
     try {
       const { data } = await API.get(`/api/historial/${id_caso}`)
       setDetalle(data)
     } catch {}
-    setLoadingDet(false)
+  }
+
+  const exportarCSV = async () => {
+    setExportando(true)
+    try {
+      const params = new URLSearchParams()
+      if (filtroRiesgo) params.append('nivel_riesgo', filtroRiesgo)
+      if (filtroRec)    params.append('recomendacion', filtroRec)
+      const res = await API.get(`/api/historial/export-csv?${params}`, { responseType: 'blob' })
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }))
+      const link = document.createElement('a')
+      link.href  = url
+      link.setAttribute('download', `historial-${new Date().toISOString().slice(0,10)}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast('CSV exportado', 'success')
+    } catch {
+      toast('Error al exportar CSV', 'error')
+    } finally { setExportando(false) }
   }
 
   return (
@@ -191,15 +343,24 @@ export default function Historial() {
           <h1 className="text-2xl font-bold text-gray-800">Historial de Casos</h1>
           <p className="text-gray-500 text-sm mt-1">{casos.length} casos</p>
         </div>
-        <button onClick={cargar} className="bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50">
-          🔄 Actualizar
-        </button>
+        <div className="flex gap-2">
+          {puedeExportar && (
+            <button onClick={exportarCSV} disabled={exportando}
+              className="bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+              {exportando ? 'Exportando...' : '⬇ CSV'}
+            </button>
+          )}
+          <button onClick={cargar} className="bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50">
+            🔄 Actualizar
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}
       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-3 flex-wrap">
         <input type="text" value={busqueda} onChange={e => setBusqueda(e.target.value)}
-          placeholder="Buscar por ID..." className={INP} />
+          placeholder="Buscar por ID..." className={INP}
+          onKeyDown={e => { if (e.key === 'Enter') cargar() }} />
         <select value={filtroRiesgo} onChange={e => setFiltroRiesgo(e.target.value)} className={INP}>
           <option value="">Todos los niveles</option>
           <option value="BAJO">Bajo</option>
@@ -221,16 +382,18 @@ export default function Historial() {
 
       <div className="grid grid-cols-1 gap-6" style={{ gridTemplateColumns: detalle ? '1fr 1fr' : '1fr' }}>
         {/* Tabla */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          {loading ? (
-            <div className="flex items-center justify-center h-48 text-gray-400">Cargando...</div>
-          ) : casos.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-gray-400">No hay casos</div>
-          ) : (
+        {loading ? (
+          <SkeletonTable rows={7} />
+        ) : casos.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 flex items-center justify-center h-48 text-gray-400">
+            No hay casos
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['ID','Fecha','Recomendación','Score','Riesgo','Evaluado por'].map(h => (
+                  {['ID', 'Fecha', 'Recomendación', 'Score', 'Riesgo', 'Evaluado por'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">{h}</th>
                   ))}
                 </tr>
@@ -243,43 +406,38 @@ export default function Historial() {
                       {c.es_critico && <span className="mr-1">🚨</span>}{c.id_caso}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{new Date(c.fecha).toLocaleDateString('es-CO')}</td>
-                    <td className="px-4 py-3 text-xs text-gray-700">{REC_LABELS[c.recomendacion]||c.recomendacion}</td>
+                    <td className="px-4 py-3 text-xs text-gray-700">{REC_LABELS[c.recomendacion] || c.recomendacion}</td>
                     <td className="px-4 py-3 text-sm font-bold text-gray-800">{c.score_riesgo}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${RISK_STYLES[c.nivel_riesgo]||''}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${RISK_STYLES[c.nivel_riesgo] || ''}`}>
                         {c.nivel_riesgo}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{c.evaluado_por||'—'}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{c.evaluado_por || '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Panel de detalle */}
         {detalle && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)]">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-gray-800">Detalle — {detalle.id_caso}</h3>
-              <button onClick={() => setDetalle(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+              <button onClick={() => { setDetalle(null); setShowComparar(false) }}
+                className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-3xl font-bold text-gray-800">{detalle.score_riesgo}</div>
-                <div className="text-xs text-gray-500">Score / 100</div>
-                <span className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full font-medium ${
-                  {BAJO:'bg-green-100 text-green-800',MODERADO:'bg-yellow-100 text-yellow-800',
-                   ALTO:'bg-orange-100 text-orange-800','CRÍTICO':'bg-red-100 text-red-800'}[detalle.nivel_riesgo]||''}`}>
-                  {detalle.nivel_riesgo}
-                </span>
-              </div>
+
+            {/* Gauge + recomendación */}
+            <div className="grid grid-cols-2 gap-3 items-center">
+              <Gauge score={detalle.score_riesgo} />
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-xs text-blue-600 font-medium mb-1">Recomendación</p>
-                <p className="text-sm font-bold text-blue-800">{detalle.recomendacion?.replace(/_/g,' ')}</p>
+                <p className="text-sm font-bold text-blue-800 leading-snug">{detalle.recomendacion?.replace(/_/g, ' ')}</p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Confianza: {detalle.confianza ? `${(detalle.confianza*100).toFixed(0)}%` : '100%'}
+                  Confianza: {detalle.confianza ? `${(detalle.confianza * 100).toFixed(0)}%` : '100%'}
                 </p>
               </div>
             </div>
@@ -305,9 +463,9 @@ export default function Historial() {
                   <div>
                     <p className="text-xs font-medium text-gray-600 mb-2">Próximos pasos</p>
                     <ul className="space-y-1">
-                      {detalle.explicacion.proximos_pasos.map((p,i) => (
+                      {detalle.explicacion.proximos_pasos.map((p, i) => (
                         <li key={i} className="text-xs text-gray-600 flex gap-1">
-                          <span className="text-blue-500 font-bold">{i+1}.</span>{p}
+                          <span className="text-blue-500 font-bold">{i + 1}.</span>{p}
                         </li>
                       ))}
                     </ul>
@@ -315,6 +473,7 @@ export default function Historial() {
                 )}
               </>
             )}
+
             {detalle.notas_adicionales && !puedeEditar && (
               <div className="p-3 bg-yellow-50 rounded-lg">
                 <p className="text-xs font-medium text-yellow-700 mb-1">Notas</p>
@@ -322,17 +481,32 @@ export default function Historial() {
               </div>
             )}
 
-            {/* Editar notas (solo admin) */}
             {puedeEditar && (
               <EditarNotas
                 idCaso={detalle.id_caso}
                 notasIniciales={detalle.notas_adicionales}
-                onGuardado={(n) => setDetalle(d => ({ ...d, notas_adicionales: n }))}
+                onGuardado={n => setDetalle(d => ({ ...d, notas_adicionales: n }))}
               />
             )}
 
-            {/* Reporte PDF */}
-            <DescargarReporte idCaso={detalle.id_caso} />
+            {/* Timeline */}
+            <TimelinePanel idCaso={detalle.id_caso} />
+
+            {/* Acciones: reporte + comparar */}
+            <div className="border-t border-gray-100 pt-3 flex items-center gap-2 flex-wrap">
+              <DescargarReporte idCaso={detalle.id_caso} />
+              <button onClick={() => setShowComparar(v => !v)}
+                className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg transition-colors border border-blue-200">
+                ⚖️ Comparar
+              </button>
+            </div>
+
+            {showComparar && (
+              <CompararDesdeHistorial
+                idCasoActual={detalle.id_caso}
+                onClose={() => setShowComparar(false)}
+              />
+            )}
 
             {/* Chat IA */}
             <ChatIA idCaso={detalle.id_caso} />

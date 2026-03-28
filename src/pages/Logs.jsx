@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import API from '../api/client'
+import { SkeletonTable } from '../Components/Skeleton'
 
 const ACCION_STYLES = {
   LOGIN:        'bg-green-100 text-green-700',
@@ -26,10 +27,10 @@ export default function Logs() {
         <h1 className="text-2xl font-bold text-gray-800">Logs de Auditoría</h1>
         <p className="text-gray-500 text-sm mt-1">{logs.length} registros</p>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center h-48 text-gray-400">Cargando...</div>
-        ) : (
+      {loading ? (
+        <SkeletonTable rows={8} />
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -59,8 +60,8 @@ export default function Logs() {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

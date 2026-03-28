@@ -1,12 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import API from '../api/client'
+import Gauge from '../Components/Gauge'
+import { useToast } from '../Components/Toast'
 
-const RISK_STYLES = {
-  BAJO:     'bg-green-100 text-green-800 border-green-200',
-  MODERADO: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  ALTO:     'bg-orange-100 text-orange-800 border-orange-200',
-  CRÍTICO:  'bg-red-100 text-red-800 border-red-200',
-}
 const REC_STYLES = {
   'CALIFICA_PENSION_INVALIDEZ':   'bg-red-50 border-red-400 text-red-800',
   'CONTINUAR_INCAPACIDAD':        'bg-yellow-50 border-yellow-400 text-yellow-800',
@@ -14,9 +10,11 @@ const REC_STYLES = {
   'FORZAR_CALIFICACION_PCL':      'bg-orange-50 border-orange-400 text-orange-800',
 }
 const INP = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-const INIT = { id_caso:'', edad:'', dias_incapacidad_acumulados:'', porcentaje_pcl:'',
-               tipo_enfermedad:'comun', en_tratamiento_activo:1, pronostico_medico:'reservado',
-               comorbilidades:'', requiere_reubicacion_laboral:0, notas_adicionales:'' }
+const INIT = {
+  id_caso:'', edad:'', dias_incapacidad_acumulados:'', porcentaje_pcl:'',
+  tipo_enfermedad:'comun', en_tratamiento_activo:1, pronostico_medico:'reservado',
+  comorbilidades:'', requiere_reubicacion_laboral:0, notas_adicionales:''
+}
 
 function Field({ label, children, required }) {
   return (
@@ -29,21 +27,88 @@ function Field({ label, children, required }) {
   )
 }
 
+/** Calcula score de riesgo localmente (misma lógica que el backend) */
+function calcularScoreLocal({ porcentaje_pcl, dias_incapacidad_acumulados, pronostico_medico, comorbilidades, en_tratamiento_activo }) {
+  const pcl   = parseFloat(porcentaje_pcl)  || 0
+  const dias  = parseInt(dias_incapacidad_acumulados) || 0
+  const comor = parseInt(comorbilidades)    || 0
+  const trat  = parseInt(en_tratamiento_activo)
+
+  let score = 0
+  score += pcl * 0.40
+  score += Math.min(dias / 540, 1.0) * 25
+  score += { malo: 20, reservado: 10, favorable: 0 }[pronostico_medico] ?? 10
+  score += Math.min(comor * 3, 10)
+  if (!trat) score += 5
+  return Math.round(Math.min(score, 100) * 10) / 10
+}
+
+function WhatIf({ base }) {
+  const [pcl,    setPcl]    = useState(parseFloat(base.porcentaje_pcl)              || 0)
+  const [dias,   setDias]   = useState(parseInt(base.dias_incapacidad_acumulados)   || 0)
+
+  const scoreBase = useMemo(() => calcularScoreLocal(base), [base])
+  const scoreWhatIf = useMemo(() => calcularScoreLocal({
+    ...base, porcentaje_pcl: pcl, dias_incapacidad_acumulados: dias,
+  }), [base, pcl, dias])
+
+  const delta = Math.round((scoreWhatIf - scoreBase) * 10) / 10
+  const deltaColor = delta > 0 ? 'text-red-600' : delta < 0 ? 'text-green-600' : 'text-gray-500'
+
+  return (
+    <div className="bg-indigo-50 rounded-xl border border-indigo-100 p-5 space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-indigo-800">Predictor "What-If"</p>
+        <p className="text-xs text-indigo-500 mt-0.5">Ajusta valores y ve cómo cambia el score en tiempo real — sin guardar</p>
+      </div>
+      <div className="grid grid-cols-2 gap-5">
+        <div>
+          <label className="text-xs font-medium text-indigo-700 mb-1 block">PCL: {pcl}%</label>
+          <input type="range" min={0} max={100} step={0.5} value={pcl}
+            onChange={e => setPcl(parseFloat(e.target.value))}
+            className="w-full accent-indigo-600" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-indigo-700 mb-1 block">Días incapacidad: {dias}</label>
+          <input type="range" min={0} max={600} step={5} value={dias}
+            onChange={e => setDias(parseInt(e.target.value))}
+            className="w-full accent-indigo-600" />
+        </div>
+      </div>
+      <div className="flex items-center gap-6">
+        <div className="text-center">
+          <p className="text-xs text-indigo-500">Score base</p>
+          <p className="text-2xl font-bold text-indigo-800">{scoreBase}</p>
+        </div>
+        <div className="text-gray-300 text-xl">→</div>
+        <div className="text-center">
+          <p className="text-xs text-indigo-500">Score proyectado</p>
+          <p className="text-2xl font-bold text-indigo-800">{scoreWhatIf}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-indigo-500">Cambio</p>
+          <p className={`text-xl font-bold ${deltaColor}`}>{delta > 0 ? '+' : ''}{delta}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function EvaluarPaciente() {
-  const [form, setForm]           = useState(INIT)
-  const [result, setResult]       = useState(null)
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState('')
-  const [pdfLoading, setPdfLoading]       = useState(false)
-  const [pdfMsg, setPdfMsg]               = useState('')
+  const toast = useToast()
+  const [form, setForm]                 = useState(INIT)
+  const [result, setResult]             = useState(null)
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState('')
+  const [pdfLoading, setPdfLoading]     = useState(false)
+  const [pdfMsg, setPdfMsg]             = useState('')
   const [reporteLoading, setReporteLoading] = useState(false)
-  const [reporteError, setReporteError]   = useState('')
-  const fileRef                           = useRef()
+  const fileRef                         = useRef()
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const descargarReporte = async (id_caso) => {
-    setReporteLoading(true); setReporteError('')
+    setReporteLoading(true)
     try {
       const res = await API.get(`/api/casos/${id_caso}/reporte-pdf`, { responseType: 'blob' })
       const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
@@ -54,8 +119,9 @@ export default function EvaluarPaciente() {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
+      toast('Reporte PDF descargado', 'success')
     } catch {
-      setReporteError('Error al generar el reporte')
+      toast('Error al generar el reporte', 'error')
     } finally { setReporteLoading(false) }
   }
 
@@ -70,20 +136,23 @@ export default function EvaluarPaciente() {
       const c = data.campos_extraidos
       setForm(f => ({
         ...f,
-        id_caso:                     c.id_caso                     ?? f.id_caso,
-        edad:                        c.edad                        ?? f.edad,
-        dias_incapacidad_acumulados: c.dias_incapacidad_acumulados ?? f.dias_incapacidad_acumulados,
-        porcentaje_pcl:              c.porcentaje_pcl              ?? f.porcentaje_pcl,
-        tipo_enfermedad:             c.tipo_enfermedad             ?? f.tipo_enfermedad,
-        en_tratamiento_activo:       c.en_tratamiento_activo       ?? f.en_tratamiento_activo,
-        pronostico_medico:           c.pronostico_medico           ?? f.pronostico_medico,
-        comorbilidades:              c.comorbilidades              ?? f.comorbilidades,
-        requiere_reubicacion_laboral:c.requiere_reubicacion_laboral?? f.requiere_reubicacion_laboral,
-        notas_adicionales:           c.notas_adicionales           ?? f.notas_adicionales,
+        id_caso:                      c.id_caso                     ?? f.id_caso,
+        edad:                         c.edad                        ?? f.edad,
+        dias_incapacidad_acumulados:  c.dias_incapacidad_acumulados ?? f.dias_incapacidad_acumulados,
+        porcentaje_pcl:               c.porcentaje_pcl              ?? f.porcentaje_pcl,
+        tipo_enfermedad:              c.tipo_enfermedad             ?? f.tipo_enfermedad,
+        en_tratamiento_activo:        c.en_tratamiento_activo       ?? f.en_tratamiento_activo,
+        pronostico_medico:            c.pronostico_medico           ?? f.pronostico_medico,
+        comorbilidades:               c.comorbilidades              ?? f.comorbilidades,
+        requiere_reubicacion_laboral: c.requiere_reubicacion_laboral ?? f.requiere_reubicacion_laboral,
+        notas_adicionales:            c.notas_adicionales           ?? f.notas_adicionales,
       }))
       setPdfMsg(`✓ PDF analizado: ${data.archivo} (${data.texto_extraido_chars} chars)`)
+      toast('PDF analizado — formulario prellenado', 'success')
     } catch (err) {
-      setPdfMsg(`✗ ${err.response?.data?.detail || 'Error al analizar el PDF'}`)
+      const msg = err.response?.data?.detail || 'Error al analizar el PDF'
+      setPdfMsg(`✗ ${msg}`)
+      toast(msg, 'error')
     } finally {
       setPdfLoading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -95,16 +164,19 @@ export default function EvaluarPaciente() {
     try {
       const { data } = await API.post('/api/evaluar-caso', {
         ...form,
-        edad: parseFloat(form.edad),
-        dias_incapacidad_acumulados: parseInt(form.dias_incapacidad_acumulados),
-        porcentaje_pcl: parseFloat(form.porcentaje_pcl),
-        comorbilidades: parseInt(form.comorbilidades),
-        en_tratamiento_activo: parseInt(form.en_tratamiento_activo),
+        edad:                         parseFloat(form.edad),
+        dias_incapacidad_acumulados:  parseInt(form.dias_incapacidad_acumulados),
+        porcentaje_pcl:               parseFloat(form.porcentaje_pcl),
+        comorbilidades:               parseInt(form.comorbilidades),
+        en_tratamiento_activo:        parseInt(form.en_tratamiento_activo),
         requiere_reubicacion_laboral: parseInt(form.requiere_reubicacion_laboral),
       })
       setResult(data)
+      toast(`Caso evaluado — Score: ${data.score_riesgo}/100`, data.es_critico ? 'warning' : 'success')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error al evaluar el caso')
+      const msg = err.response?.data?.detail || 'Error al evaluar el caso'
+      setError(msg)
+      toast(msg, 'error')
     } finally { setLoading(false) }
   }
 
@@ -210,16 +282,13 @@ export default function EvaluarPaciente() {
               {reporteLoading ? 'Generando...' : '📄 Descargar Reporte PDF'}
             </button>
           </div>
-          {reporteError && <p className="text-xs text-red-500">{reporteError}</p>}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-xl">
-              <div className="text-4xl font-bold text-gray-800">{result.score_riesgo}</div>
-              <div className="text-sm text-gray-500 mt-1">Score de Riesgo / 100</div>
-              <span className={`mt-2 inline-block text-xs px-3 py-1 rounded-full border font-medium ${RISK_STYLES[result.nivel_riesgo] || ''}`}>
-                {result.nivel_riesgo}
-              </span>
+
+          {/* Gauge + Recomendación */}
+          <div className="grid grid-cols-3 gap-4 items-center">
+            <div className="flex justify-center">
+              <Gauge score={result.score_riesgo} />
             </div>
-            <div className={`col-span-2 p-4 rounded-xl border-2 ${REC_STYLES[result.recomendacion] || ''}`}>
+            <div className={`col-span-2 p-5 rounded-xl border-2 ${REC_STYLES[result.recomendacion] || ''}`}>
               <p className="text-xs font-medium uppercase tracking-wide opacity-70 mb-1">Recomendación</p>
               <p className="font-bold text-lg">{result.recomendacion?.replace(/_/g, ' ')}</p>
               <p className="text-xs mt-2 opacity-80">
@@ -236,7 +305,6 @@ export default function EvaluarPaciente() {
               <div>
                 <p className="text-sm font-medium text-indigo-800">días estimados de recuperación</p>
                 <p className="text-xs text-indigo-600">Rango: {result.tiempo_recuperacion.rango}</p>
-                <p className="text-xs text-indigo-500 mt-0.5">{result.tiempo_recuperacion.mensaje}</p>
               </div>
             </div>
           )}
@@ -269,6 +337,9 @@ export default function EvaluarPaciente() {
               )}
             </div>
           )}
+
+          {/* What-If predictor */}
+          <WhatIf base={form} />
         </div>
       )}
     </div>
