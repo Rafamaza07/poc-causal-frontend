@@ -1,15 +1,15 @@
 import { useState, useRef, useMemo } from 'react'
+import { FileUp, Send, ArrowRight, Download, SlidersHorizontal } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { useToast } from '../Components/Toast'
 
 const REC_STYLES = {
-  'CALIFICA_PENSION_INVALIDEZ':   'bg-red-50 border-red-400 text-red-800',
-  'CONTINUAR_INCAPACIDAD':        'bg-yellow-50 border-yellow-400 text-yellow-800',
-  'REINCORPORACION_CON_TERAPIAS': 'bg-green-50 border-green-400 text-green-800',
-  'FORZAR_CALIFICACION_PCL':      'bg-orange-50 border-orange-400 text-orange-800',
+  'CALIFICA_PENSION_INVALIDEZ':   'bg-red-50 border-red-300 text-red-800',
+  'CONTINUAR_INCAPACIDAD':        'bg-yellow-50 border-yellow-300 text-yellow-800',
+  'REINCORPORACION_CON_TERAPIAS': 'bg-green-50 border-green-300 text-green-800',
+  'FORZAR_CALIFICACION_PCL':      'bg-orange-50 border-orange-300 text-orange-800',
 }
-const INP = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 const INIT = {
   id_caso:'', edad:'', dias_incapacidad_acumulados:'', porcentaje_pcl:'',
   tipo_enfermedad:'comun', en_tratamiento_activo:1, pronostico_medico:'reservado',
@@ -19,7 +19,7 @@ const INIT = {
 function Field({ label, children, required }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
@@ -27,7 +27,6 @@ function Field({ label, children, required }) {
   )
 }
 
-/** Calcula score de riesgo localmente (misma lógica que el backend) */
 function calcularScoreLocal({ porcentaje_pcl, dias_incapacidad_acumulados, pronostico_medico, comorbilidades, en_tratamiento_activo }) {
   const pcl   = parseFloat(porcentaje_pcl)  || 0
   const dias  = parseInt(dias_incapacidad_acumulados) || 0
@@ -56,38 +55,43 @@ function WhatIf({ base }) {
   const deltaColor = delta > 0 ? 'text-red-600' : delta < 0 ? 'text-green-600' : 'text-gray-500'
 
   return (
-    <div className="bg-indigo-50 rounded-xl border border-indigo-100 p-5 space-y-4">
-      <div>
-        <p className="text-sm font-semibold text-indigo-800">Predictor "What-If"</p>
-        <p className="text-xs text-indigo-500 mt-0.5">Ajusta valores y ve cómo cambia el score en tiempo real — sin guardar</p>
+    <div className="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl border border-indigo-200/60 p-6 space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
+          <SlidersHorizontal className="w-4.5 h-4.5 text-indigo-600" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-indigo-800">Predictor "What-If"</p>
+          <p className="text-xs text-indigo-500 mt-0.5">Ajusta valores y ve cómo cambia el score en tiempo real</p>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div>
-          <label className="text-xs font-medium text-indigo-700 mb-1 block">PCL: {pcl}%</label>
+          <label className="text-xs font-medium text-indigo-700 mb-1.5 block">PCL: {pcl}%</label>
           <input type="range" min={0} max={100} step={0.5} value={pcl}
             onChange={e => setPcl(parseFloat(e.target.value))}
-            className="w-full accent-indigo-600" />
+            className="w-full accent-indigo-600 h-2" />
         </div>
         <div>
-          <label className="text-xs font-medium text-indigo-700 mb-1 block">Días incapacidad: {dias}</label>
+          <label className="text-xs font-medium text-indigo-700 mb-1.5 block">Días incapacidad: {dias}</label>
           <input type="range" min={0} max={600} step={5} value={dias}
             onChange={e => setDias(parseInt(e.target.value))}
-            className="w-full accent-indigo-600" />
+            className="w-full accent-indigo-600 h-2" />
         </div>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="text-center">
-          <p className="text-xs text-indigo-500">Score base</p>
-          <p className="text-2xl font-bold text-indigo-800">{scoreBase}</p>
+      <div className="flex items-center gap-6 bg-white/60 rounded-xl p-4 border border-indigo-100">
+        <div className="text-center flex-1">
+          <p className="text-xs text-indigo-500 font-medium">Score base</p>
+          <p className="text-2xl font-bold text-indigo-800 mt-0.5">{scoreBase}</p>
         </div>
-        <div className="text-gray-300 text-xl">→</div>
-        <div className="text-center">
-          <p className="text-xs text-indigo-500">Score proyectado</p>
-          <p className="text-2xl font-bold text-indigo-800">{scoreWhatIf}</p>
+        <ArrowRight className="w-5 h-5 text-indigo-300 flex-shrink-0" />
+        <div className="text-center flex-1">
+          <p className="text-xs text-indigo-500 font-medium">Score proyectado</p>
+          <p className="text-2xl font-bold text-indigo-800 mt-0.5">{scoreWhatIf}</p>
         </div>
-        <div className="text-center">
-          <p className="text-xs text-indigo-500">Cambio</p>
-          <p className={`text-xl font-bold ${deltaColor}`}>{delta > 0 ? '+' : ''}{delta}</p>
+        <div className="text-center flex-1 border-l border-indigo-200 pl-4">
+          <p className="text-xs text-indigo-500 font-medium">Cambio</p>
+          <p className={`text-xl font-bold mt-0.5 ${deltaColor}`}>{delta > 0 ? '+' : ''}{delta}</p>
         </div>
       </div>
     </div>
@@ -147,11 +151,11 @@ export default function EvaluarPaciente() {
         requiere_reubicacion_laboral: c.requiere_reubicacion_laboral ?? f.requiere_reubicacion_laboral,
         notas_adicionales:            c.notas_adicionales           ?? f.notas_adicionales,
       }))
-      setPdfMsg(`✓ PDF analizado: ${data.archivo} (${data.texto_extraido_chars} chars)`)
+      setPdfMsg(`PDF analizado: ${data.archivo} (${data.texto_extraido_chars} chars)`)
       toast('PDF analizado — formulario prellenado', 'success')
     } catch (err) {
       const msg = err.response?.data?.detail || 'Error al analizar el PDF'
-      setPdfMsg(`✗ ${msg}`)
+      setPdfMsg(msg)
       toast(msg, 'error')
     } finally {
       setPdfLoading(false)
@@ -188,73 +192,78 @@ export default function EvaluarPaciente() {
       </div>
 
       {/* Analizar PDF */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-        <div className="flex-1">
+      <div className="card p-5 flex items-center gap-4">
+        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+          <FileUp className="w-5 h-5 text-slate-600" />
+        </div>
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-700">Prellenar desde historia clínica (PDF)</p>
           <p className="text-xs text-gray-400 mt-0.5">La IA extraerá los campos automáticamente</p>
         </div>
         <input ref={fileRef} type="file" accept=".pdf" onChange={handlePdf}
           className="hidden" id="pdf-input" />
         <label htmlFor="pdf-input"
-          className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            pdfLoading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-white'
+          className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+            pdfLoading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'btn-dark'
           }`}>
-          {pdfLoading ? 'Analizando...' : '📄 Subir PDF'}
+          <FileUp className="w-4 h-4" />
+          {pdfLoading ? 'Analizando...' : 'Subir PDF'}
         </label>
         {pdfMsg && (
-          <span className={`text-xs ${pdfMsg.startsWith('✓') ? 'text-green-600' : 'text-red-500'}`}>
+          <span className={`text-xs flex-shrink-0 ${pdfMsg.startsWith('PDF analizado') ? 'text-green-600' : 'text-red-500'}`}>
             {pdfMsg}
           </span>
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      {/* Formulario */}
+      <div className="card p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <Field label="ID del Caso" required>
               <input type="text" value={form.id_caso} onChange={e => set('id_caso', e.target.value)}
-                className={INP} placeholder="CASO-2024-001" required />
+                className="input" placeholder="CASO-2024-001" required />
             </Field>
             <Field label="Edad (años)" required>
               <input type="number" value={form.edad} onChange={e => set('edad', e.target.value)}
-                className={INP} placeholder="45" min="18" max="100" required />
+                className="input" placeholder="45" min="18" max="100" required />
             </Field>
             <Field label="Días de Incapacidad Acumulados" required>
               <input type="number" value={form.dias_incapacidad_acumulados}
                 onChange={e => set('dias_incapacidad_acumulados', e.target.value)}
-                className={INP} placeholder="120" min="0" required />
+                className="input" placeholder="120" min="0" required />
             </Field>
             <Field label="Porcentaje PCL (%)" required>
               <input type="number" value={form.porcentaje_pcl}
                 onChange={e => set('porcentaje_pcl', e.target.value)}
-                className={INP} placeholder="38.5" min="0" max="100" step="0.1" required />
+                className="input" placeholder="38.5" min="0" max="100" step="0.1" required />
             </Field>
             <Field label="Comorbilidades" required>
               <input type="number" value={form.comorbilidades}
                 onChange={e => set('comorbilidades', e.target.value)}
-                className={INP} placeholder="2" min="0" required />
+                className="input" placeholder="2" min="0" required />
             </Field>
             <Field label="Tipo de Enfermedad">
-              <select value={form.tipo_enfermedad} onChange={e => set('tipo_enfermedad', e.target.value)} className={INP}>
+              <select value={form.tipo_enfermedad} onChange={e => set('tipo_enfermedad', e.target.value)} className="input">
                 <option value="comun">Común</option>
                 <option value="laboral">Laboral</option>
               </select>
             </Field>
             <Field label="Pronóstico Médico">
-              <select value={form.pronostico_medico} onChange={e => set('pronostico_medico', e.target.value)} className={INP}>
+              <select value={form.pronostico_medico} onChange={e => set('pronostico_medico', e.target.value)} className="input">
                 <option value="favorable">Favorable</option>
                 <option value="reservado">Reservado</option>
                 <option value="malo">Malo</option>
               </select>
             </Field>
             <Field label="En Tratamiento Activo">
-              <select value={form.en_tratamiento_activo} onChange={e => set('en_tratamiento_activo', e.target.value)} className={INP}>
+              <select value={form.en_tratamiento_activo} onChange={e => set('en_tratamiento_activo', e.target.value)} className="input">
                 <option value={1}>Sí</option>
                 <option value={0}>No</option>
               </select>
             </Field>
             <Field label="Requiere Reubicación Laboral">
-              <select value={form.requiere_reubicacion_laboral} onChange={e => set('requiere_reubicacion_laboral', e.target.value)} className={INP}>
+              <select value={form.requiere_reubicacion_laboral} onChange={e => set('requiere_reubicacion_laboral', e.target.value)} className="input">
                 <option value={0}>No</option>
                 <option value={1}>Sí</option>
               </select>
@@ -262,24 +271,27 @@ export default function EvaluarPaciente() {
             <Field label="Notas Adicionales">
               <input type="text" value={form.notas_adicionales}
                 onChange={e => set('notas_adicionales', e.target.value)}
-                className={INP} placeholder="Observaciones clínicas..." />
+                className="input" placeholder="Observaciones clínicas..." />
             </Field>
           </div>
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>}
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm animate-fade-in">{error}</div>}
           <button type="submit" disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium px-8 py-2.5 rounded-lg transition-colors">
+            className="btn-primary px-8 py-2.5 text-sm flex items-center gap-2">
+            <Send className="w-4 h-4" />
             {loading ? 'Evaluando...' : 'Evaluar Caso'}
           </button>
         </form>
       </div>
 
+      {/* Resultado */}
       {result && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
+        <div className="card p-6 space-y-5 animate-slide-up">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-800">Resultado — {result.id_caso}</h2>
             <button onClick={() => descargarReporte(result.id_caso)} disabled={reporteLoading}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-sm px-4 py-2 rounded-lg transition-colors">
-              {reporteLoading ? 'Generando...' : '📄 Descargar Reporte PDF'}
+              className="btn-dark text-sm px-4 py-2 flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              {reporteLoading ? 'Generando...' : 'Descargar Reporte PDF'}
             </button>
           </div>
 
@@ -289,7 +301,7 @@ export default function EvaluarPaciente() {
               <Gauge score={result.score_riesgo} />
             </div>
             <div className={`col-span-2 p-5 rounded-xl border-2 ${REC_STYLES[result.recomendacion] || ''}`}>
-              <p className="text-xs font-medium uppercase tracking-wide opacity-70 mb-1">Recomendación</p>
+              <p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-1">Recomendación</p>
               <p className="font-bold text-lg">{result.recomendacion?.replace(/_/g, ' ')}</p>
               <p className="text-xs mt-2 opacity-80">
                 Confianza: {result.confianza ? `${(result.confianza*100).toFixed(0)}%` : '100%'}
@@ -300,7 +312,7 @@ export default function EvaluarPaciente() {
 
           {/* Tiempo de recuperación */}
           {result.tiempo_recuperacion?.estimado_dias && (
-            <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 flex items-center gap-4">
+            <div className="p-4 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-xl border border-indigo-200/60 flex items-center gap-4">
               <div className="text-3xl font-bold text-indigo-700">{result.tiempo_recuperacion.estimado_dias}</div>
               <div>
                 <p className="text-sm font-medium text-indigo-800">días estimados de recuperación</p>
@@ -311,17 +323,17 @@ export default function EvaluarPaciente() {
 
           {result.explicacion && (
             <div className="space-y-3">
-              <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <p className="text-sm font-medium text-blue-800 mb-1">Explicación</p>
-                <p className="text-sm text-blue-700">{result.explicacion.resumen}</p>
+                <p className="text-sm text-blue-700 leading-relaxed">{result.explicacion.resumen}</p>
               </div>
               {result.explicacion.proximos_pasos?.length > 0 && (
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <p className="text-sm font-medium text-gray-700 mb-2">Próximos Pasos</p>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1.5">
                     {result.explicacion.proximos_pasos.map((p, i) => (
                       <li key={i} className="text-sm text-gray-600 flex gap-2">
-                        <span className="text-blue-500 font-bold">{i+1}.</span>{p}
+                        <span className="text-brand-600 font-bold">{i+1}.</span>{p}
                       </li>
                     ))}
                   </ul>
@@ -329,16 +341,15 @@ export default function EvaluarPaciente() {
               )}
               {result.variables_causales_detectadas?.length > 0 && (
                 <div className="flex gap-2 flex-wrap items-center">
-                  <span className="text-xs text-gray-500">Variables causales:</span>
+                  <span className="text-xs text-gray-500 font-medium">Variables causales:</span>
                   {result.variables_causales_detectadas.map(v => (
-                    <span key={v} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{v}</span>
+                    <span key={v} className="text-xs bg-brand-100 text-brand-700 px-2.5 py-0.5 rounded-full font-medium">{v}</span>
                   ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* What-If predictor */}
           <WhatIf base={form} />
         </div>
       )}

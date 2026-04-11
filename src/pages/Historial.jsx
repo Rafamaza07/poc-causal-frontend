@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
+import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { SkeletonTable } from '../Components/Skeleton'
@@ -17,7 +18,6 @@ const REC_LABELS = {
   'REINCORPORACION_CON_TERAPIAS': 'Reincorporar',
   'FORZAR_CALIFICACION_PCL':      'Forzar PCL',
 }
-const INP = 'border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
 // ─── Timeline del caso ──────────────────────────────────────────────────────
 function TimelinePanel({ idCaso }) {
@@ -52,16 +52,17 @@ function TimelinePanel({ idCaso }) {
 
   return (
     <div className="border-t border-gray-100 pt-4 space-y-3">
-      <p className="text-xs font-semibold text-gray-600">
-        📈 Timeline — {data.total_evaluaciones} evaluaciones
-      </p>
+      <div className="flex items-center gap-2">
+        <TrendingUp className="w-3.5 h-3.5 text-gray-500" />
+        <p className="text-xs font-semibold text-gray-600">Timeline — {data.total_evaluaciones} evaluaciones</p>
+      </div>
       <ResponsiveContainer width="100%" height={130}>
         <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
           <XAxis dataKey="fecha" tick={{ fontSize: 9, fill: '#9ca3af' }} />
           <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#9ca3af' }} />
           <Tooltip
-            contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 11 }}
+            contentStyle={{ borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 11 }}
             formatter={v => [`${v}/100`, 'Score']}
           />
           <ReferenceLine y={75} stroke="#ef4444" strokeDasharray="4 2"
@@ -75,8 +76,8 @@ function TimelinePanel({ idCaso }) {
       {hitos.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {hitos.map((h, i) => (
-            <span key={i} className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
-              ⚑ {h.hito}
+            <span key={i} className="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-medium">
+              {h.hito}
             </span>
           ))}
         </div>
@@ -115,7 +116,10 @@ function CompararDesdeHistorial({ idCasoActual, onClose }) {
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-3">
-      <p className="text-xs font-semibold text-gray-600">⚖️ Comparar con otro caso</p>
+      <div className="flex items-center gap-2">
+        <Scale className="w-3.5 h-3.5 text-gray-500" />
+        <p className="text-xs font-semibold text-gray-600">Comparar con otro caso</p>
+      </div>
       <div className="flex gap-2">
         <input
           type="text"
@@ -123,24 +127,26 @@ function CompararDesdeHistorial({ idCasoActual, onClose }) {
           onChange={e => setIdOtro(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') comparar() }}
           placeholder="ID del otro caso..."
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input flex-1 !py-1.5 text-xs"
         />
         <button onClick={comparar} disabled={loading || !idOtro.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+          className="btn-primary text-xs px-3 py-1.5">
           {loading ? '...' : 'Comparar'}
         </button>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs px-2">✕</button>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 px-2 transition-colors">
+          <X className="w-4 h-4" />
+        </button>
       </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
       {result && (
-        <div className="space-y-2">
-          <div className="bg-slate-800 text-white rounded-lg px-3 py-2 text-xs text-center font-medium">
+        <div className="space-y-2 animate-fade-in">
+          <div className="bg-sidebar text-white rounded-lg px-3 py-2 text-xs text-center font-medium">
             Caso más crítico: <span className="text-yellow-300">{result.mas_critico}</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {[result.detalle_paciente_1, result.detalle_paciente_2].map((p, i) => p && (
-              <div key={i} className={`rounded-lg border p-3 text-center ${
-                result.mas_critico === p.id_caso ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+              <div key={i} className={`rounded-xl border p-3 text-center transition-shadow hover:shadow-soft ${
+                result.mas_critico === p.id_caso ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
               }`}>
                 <p className="text-xs font-semibold text-gray-700 mb-1">{p.id_caso}</p>
                 <p className={`text-xl font-bold ${scoreColor(p.score_riesgo)}`}>{p.score_riesgo}</p>
@@ -180,9 +186,9 @@ function DescargarReporte({ idCaso }) {
 
   return (
     <button onClick={descargar} disabled={loading}
-      className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-400 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
-      {loading ? 'Generando...' : '📄 Reporte PDF'}
-      {loading && <span className="text-slate-300 text-xs">IA redactando...</span>}
+      className="btn-dark text-xs px-3 py-1.5 flex items-center gap-1.5">
+      <FileText className="w-3.5 h-3.5" />
+      {loading ? 'Generando...' : 'Reporte PDF'}
     </button>
   )
 }
@@ -212,23 +218,30 @@ function ChatIA({ idCaso }) {
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
-      <p className="text-xs font-semibold text-gray-600 flex items-center gap-1">🤖 Chat IA sobre este caso</p>
-      <div className="bg-gray-50 rounded-lg p-2 h-36 overflow-y-auto space-y-2 text-xs">
+      <div className="flex items-center gap-2">
+        <MessageSquare className="w-3.5 h-3.5 text-gray-500" />
+        <p className="text-xs font-semibold text-gray-600">Chat IA sobre este caso</p>
+      </div>
+      <div className="bg-gray-50 rounded-xl p-3 h-36 overflow-y-auto space-y-2 text-xs border border-gray-100">
         {msgs.length === 0 && (
-          <p className="text-gray-400 text-center mt-4">Hazle una pregunta sobre el caso...</p>
+          <p className="text-gray-400 text-center mt-8">Hazle una pregunta sobre el caso...</p>
         )}
         {msgs.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-2 py-1.5 rounded-lg leading-relaxed ${
-              m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700'
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+            <div className={`max-w-[85%] px-3 py-2 rounded-xl leading-relaxed ${
+              m.role === 'user'
+                ? 'bg-brand-600 text-white rounded-br-sm'
+                : 'bg-white border border-gray-200 text-gray-700 rounded-bl-sm shadow-sm'
             }`}>
               {m.text}
             </div>
           </div>
         ))}
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 text-gray-400 px-2 py-1.5 rounded-lg">Pensando...</div>
+          <div className="flex justify-start animate-fade-in">
+            <div className="bg-white border border-gray-200 text-gray-400 px-3 py-2 rounded-xl rounded-bl-sm shadow-sm">
+              <span className="animate-pulse">Pensando...</span>
+            </div>
           </div>
         )}
         <div ref={bottomRef} />
@@ -237,9 +250,10 @@ function ChatIA({ idCaso }) {
         <input type="text" value={pregunta} onChange={e => setPregunta(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
           placeholder="Escribe una pregunta..."
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          className="input flex-1 !py-1.5 text-xs" />
         <button onClick={enviar} disabled={loading || !pregunta.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+          className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
+          <Send className="w-3.5 h-3.5" />
           Enviar
         </button>
       </div>
@@ -266,12 +280,13 @@ function EditarNotas({ idCaso, notasIniciales, onGuardado }) {
 
   return (
     <div className="border-t border-gray-100 pt-3 space-y-2">
-      <p className="text-xs font-semibold text-gray-600">✏️ Editar notas (Admin)</p>
+      <p className="text-xs font-semibold text-gray-600">Editar notas (Admin)</p>
       <textarea value={notas} onChange={e => setNotas(e.target.value)} rows={3}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        className="input resize-none text-xs"
         placeholder="Notas adicionales..." />
       <button onClick={guardar} disabled={saving}
-        className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white text-xs px-4 py-1.5 rounded-lg transition-colors">
+        className="btn-dark text-xs px-4 py-1.5 flex items-center gap-1.5">
+        <Save className="w-3.5 h-3.5" />
         {saving ? 'Guardando...' : 'Guardar'}
       </button>
     </div>
@@ -346,36 +361,39 @@ export default function Historial() {
         <div className="flex gap-2">
           {puedeExportar && (
             <button onClick={exportarCSV} disabled={exportando}
-              className="bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
-              {exportando ? 'Exportando...' : '⬇ CSV'}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:shadow-md">
+              <Download className="w-4 h-4" />
+              {exportando ? 'Exportando...' : 'CSV'}
             </button>
           )}
-          <button onClick={cargar} className="bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50">
-            🔄 Actualizar
+          <button onClick={cargar} className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5">
+            <RefreshCw className="w-4 h-4" />
+            Actualizar
           </button>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-3 flex-wrap">
+      <div className="card p-4 flex gap-3 flex-wrap items-center">
+        <Filter className="w-4 h-4 text-gray-400" />
         <input type="text" value={busqueda} onChange={e => setBusqueda(e.target.value)}
-          placeholder="Buscar por ID..." className={INP}
+          placeholder="Buscar por ID..." className="input !w-auto"
           onKeyDown={e => { if (e.key === 'Enter') cargar() }} />
-        <select value={filtroRiesgo} onChange={e => setFiltroRiesgo(e.target.value)} className={INP}>
+        <select value={filtroRiesgo} onChange={e => setFiltroRiesgo(e.target.value)} className="input !w-auto">
           <option value="">Todos los niveles</option>
           <option value="BAJO">Bajo</option>
           <option value="MODERADO">Moderado</option>
           <option value="ALTO">Alto</option>
           <option value="CRÍTICO">Crítico</option>
         </select>
-        <select value={filtroRec} onChange={e => setFiltroRec(e.target.value)} className={INP}>
+        <select value={filtroRec} onChange={e => setFiltroRec(e.target.value)} className="input !w-auto">
           <option value="">Todas las recomendaciones</option>
           <option value="CALIFICA_PENSION_INVALIDEZ">Pensión</option>
           <option value="CONTINUAR_INCAPACIDAD">Continuar</option>
           <option value="REINCORPORACION_CON_TERAPIAS">Reincorporar</option>
           <option value="FORZAR_CALIFICACION_PCL">Forzar PCL</option>
         </select>
-        <button onClick={cargar} className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700">
+        <button onClick={cargar} className="btn-primary text-sm px-4 py-2">
           Filtrar
         </button>
       </div>
@@ -385,31 +403,31 @@ export default function Historial() {
         {loading ? (
           <SkeletonTable rows={7} />
         ) : casos.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 flex items-center justify-center h-48 text-gray-400">
+          <div className="card flex items-center justify-center h-48 text-gray-400">
             No hay casos
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="card overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50/80 border-b border-gray-200">
                 <tr>
                   {['ID', 'Fecha', 'Recomendación', 'Score', 'Riesgo', 'Evaluado por'].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {casos.map(c => (
                   <tr key={c.id} onClick={() => verDetalle(c.id_caso)}
-                    className={`cursor-pointer transition-colors hover:bg-blue-50 ${c.es_critico ? 'bg-red-50' : ''} ${detalle?.id_caso === c.id_caso ? 'bg-blue-50' : ''}`}>
-                    <td className="px-4 py-3 text-sm font-medium text-blue-600">
-                      {c.es_critico && <span className="mr-1">🚨</span>}{c.id_caso}
+                    className={`cursor-pointer transition-colors duration-150 hover:bg-brand-50/50 ${c.es_critico ? 'bg-red-50/50' : ''} ${detalle?.id_caso === c.id_caso ? 'bg-brand-50' : ''}`}>
+                    <td className="px-4 py-3 text-sm font-medium text-brand-600">
+                      {c.es_critico && <span className="mr-1 text-red-500 text-xs">!</span>}{c.id_caso}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{new Date(c.fecha).toLocaleDateString('es-CO')}</td>
                     <td className="px-4 py-3 text-xs text-gray-700">{REC_LABELS[c.recomendacion] || c.recomendacion}</td>
                     <td className="px-4 py-3 text-sm font-bold text-gray-800">{c.score_riesgo}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${RISK_STYLES[c.nivel_riesgo] || ''}`}>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${RISK_STYLES[c.nivel_riesgo] || ''}`}>
                         {c.nivel_riesgo}
                       </span>
                     </td>
@@ -423,20 +441,22 @@ export default function Historial() {
 
         {/* Panel de detalle */}
         {detalle && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)]">
+          <div className="card p-5 space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)] animate-slide-up">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-gray-800">Detalle — {detalle.id_caso}</h3>
               <button onClick={() => { setDetalle(null); setShowComparar(false) }}
-                className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Gauge + recomendación */}
             <div className="grid grid-cols-2 gap-3 items-center">
               <Gauge score={detalle.score_riesgo} />
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-blue-600 font-medium mb-1">Recomendación</p>
-                <p className="text-sm font-bold text-blue-800 leading-snug">{detalle.recomendacion?.replace(/_/g, ' ')}</p>
-                <p className="text-xs text-blue-600 mt-1">
+              <div className="p-3.5 bg-brand-50 rounded-xl border border-brand-100">
+                <p className="text-xs text-brand-600 font-medium mb-1">Recomendación</p>
+                <p className="text-sm font-bold text-brand-800 leading-snug">{detalle.recomendacion?.replace(/_/g, ' ')}</p>
+                <p className="text-xs text-brand-600 mt-1.5">
                   Confianza: {detalle.confianza ? `${(detalle.confianza * 100).toFixed(0)}%` : '100%'}
                 </p>
               </div>
@@ -444,7 +464,7 @@ export default function Historial() {
 
             {/* Tiempo de recuperación */}
             {detalle.tiempo_recuperacion?.estimado_dias && (
-              <div className="p-3 bg-indigo-50 rounded-lg flex items-center gap-3">
+              <div className="p-3.5 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-xl border border-indigo-100 flex items-center gap-3">
                 <div className="text-2xl font-bold text-indigo-700">{detalle.tiempo_recuperacion.estimado_dias}d</div>
                 <div>
                   <p className="text-xs font-medium text-indigo-800">Estimado recuperación</p>
@@ -455,17 +475,17 @@ export default function Historial() {
 
             {detalle.explicacion && (
               <>
-                <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
                   <p className="text-xs font-medium text-gray-600 mb-1">Explicación</p>
-                  <p className="text-xs text-gray-600">{detalle.explicacion.resumen}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed">{detalle.explicacion.resumen}</p>
                 </div>
                 {detalle.explicacion.proximos_pasos?.length > 0 && (
                   <div>
                     <p className="text-xs font-medium text-gray-600 mb-2">Próximos pasos</p>
                     <ul className="space-y-1">
                       {detalle.explicacion.proximos_pasos.map((p, i) => (
-                        <li key={i} className="text-xs text-gray-600 flex gap-1">
-                          <span className="text-blue-500 font-bold">{i + 1}.</span>{p}
+                        <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                          <span className="text-brand-600 font-bold">{i + 1}.</span>{p}
                         </li>
                       ))}
                     </ul>
@@ -475,9 +495,9 @@ export default function Historial() {
             )}
 
             {detalle.notas_adicionales && !puedeEditar && (
-              <div className="p-3 bg-yellow-50 rounded-lg">
+              <div className="p-3.5 bg-yellow-50 rounded-xl border border-yellow-100">
                 <p className="text-xs font-medium text-yellow-700 mb-1">Notas</p>
-                <p className="text-xs text-yellow-700">{detalle.notas_adicionales}</p>
+                <p className="text-xs text-yellow-700 leading-relaxed">{detalle.notas_adicionales}</p>
               </div>
             )}
 
@@ -489,15 +509,15 @@ export default function Historial() {
               />
             )}
 
-            {/* Timeline */}
             <TimelinePanel idCaso={detalle.id_caso} />
 
-            {/* Acciones: reporte + comparar */}
+            {/* Acciones */}
             <div className="border-t border-gray-100 pt-3 flex items-center gap-2 flex-wrap">
               <DescargarReporte idCaso={detalle.id_caso} />
               <button onClick={() => setShowComparar(v => !v)}
-                className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg transition-colors border border-blue-200">
-                ⚖️ Comparar
+                className="flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs px-3 py-1.5 rounded-lg transition-colors border border-brand-200">
+                <Scale className="w-3.5 h-3.5" />
+                Comparar
               </button>
             </div>
 
@@ -508,7 +528,6 @@ export default function Historial() {
               />
             )}
 
-            {/* Chat IA */}
             <ChatIA idCaso={detalle.id_caso} />
           </div>
         )}

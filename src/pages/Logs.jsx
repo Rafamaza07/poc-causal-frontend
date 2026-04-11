@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import API from '../api/client'
 import { SkeletonTable } from '../Components/Skeleton'
 
@@ -30,31 +31,31 @@ export default function Logs() {
       {loading ? (
         <SkeletonTable rows={8} />
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="card overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50/80 border-b border-gray-200">
               <tr>
                 {['Fecha','Usuario','Rol','Acción','ID Caso','Detalle'].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {logs.map(l => (
-                <tr key={l.id} className="hover:bg-gray-50">
+                <tr key={l.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                   <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                     {new Date(l.timestamp).toLocaleString('es-CO')}
                   </td>
                   <td className="px-4 py-3 text-sm font-medium text-gray-700">{l.usuario}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded capitalize">{l.rol}</span>
+                    <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full capitalize font-medium">{l.rol}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${ACCION_STYLES[l.accion]||'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${ACCION_STYLES[l.accion]||'bg-gray-100 text-gray-600'}`}>
                       {l.accion}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-blue-600">{l.id_caso||'—'}</td>
+                  <td className="px-4 py-3 text-xs text-brand-600 font-medium">{l.id_caso||'—'}</td>
                   <td className="px-4 py-3 text-xs text-gray-500 max-w-xs truncate">{l.detalle}</td>
                 </tr>
               ))}
