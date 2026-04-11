@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { FileUp, Send, ArrowRight, Download, SlidersHorizontal } from 'lucide-react'
+import { FileUp, Send, ArrowRight, Download, SlidersHorizontal, Tag } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { useToast } from '../Components/Toast'
@@ -94,6 +94,90 @@ function WhatIf({ base }) {
           <p className={`text-xl font-bold mt-0.5 ${deltaColor}`}>{delta > 0 ? '+' : ''}{delta}</p>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ClasificadorCIE10() {
+  const toast = useToast()
+  const [texto, setTexto]   = useState('')
+  const [data, setData]     = useState(null)
+  const [loading, setLoad]  = useState(false)
+  const [open, setOpen]     = useState(false)
+
+  const clasificar = async () => {
+    if (!texto.trim()) return
+    setLoad(true); setData(null)
+    try {
+      const { data: d } = await API.post('/api/clasificar-cie10', { texto_clinico: texto })
+      setData(d)
+    } catch (err) {
+      toast(err.response?.data?.detail || 'Error al clasificar', 'error')
+    } finally { setLoad(false) }
+  }
+
+  const conf = data ? Math.round(data.confianza * 100) : 0
+  const confColor = conf >= 80 ? 'text-green-700' : conf >= 50 ? 'text-amber-700' : 'text-red-600'
+
+  return (
+    <div className="card p-5 space-y-3">
+      <button onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 text-left">
+        <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+          <Tag className="w-5 h-5 text-teal-600" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-700">Clasificador CIE-10</p>
+          <p className="text-xs text-gray-400 mt-0.5">Convierte texto clínico libre a código CIE-10</p>
+        </div>
+        <span className="text-xs text-gray-400">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="space-y-3 animate-fade-in">
+          <textarea
+            value={texto}
+            onChange={e => setTexto(e.target.value)}
+            rows={3}
+            placeholder="Ej: Lumbalgia crónica por hernia discal L4-L5 con radiculopatía derecha..."
+            className="input resize-none text-sm w-full"
+          />
+          <button onClick={clasificar} disabled={loading || !texto.trim()}
+            className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
+            <Tag className="w-4 h-4" />
+            {loading ? 'Clasificando...' : 'Clasificar'}
+          </button>
+
+          {data && (
+            <div className="space-y-3 animate-fade-in">
+              <div className="flex items-center gap-3 p-4 bg-teal-50 rounded-xl border border-teal-200">
+                <div className="text-center px-4 border-r border-teal-200">
+                  <p className="text-2xl font-bold text-teal-800">{data.codigo_cie10}</p>
+                  <p className={`text-xs font-medium mt-0.5 ${confColor}`}>{conf}% confianza</p>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-teal-800 leading-snug">{data.descripcion_oficial}</p>
+                  <p className="text-xs text-teal-600 mt-0.5">{data.categoria}</p>
+                </div>
+              </div>
+              {data.codigos_alternativos?.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-gray-500">Alternativos</p>
+                  {data.codigos_alternativos.map((c, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                      <span className="font-bold text-gray-800 shrink-0">{c.codigo}</span>
+                      <span>{c.descripcion} — <span className="text-gray-400">{c.razon}</span></span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {data.notas_codificacion && (
+                <p className="text-xs text-gray-500 italic">{data.notas_codificacion}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -215,6 +299,8 @@ export default function EvaluarPaciente() {
           </span>
         )}
       </div>
+
+      <ClasificadorCIE10 />
 
       {/* Formulario */}
       <div className="card p-6">

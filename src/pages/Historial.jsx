@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter } from 'lucide-react'
+import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { SkeletonTable } from '../Components/Skeleton'
@@ -17,6 +17,156 @@ const REC_LABELS = {
   'CONTINUAR_INCAPACIDAD':        'Continuar',
   'REINCORPORACION_CON_TERAPIAS': 'Reincorporar',
   'FORZAR_CALIFICACION_PCL':      'Forzar PCL',
+}
+
+// ─── Score de retorno al trabajo ─────────────────────────────────────────────
+function RetornoPanel({ idCaso }) {
+  const [data, setData]    = useState(null)
+  const [loading, setLoad] = useState(false)
+  const [error, setError]  = useState('')
+
+  const cargar = () => {
+    setLoad(true); setError('')
+    API.get(`/api/casos/${idCaso}/retorno`)
+      .then(r => setData(r.data))
+      .catch(() => setError('No se pudo calcular el score de retorno.'))
+      .finally(() => setLoad(false))
+  }
+
+  const INTERP_STYLES = {
+    FAVORABLE:    'text-green-700 bg-green-50 border-green-200',
+    MODERADO:     'text-amber-700 bg-amber-50 border-amber-200',
+    DESFAVORABLE: 'text-red-700 bg-red-50 border-red-200',
+  }
+
+  return (
+    <div className="border-t border-gray-100 pt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-gray-500" />
+          <p className="text-xs font-semibold text-gray-600">Score de Retorno al Trabajo</p>
+        </div>
+        {!data && (
+          <button onClick={cargar} disabled={loading}
+            className="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-2.5 py-1 rounded-lg border border-brand-200 transition-colors">
+            {loading ? 'Calculando...' : 'Calcular'}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {loading && <div className="h-2 bg-gray-100 rounded-full animate-pulse w-full" />}
+      {data && !loading && (
+        <div className="space-y-3 animate-fade-in">
+          <div className={`rounded-xl border px-4 py-3 flex items-center justify-between ${INTERP_STYLES[data.interpretacion] || ''}`}>
+            <div>
+              <p className="text-xs font-medium opacity-70">Score de retorno</p>
+              <p className="text-2xl font-bold">{data.score_retorno_trabajo}<span className="text-sm font-normal">/100</span></p>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/60 border border-current/20">
+              {data.interpretacion}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[
+              { label: 'Retorno', val: data.probabilidades.retorno_exitoso, color: 'text-green-700' },
+              { label: 'Invalidez', val: data.probabilidades.hacia_invalidez, color: 'text-red-600' },
+              { label: 'Reincidencia', val: data.probabilidades.riesgo_reincidencia, color: 'text-amber-600' },
+            ].map(p => (
+              <div key={p.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                <p className={`text-sm font-bold ${p.color}`}>{(p.val * 100).toFixed(0)}%</p>
+                <p className="text-xs text-gray-500">{p.label}</p>
+              </div>
+            ))}
+          </div>
+          {data.acciones_recomendadas?.length > 0 && (
+            <ul className="space-y-1">
+              {data.acciones_recomendadas.map((a, i) => (
+                <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                  <span className="text-brand-500 font-bold">→</span>{a}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-xs text-gray-500 leading-relaxed italic">{data.analisis_ia}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Predictor de reincidencia ────────────────────────────────────────────────
+function ReincidenciaPanel({ idCaso }) {
+  const [data, setData]    = useState(null)
+  const [loading, setLoad] = useState(false)
+  const [error, setError]  = useState('')
+
+  const cargar = () => {
+    setLoad(true); setError('')
+    API.get(`/api/casos/${idCaso}/reincidencia`)
+      .then(r => setData(r.data))
+      .catch(() => setError('No se pudo calcular el predictor.'))
+      .finally(() => setLoad(false))
+  }
+
+  const NIVEL_STYLES = {
+    ALTO:     'text-red-700 bg-red-50 border-red-200',
+    MODERADO: 'text-amber-700 bg-amber-50 border-amber-200',
+    BAJO:     'text-green-700 bg-green-50 border-green-200',
+  }
+
+  return (
+    <div className="border-t border-gray-100 pt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <RotateCcw className="w-3.5 h-3.5 text-gray-500" />
+          <p className="text-xs font-semibold text-gray-600">Predictor de Reincidencia</p>
+        </div>
+        {!data && (
+          <button onClick={cargar} disabled={loading}
+            className="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-2.5 py-1 rounded-lg border border-brand-200 transition-colors">
+            {loading ? 'Calculando...' : 'Calcular'}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {loading && <div className="h-2 bg-gray-100 rounded-full animate-pulse w-full" />}
+      {data && !loading && (
+        <div className="space-y-3 animate-fade-in">
+          {data.alerta && (
+            <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 font-medium">
+              Alerta: riesgo ALTO de reincidencia
+            </div>
+          )}
+          <div className={`rounded-xl border px-4 py-2 text-center ${NIVEL_STYLES[data.nivel_riesgo_reincidencia] || ''}`}>
+            <p className="text-xs opacity-70">Nivel de riesgo</p>
+            <p className="text-lg font-bold">{data.nivel_riesgo_reincidencia}</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[
+              { label: '30 días', val: data.probabilidades.en_30_dias },
+              { label: '60 días', val: data.probabilidades.en_60_dias },
+              { label: '90 días', val: data.probabilidades.en_90_dias },
+            ].map(p => (
+              <div key={p.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                <p className="text-sm font-bold text-gray-800">{(p.val * 100).toFixed(0)}%</p>
+                <p className="text-xs text-gray-500">{p.label}</p>
+              </div>
+            ))}
+          </div>
+          {data.factores_riesgo?.length > 0 && (
+            <ul className="space-y-1">
+              {data.factores_riesgo.map((f, i) => (
+                <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                  <span className="text-amber-500 font-bold">!</span>{f}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-xs text-gray-500 leading-relaxed italic">{data.analisis_ia}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ─── Timeline del caso ──────────────────────────────────────────────────────
@@ -510,6 +660,8 @@ export default function Historial() {
             )}
 
             <TimelinePanel idCaso={detalle.id_caso} />
+            <RetornoPanel idCaso={detalle.id_caso} />
+            <ReincidenciaPanel idCaso={detalle.id_caso} />
 
             {/* Acciones */}
             <div className="border-t border-gray-100 pt-3 flex items-center gap-2 flex-wrap">

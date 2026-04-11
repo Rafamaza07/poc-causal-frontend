@@ -1,8 +1,103 @@
 import { useEffect, useState } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
-import { ClipboardList, BarChart3, AlertTriangle, TrendingUp, Bot, Sparkles } from 'lucide-react'
+import { ClipboardList, BarChart3, AlertTriangle, TrendingUp, Bot, Sparkles, ShieldAlert } from 'lucide-react'
 import API from '../api/client'
 import { SkeletonCard } from '../Components/Skeleton'
+
+function AnomalíasIA() {
+  const [data, setData]       = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+
+  const analizar = async () => {
+    setLoading(true); setError('')
+    try {
+      const { data: d } = await API.get('/api/analisis/anomalias')
+      setData(d)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Error al detectar anomalías')
+    } finally { setLoading(false) }
+  }
+
+  const SEV_STYLES = { ALTA: 'bg-red-100 text-red-700', MEDIA: 'bg-amber-100 text-amber-700' }
+  const TIPO_LABELS = {
+    UMBRAL_LIMITE:               'Umbral límite',
+    INCONSISTENCIA_PCL_SCORE:    'PCL vs score',
+    ALTA_FRECUENCIA_EVALUACIONES:'Alta frecuencia',
+    SCORE_ALTO_SIN_JUSTIFICACION:'Score sin justificación',
+    DURACION_EXCESIVA_SIN_ESCALADA: 'Duración excesiva',
+  }
+
+  return (
+    <div className="card p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+            <ShieldAlert className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">Detector de Anomalías</h3>
+            <p className="text-xs text-gray-400 mt-0.5">Inconsistencias y patrones sospechosos en el historial</p>
+          </div>
+        </div>
+        <button onClick={analizar} disabled={loading}
+          className="btn-dark text-sm px-4 py-2 flex items-center gap-2">
+          <Bot className="w-4 h-4" />
+          {loading ? 'Analizando...' : 'Detectar'}
+        </button>
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {loading && (
+        <div className="space-y-2.5 animate-pulse">
+          <div className="h-3 bg-gray-100 rounded-full w-full" />
+          <div className="h-3 bg-gray-100 rounded-full w-4/6" />
+          <div className="h-3 bg-gray-100 rounded-full w-5/6" />
+        </div>
+      )}
+      {data && !loading && (
+        <div className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
+              <div className="text-xl font-bold text-gray-800">{data.resumen.total_casos_analizados}</div>
+              <div className="text-xs text-gray-500 mt-0.5">Casos analizados</div>
+            </div>
+            <div className="bg-red-50 rounded-xl p-3.5 border border-red-100">
+              <div className="text-xl font-bold text-red-700">{data.resumen.por_severidad.ALTA}</div>
+              <div className="text-xs text-red-500 mt-0.5">Anomalías altas</div>
+            </div>
+            <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-100">
+              <div className="text-xl font-bold text-amber-700">{data.resumen.por_severidad.MEDIA}</div>
+              <div className="text-xs text-amber-500 mt-0.5">Anomalías medias</div>
+            </div>
+          </div>
+          {data.anomalias.length === 0 ? (
+            <div className="text-center py-4 text-sm text-green-600 bg-green-50 rounded-xl border border-green-100">
+              Sin anomalías detectadas
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-52 overflow-y-auto">
+              {data.anomalias.map((a, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap mt-0.5 ${SEV_STYLES[a.severidad] || ''}`}>
+                    {a.severidad}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-700">{a.id_caso} · {TIPO_LABELS[a.tipo] || a.tipo}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{a.descripcion}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-5 border border-slate-200/60">
+            <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Análisis del auditor IA</p>
+            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.analisis_ia}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function PatronesIA() {
   const [data, setData]       = useState(null)
@@ -174,6 +269,7 @@ export default function Dashboard() {
       </div>
 
       <PatronesIA />
+      <AnomalíasIA />
 
       {/* Charts */}
       <div className="grid grid-cols-2 gap-6">
