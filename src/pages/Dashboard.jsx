@@ -55,22 +55,25 @@ function AnomalíasIA() {
         </div>
       )}
       {data && !loading && (
+        data.mensaje ? (
+          <p className="text-sm text-amber-600 bg-amber-50 rounded-xl border border-amber-200 px-4 py-3 text-center">{data.mensaje}</p>
+        ) : (
         <div className="space-y-4 animate-fade-in">
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
-              <div className="text-xl font-bold text-gray-800">{data.resumen.total_casos_analizados}</div>
+              <div className="text-xl font-bold text-gray-800">{data.resumen?.total_casos_analizados ?? 0}</div>
               <div className="text-xs text-gray-500 mt-0.5">Casos analizados</div>
             </div>
             <div className="bg-red-50 rounded-xl p-3.5 border border-red-100">
-              <div className="text-xl font-bold text-red-700">{data.resumen.por_severidad.ALTA}</div>
+              <div className="text-xl font-bold text-red-700">{data.resumen?.por_severidad?.ALTA ?? 0}</div>
               <div className="text-xs text-red-500 mt-0.5">Anomalías altas</div>
             </div>
             <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-100">
-              <div className="text-xl font-bold text-amber-700">{data.resumen.por_severidad.MEDIA}</div>
+              <div className="text-xl font-bold text-amber-700">{data.resumen?.por_severidad?.MEDIA ?? 0}</div>
               <div className="text-xs text-amber-500 mt-0.5">Anomalías medias</div>
             </div>
           </div>
-          {data.anomalias.length === 0 ? (
+          {(data.anomalias?.length ?? 0) === 0 ? (
             <div className="text-center py-4 text-sm text-green-600 bg-green-50 rounded-xl border border-green-100">
               Sin anomalías detectadas
             </div>
@@ -94,6 +97,7 @@ function AnomalíasIA() {
             <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.analisis_ia}</p>
           </div>
         </div>
+        )
       )}
     </div>
   )
@@ -141,26 +145,30 @@ function PatronesIA() {
         </div>
       )}
       {data && !loading && (
-        <div className="space-y-4 animate-fade-in">
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
-              <div className="text-xl font-bold text-gray-800">{data.estadisticas.total_casos}</div>
-              <div className="text-xs text-gray-500 mt-0.5">Total casos</div>
+        data.mensaje ? (
+          <p className="text-sm text-amber-600 bg-amber-50 rounded-xl border border-amber-200 px-4 py-3 text-center">{data.mensaje}</p>
+        ) : (
+          <div className="space-y-4 animate-fade-in">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
+                <div className="text-xl font-bold text-gray-800">{data.estadisticas?.total_casos ?? 0}</div>
+                <div className="text-xs text-gray-500 mt-0.5">Total casos</div>
+              </div>
+              <div className="bg-red-50 rounded-xl p-3.5 border border-red-100">
+                <div className="text-xl font-bold text-red-700">{data.estadisticas?.casos_criticos ?? 0}</div>
+                <div className="text-xs text-red-500 mt-0.5">Críticos</div>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-100">
+                <div className="text-xl font-bold text-blue-700">{data.estadisticas?.score_promedio ?? 0}</div>
+                <div className="text-xs text-blue-500 mt-0.5">Score promedio</div>
+              </div>
             </div>
-            <div className="bg-red-50 rounded-xl p-3.5 border border-red-100">
-              <div className="text-xl font-bold text-red-700">{data.estadisticas.casos_criticos}</div>
-              <div className="text-xs text-red-500 mt-0.5">Críticos</div>
-            </div>
-            <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-100">
-              <div className="text-xl font-bold text-blue-700">{data.estadisticas.score_promedio}</div>
-              <div className="text-xs text-blue-500 mt-0.5">Score promedio</div>
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-5 border border-slate-200/60">
+              <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Análisis narrativo</p>
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.analisis_ia}</p>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-5 border border-slate-200/60">
-            <p className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Análisis narrativo</p>
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.analisis_ia}</p>
-          </div>
-        </div>
+        )
       )}
     </div>
   )

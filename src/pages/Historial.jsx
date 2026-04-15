@@ -143,9 +143,9 @@ function ReincidenciaPanel({ idCaso }) {
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             {[
-              { label: '30 días', val: data.probabilidades.en_30_dias },
-              { label: '60 días', val: data.probabilidades.en_60_dias },
-              { label: '90 días', val: data.probabilidades.en_90_dias },
+              { label: '30 días', val: data.probabilidades?.en_30_dias ?? 0 },
+              { label: '60 días', val: data.probabilidades?.en_60_dias ?? 0 },
+              { label: '90 días', val: data.probabilidades?.en_90_dias ?? 0 },
             ].map(p => (
               <div key={p.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
                 <p className="text-sm font-bold text-gray-800">{(p.val * 100).toFixed(0)}%</p>
