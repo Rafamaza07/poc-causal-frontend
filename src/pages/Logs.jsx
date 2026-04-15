@@ -4,12 +4,13 @@ import API from '../api/client'
 import { SkeletonTable } from '../Components/Skeleton'
 
 const ACCION_STYLES = {
-  LOGIN:        'bg-green-100 text-green-700',
-  EVALUAR_CASO: 'bg-blue-100 text-blue-700',
-  VER_HISTORIAL:'bg-gray-100 text-gray-700',
-  VER_DETALLE:  'bg-purple-100 text-purple-700',
-  COMPARAR:     'bg-yellow-100 text-yellow-700',
-  EDITAR_CASO:  'bg-orange-100 text-orange-700',
+  LOGIN:          'bg-green-100 text-green-700',
+  EVALUAR_CASO:   'bg-blue-100 text-blue-700',
+  REEVALUAR_CASO: 'bg-amber-100 text-amber-700',
+  VER_HISTORIAL:  'bg-gray-100 text-gray-700',
+  VER_DETALLE:    'bg-purple-100 text-purple-700',
+  COMPARAR:       'bg-yellow-100 text-yellow-700',
+  EDITAR_CASO:    'bg-orange-100 text-orange-700',
 }
 
 export default function Logs() {

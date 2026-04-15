@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw } from 'lucide-react'
+import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw, Zap } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { SkeletonTable } from '../Components/Skeleton'
@@ -454,6 +454,7 @@ export default function Historial() {
   const [detalle, setDetalle]           = useState(null)
   const [showComparar, setShowComparar] = useState(false)
   const [exportando, setExportando]     = useState(false)
+  const [reevaluando, setReevaluando]   = useState(false)
 
   const user = (() => { try { return JSON.parse(localStorage.getItem('user')) } catch { return null } })()
   const puedeEditar   = user?.permisos?.includes('editar_caso')
@@ -481,6 +482,18 @@ export default function Historial() {
     } catch {
       toast('No se pudo cargar el detalle del caso', 'error')
     }
+  }
+
+  const reevaluar = async () => {
+    setReevaluando(true)
+    try {
+      const { data } = await API.put(`/api/historial/${detalle.id_caso}/reevaluar`)
+      setDetalle(data)
+      cargar()
+      toast('Caso existente actualizado con el modelo vigente', 'success')
+    } catch {
+      toast('Error al re-evaluar el caso', 'error')
+    } finally { setReevaluando(false) }
   }
 
   const exportarCSV = async () => {
@@ -596,7 +609,13 @@ export default function Historial() {
         {detalle && (
           <div className="card p-5 space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)] animate-slide-up">
             <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-gray-800">Detalle — {detalle.id_caso}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-gray-800">Detalle — {detalle.id_caso}</h3>
+                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Caso existente</span>
+                {detalle.es_reevaluacion && (
+                  <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Reevaluado</span>
+                )}
+              </div>
               <button onClick={() => { setDetalle(null); setShowComparar(false) }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
                 <X className="w-4 h-4" />
@@ -673,6 +692,11 @@ export default function Historial() {
                 className="flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs px-3 py-1.5 rounded-lg transition-colors border border-brand-200">
                 <Scale className="w-3.5 h-3.5" />
                 Comparar
+              </button>
+              <button onClick={reevaluar} disabled={reevaluando}
+                className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 disabled:opacity-50 text-amber-700 text-xs px-3 py-1.5 rounded-lg transition-colors border border-amber-200">
+                <Zap className="w-3.5 h-3.5" />
+                {reevaluando ? 'Evaluando...' : 'Re-evaluar'}
               </button>
             </div>
 

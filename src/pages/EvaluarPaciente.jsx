@@ -260,7 +260,10 @@ export default function EvaluarPaciente() {
         requiere_reubicacion_laboral: parseInt(form.requiere_reubicacion_laboral),
       })
       setResult(data)
-      toast(`Caso evaluado — Score: ${data.score_riesgo}/100`, data.es_critico ? 'warning' : 'success')
+      const msg = data.caso_existente
+        ? `ID ya existente — nueva evaluación guardada · Score: ${data.score_riesgo}/100`
+        : `Caso evaluado — Score: ${data.score_riesgo}/100`
+      toast(msg, data.es_critico ? 'warning' : 'success')
     } catch (err) {
       const msg = err.response?.data?.detail || 'Error al evaluar el caso'
       setError(msg)
@@ -373,7 +376,14 @@ export default function EvaluarPaciente() {
       {result && (
         <div className="card p-6 space-y-5 animate-slide-up">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Resultado — {result.id_caso}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg font-semibold text-gray-800">Resultado — {result.id_caso}</h2>
+              {result.caso_existente && (
+                <span className="text-xs bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">
+                  ID ya existía
+                </span>
+              )}
+            </div>
             <button onClick={() => descargarReporte(result.id_caso)} disabled={reporteLoading}
               className="btn-dark text-sm px-4 py-2 flex items-center gap-2">
               <Download className="w-4 h-4" />
