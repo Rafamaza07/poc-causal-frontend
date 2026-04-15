@@ -15,10 +15,12 @@ const ACCION_STYLES = {
 export default function Logs() {
   const [logs, setLogs]       = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState('')
 
   useEffect(() => {
     API.get('/api/logs?limite=100')
       .then(r => setLogs(r.data.logs || []))
+      .catch(() => setError('No se pudieron cargar los logs de auditoría.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -28,6 +30,9 @@ export default function Logs() {
         <h1 className="text-2xl font-bold text-gray-800">Logs de Auditoría</h1>
         <p className="text-gray-500 text-sm mt-1">{logs.length} registros</p>
       </div>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+      )}
       {loading ? (
         <SkeletonTable rows={8} />
       ) : (

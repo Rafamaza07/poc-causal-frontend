@@ -467,6 +467,7 @@ export default function Historial() {
     if (filtroRec)    params.append('recomendacion', filtroRec)
     API.get(`/api/historial?${params}`)
       .then(r => setCasos(r.data.casos || []))
+      .catch(() => toast('Error al cargar el historial', 'error'))
       .finally(() => setLoading(false))
   }
 
@@ -477,7 +478,9 @@ export default function Historial() {
     try {
       const { data } = await API.get(`/api/historial/${id_caso}`)
       setDetalle(data)
-    } catch {}
+    } catch {
+      toast('No se pudo cargar el detalle del caso', 'error')
+    }
   }
 
   const exportarCSV = async () => {
