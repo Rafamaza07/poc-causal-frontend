@@ -631,6 +631,11 @@ export default function Historial() {
                 <p className="text-xs text-brand-600 mt-1.5">
                   Confianza: {detalle.confianza ? `${(detalle.confianza * 100).toFixed(0)}%` : '100%'}
                 </p>
+                {detalle.model_version && (
+                  <span className="inline-block mt-1.5 text-[10px] font-mono bg-white/60 border border-brand-200 text-brand-500 px-2 py-0.5 rounded-md">
+                    Modelo: {detalle.model_version}
+                  </span>
+                )}
               </div>
             </div>
 

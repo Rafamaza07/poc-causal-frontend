@@ -403,6 +403,11 @@ export default function EvaluarPaciente() {
                 Confianza: {result.confianza ? `${(result.confianza*100).toFixed(0)}%` : '100%'}
                 {' · '}Capa: {result.capa === 'reglas_normativas' ? 'Normativa' : 'Modelo Causal'}
               </p>
+              {result.model_version && (
+                <span className="inline-block mt-2 text-[10px] font-mono bg-white/50 border border-current/20 px-2 py-0.5 rounded-md opacity-70">
+                  Modelo: {result.model_version}
+                </span>
+              )}
             </div>
           </div>
 
