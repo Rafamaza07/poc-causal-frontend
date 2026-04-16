@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { FileUp, Send, ArrowRight, Download, SlidersHorizontal, Tag } from 'lucide-react'
+import { FileUp, Send, ArrowRight, Download, SlidersHorizontal, Tag, BookOpen, ChevronDown, ChevronUp, Scale } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { useToast } from '../Components/Toast'
@@ -446,7 +446,64 @@ export default function EvaluarPaciente() {
             </div>
           )}
 
+          <BaseLegal baseLegal={result.base_legal} justificacion={result.justificacion_legal} />
+
           <WhatIf base={form} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BaseLegal({ baseLegal, justificacion }) {
+  const [open, setOpen]       = useState(false)
+  const [expanded, setExpanded] = useState({})
+
+  if (!baseLegal?.length) return null
+
+  const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
+
+  return (
+    <div className="rounded-xl border border-indigo-200 overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-5 py-3.5 bg-indigo-50/70 hover:bg-indigo-50 transition-colors text-left">
+        <Scale className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+        <span className="text-sm font-semibold text-indigo-800 flex-1">Fundamento Normativo</span>
+        <span className="text-xs text-indigo-500 mr-2">{baseLegal.length} artículos relevantes</span>
+        {open ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-indigo-400" />}
+      </button>
+
+      {open && (
+        <div className="divide-y divide-indigo-100 animate-fade-in">
+          {justificacion && (
+            <div className="px-5 py-4 bg-indigo-50/40 flex gap-3">
+              <BookOpen className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-indigo-800 leading-relaxed italic">{justificacion}</p>
+            </div>
+          )}
+          {baseLegal.map((art, i) => (
+            <div key={i} className="px-5 py-3.5 hover:bg-indigo-50/30 transition-colors">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md font-mono">
+                      {art.norma}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">{art.titulo}</span>
+                  </div>
+                  {expanded[i] && (
+                    <p className="text-xs text-gray-500 mt-2 leading-relaxed animate-fade-in">{art.extracto}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => toggle(i)}
+                  className="text-xs text-indigo-500 hover:text-indigo-700 flex-shrink-0 mt-0.5 underline underline-offset-2">
+                  {expanded[i] ? 'menos' : 'ver'}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
