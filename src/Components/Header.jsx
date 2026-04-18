@@ -72,7 +72,7 @@ export default function Header({ user, onLogout }) {
       if (sumRes.status === 'fulfilled')
         setUnread(sumRes.value.data?.unread ?? 0)
       if (listRes.status === 'fulfilled')
-        setRecentAlerts(listRes.value.data?.alerts ?? listRes.value.data ?? [])
+        setRecentAlerts(listRes.value.data?.alerts ?? listRes.value.data?.alertas ?? [])
     } catch {}
   }, [])
 

@@ -29,14 +29,6 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 1024) setCollapsed(false)
-      else if (window.innerWidth >= 768) setCollapsed(true)
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
 
   const puede = (p) => !p || user.permisos?.includes(p)
 

@@ -190,12 +190,24 @@ export default function EvaluarPaciente() {
       const { data } = await API.post('/api/analizar-pdf', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const texto = data.texto_extraido ?? data.text ?? data.contenido ?? ''
-      if (texto) {
-        set('texto_clinico', texto)
-        toast('Texto extraído del archivo', 'success')
+      const c = data.campos_extraidos
+      if (c) {
+        setForm(f => ({
+          ...f,
+          ...(c.id_caso                      ? { id_caso: c.id_caso } : {}),
+          ...(c.edad != null                 ? { edad: String(c.edad) } : {}),
+          ...(c.dias_incapacidad_acumulados != null ? { dias_incapacidad_acumulados: String(c.dias_incapacidad_acumulados) } : {}),
+          ...(c.porcentaje_pcl != null        ? { porcentaje_pcl: parseFloat(c.porcentaje_pcl) } : {}),
+          ...(c.tipo_enfermedad              ? { tipo_enfermedad: c.tipo_enfermedad } : {}),
+          ...(c.pronostico_medico            ? { pronostico_medico: c.pronostico_medico } : {}),
+          ...(c.en_tratamiento_activo != null ? { en_tratamiento_activo: Boolean(c.en_tratamiento_activo) } : {}),
+          ...(c.comorbilidades != null        ? { comorbilidades: parseInt(c.comorbilidades) || 0 } : {}),
+          ...(c.requiere_reubicacion_laboral != null ? { requiere_reubicacion_laboral: Boolean(c.requiere_reubicacion_laboral) } : {}),
+          ...(c.notas_adicionales            ? { notas_adicionales: c.notas_adicionales } : {}),
+        }))
+        toast('Datos del paciente extraídos del PDF', 'success')
       } else {
-        toast('El archivo no contiene texto legible', 'warning')
+        toast('El archivo no contiene información legible', 'warning')
       }
     } catch {
       toast('No se pudo procesar el archivo', 'error')
@@ -300,7 +312,7 @@ export default function EvaluarPaciente() {
     const recStyle   = rec ? REC_STYLES[rec.color] : { card: 'bg-gray-50 border-gray-200 text-gray-800', icon: 'text-gray-600' }
 
     return (
-      <div className="max-w-4xl space-y-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Resultado de evaluación</h1>
           <p className="text-gray-500 text-sm mt-1">Caso {result.id_caso}</p>
@@ -417,7 +429,7 @@ export default function EvaluarPaciente() {
 
   /* ──────────────────────────────────────────────────────── WIZARD */
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Evaluar caso</h1>
 
       {/* Stepper header */}

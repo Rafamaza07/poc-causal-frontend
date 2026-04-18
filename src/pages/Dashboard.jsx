@@ -230,28 +230,49 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* ── Fila 1: Header ─────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-[18px] font-semibold text-gray-900">
-            {getGreeting()}{user.nombre ? `, ${user.nombre}` : ''}
-          </h1>
-          <p className="text-sm text-gray-500 mt-0.5 capitalize">{formatDate()}</p>
+      {/* ── Fila 1: Hero header ────────────────────────── */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-500 p-6 shadow-md">
+        {/* subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.07]"
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-brand-200 text-xs font-medium uppercase tracking-widest mb-1 capitalize">{formatDate()}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+              {getGreeting()}{user.nombre ? `, ${user.nombre}` : ''}
+            </h1>
+            <div className="flex items-center gap-4 mt-3">
+              <span className="text-white/80 text-sm flex items-center gap-1.5">
+                <ClipboardList className="w-4 h-4 text-brand-200" />
+                <strong className="text-white">{totalEvaluados}</strong> casos evaluados
+              </span>
+              {casosCriticos > 0 && (
+                <span className="text-white/80 text-sm flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-300" />
+                  <strong className="text-amber-200">{casosCriticos}</strong> críticos
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/evaluar')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-brand-700
+              text-sm font-bold rounded-xl shadow-sm hover:bg-brand-50
+              active:scale-[0.97] transition-all duration-150
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
+              self-start sm:self-auto flex-shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo caso
+          </button>
         </div>
-        <button
-          onClick={() => navigate('/evaluar')}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white
-            text-sm font-semibold rounded-xl shadow-sm hover:bg-brand-700
-            active:scale-[0.97] transition-all duration-150
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40
-            self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo caso
-        </button>
       </div>
 
       {/* ── Fila 2: Stat cards ─────────────────────────── */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Resumen general</span>
+        <div className="flex-1 h-px bg-gray-100" />
+      </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           value={totalEvaluados}
@@ -290,6 +311,10 @@ export default function Dashboard() {
       </div>
 
       {/* ── Fila 3: Line chart + Alertas recientes ─────── */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Actividad reciente</span>
+        <div className="flex-1 h-px bg-gray-100" />
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
         {/* Line chart — 60% */}
