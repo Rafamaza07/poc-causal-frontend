@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Cpu, Upload, AlertTriangle, CheckCircle, Clock, BarChart2, RefreshCw } from 'lucide-react'
+import { Cpu, Upload, AlertTriangle, CheckCircle, Clock, BarChart2, RefreshCw, Network } from 'lucide-react'
 import API from '../api/client'
+import { CausalGraphView } from '../Components/charts'
 
 const OUTCOME_NAMES = ['REINCORP. INMEDIATA', 'REINCORP. CON TERAPIAS', 'CONTINUAR INCAP.', 'CALIFICA PENSIÓN']
 
@@ -174,6 +175,7 @@ function UploadModal({ onClose, onSubido }) {
 
 export default function ModeloPerformance() {
   const [data, setData] = useState(null)
+  const [grafo, setGrafo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showUpload, setShowUpload] = useState(false)
   const [recalcLoading, setRecalcLoading] = useState(false)
@@ -182,9 +184,13 @@ export default function ModeloPerformance() {
   async function fetchData() {
     setLoading(true)
     try {
-      const r = await API.get('/api/v1/modelo/performance')
-      setData(r.data)
-    } catch { setData(null) }
+      const [perf, graph] = await Promise.all([
+        API.get('/api/v1/modelo/performance'),
+        API.get('/api/v1/modelo/grafo').catch(() => null),
+      ])
+      setData(perf.data)
+      setGrafo(graph?.data ?? null)
+    } catch { setData(null); setGrafo(null) }
     finally { setLoading(false) }
   }
 
@@ -363,6 +369,36 @@ export default function ModeloPerformance() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Grafo causal */}
+          {grafo && grafo.feature_cols?.length > 0 && (
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <div className="flex items-start gap-3 mb-1">
+                <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
+                  <Network className="w-5 h-5 text-brand-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800">
+                    Grafo causal · PC Algorithm (α={grafo.alpha ?? 0.05})
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {grafo.causal_parents?.length ?? 0} de {grafo.all_features_count} variables detectadas como causales
+                    {grafo.model_version && <> · Modelo <span className="font-mono">{grafo.model_version}</span></>}
+                    {grafo.built_at && <> · {new Date(grafo.built_at).toLocaleString('es-CO')}</>}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <CausalGraphView
+                  feature_cols={grafo.feature_cols}
+                  causal_parents={grafo.causal_parents}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-4 bg-gray-50 rounded-lg p-3">
+                El PC Algorithm identifica qué variables tienen relación causal con el Outcome. Solo estas se usan en el scoring kNN.
+              </p>
+            </div>
           )}
 
           {!metricas && (
