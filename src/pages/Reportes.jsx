@@ -276,9 +276,15 @@ export default function Reportes() {
               </div>
             )
           })() : (
-            <p className="text-xs text-gray-400 text-center py-1">
-              Selecciona un caso para previsualizar y generar su reporte PDF
-            </p>
+            <div className="flex flex-col items-center justify-center py-8 text-center animate-fade-in">
+              <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mb-3">
+                <FileText className="w-7 h-7 text-brand-400" />
+              </div>
+              <p className="text-sm font-semibold text-gray-700">Genera tu primer reporte</p>
+              <p className="text-xs text-gray-400 mt-1 max-w-xs leading-relaxed">
+                Busca un caso por ID o evaluador para previsualizar y descargar su reporte PDF detallado.
+              </p>
+            </div>
           )}
         </div>
       </section>

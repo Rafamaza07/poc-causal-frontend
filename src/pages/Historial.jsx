@@ -5,6 +5,7 @@ import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { SkeletonTable } from '../Components/Skeleton'
 import { useToast } from '../Components/Toast'
+import EmptyState from '../Components/EmptyState'
 
 const RISK_STYLES = {
   BAJO:     'bg-green-100 text-green-800',
@@ -569,12 +570,16 @@ export default function Historial() {
         {loading ? (
           <SkeletonTable rows={7} />
         ) : casos.length === 0 ? (
-          <div className="card flex items-center justify-center h-48 text-gray-400">
-            No hay casos
+          <div className="card">
+            <EmptyState
+              icon={FileText}
+              title="No hay casos evaluados aún"
+              description="Prueba cambiando los filtros o evalúa un nuevo caso para verlo aquí."
+            />
           </div>
         ) : (
-          <div className="card overflow-hidden">
-            <table className="w-full">
+          <div className="card overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50/80 border-b border-gray-200">
                 <tr>
                   {['ID', 'Fecha', 'Recomendación', 'Score', 'Riesgo', 'Evaluado por'].map(h => (

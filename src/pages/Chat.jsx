@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Plus, Brain, MessageSquare, Send,
-  Menu, X, Briefcase, ChevronDown, Loader2,
+  Menu, X, Briefcase, ChevronDown, Loader2, BookOpen,
 } from 'lucide-react'
 import API from '../api/client'
 import Button from '../Components/ui/Button'
 import Badge from '../Components/ui/Badge'
+import LegalSearch from '../Components/LegalSearch'
 import { timeAgo } from '../utils/formatters'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -160,6 +161,7 @@ export default function Chat() {
   const [sidebarOpen,     setSidebarOpen]     = useState(false)
   const [showLinkCase,    setShowLinkCase]     = useState(false)
   const [caseInput,       setCaseInput]       = useState('')
+  const [showLegalPanel,  setShowLegalPanel]  = useState(false)
 
   const bottomRef   = useRef(null)
   const textareaRef = useRef(null)
@@ -388,7 +390,7 @@ export default function Chat() {
       </aside>
 
       {/* ── Right panel — chat ────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col bg-gray-50/50 min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-gray-50/50 min-w-0 overflow-hidden relative">
 
         {/* Chat header */}
         <header className="h-14 bg-white border-b border-gray-100 px-4
@@ -485,7 +487,21 @@ export default function Chat() {
           )}
 
           {/* Welcome card */}
-          {!loadingMsgs && (
+          {!loadingMsgs && isEmptyChat && (
+            <div className="flex flex-col items-center justify-center py-8 gap-4 animate-fade-in">
+              <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center shadow-soft">
+                <Brain className="w-8 h-8 text-brand-500" />
+              </div>
+              <div className="text-center">
+                <p className="text-base font-semibold text-gray-800">Inicia una conversación</p>
+                <p className="text-sm text-gray-500 mt-1 max-w-xs leading-relaxed">
+                  Soy tu asistente especializado en incapacidades. Puedo ayudarte con normativa colombiana,
+                  análisis de casos y consultas CIE-10.
+                </p>
+              </div>
+            </div>
+          )}
+          {!loadingMsgs && !isEmptyChat && (
             <div className="flex justify-start">
               <div className="bg-brand-50 border border-brand-100 rounded-xl p-4 max-w-[85%] animate-fade-in">
                 <div className="flex items-center gap-2 mb-2">
@@ -547,6 +563,18 @@ export default function Chat() {
               style={{ minHeight: '42px', maxHeight: '112px' }}
             />
             <button
+              onClick={() => setShowLegalPanel(v => !v)}
+              title="Buscar normativa"
+              className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center
+                transition-all duration-150 active:scale-95 border
+                ${showLegalPanel
+                  ? 'bg-brand-600 text-white border-brand-600'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50'
+                }`}
+            >
+              <BookOpen className="w-[18px] h-[18px]" />
+            </button>
+            <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || sending}
               className="w-10 h-10 flex-shrink-0 rounded-full bg-brand-600 text-white
@@ -561,6 +589,35 @@ export default function Chat() {
             </button>
           </div>
         </div>
+
+        {/* Legal panel — slide-in from right */}
+        {showLegalPanel && (
+          <div className="absolute inset-y-0 right-0 w-80 bg-white border-l border-gray-200
+            shadow-xl z-20 flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-brand-600" />
+                <span className="text-sm font-semibold text-gray-800">Normativa legal</span>
+              </div>
+              <button
+                onClick={() => setShowLegalPanel(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg
+                  text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              <LegalSearch
+                compact
+                onSelect={(article) => {
+                  setInput(`Consulta sobre: ${article.source} - ${article.article}: ${article.title}`)
+                  setShowLegalPanel(false)
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

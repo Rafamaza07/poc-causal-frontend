@@ -12,6 +12,7 @@ import StatCard from '../Components/StatCard'
 import DistributionPie from '../Components/charts/DistributionPie'
 import DataTable from '../Components/DataTable'
 import CIE10Search from '../Components/CIE10Search'
+import EmptyState from '../Components/EmptyState'
 import { RECOMENDACIONES } from '../utils/constants'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -291,6 +292,21 @@ export default function Analytics() {
   const casosCriticos = overview?.distribucion_riesgo?.CRITICO ?? 0
 
   // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (!ovLoading && (overview?.total_casos ?? 0) < 5) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[65vh] text-center px-4 animate-fade-in">
+        <div className="w-20 h-20 bg-brand-50 rounded-2xl flex items-center justify-center mb-6 shadow-soft">
+          <Activity className="w-10 h-10 text-brand-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800">Se necesitan al menos 5 casos</h2>
+        <p className="text-gray-500 mt-2 max-w-sm text-sm leading-relaxed">
+          Analytics requiere un mínimo de 5 evaluaciones para generar métricas y tendencias significativas.
+          {overview?.total_casos > 0 && ` Tienes ${overview.total_casos} caso${overview.total_casos !== 1 ? 's' : ''} — ¡casi listo!`}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

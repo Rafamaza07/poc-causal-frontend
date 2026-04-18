@@ -67,7 +67,7 @@
   /* Tarjeta con hover elegante */
   .card {
     @apply bg-white rounded-xl shadow-card border border-gray-100
-           transition-shadow duration-300
-           hover:shadow-lifted;
+           transition-all duration-200
+           hover:shadow-lifted hover:-translate-y-0.5;
   }
 }

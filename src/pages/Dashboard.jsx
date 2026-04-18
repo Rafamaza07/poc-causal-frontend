@@ -6,7 +6,7 @@ import {
 } from 'recharts'
 import {
   ClipboardList, AlertTriangle, Bell, Calendar,
-  Plus, ChevronRight, Clock,
+  Plus, ChevronRight, Clock, Sparkles,
 } from 'lucide-react'
 import API from '../api/client'
 import StatCard from '../Components/StatCard'
@@ -196,6 +196,31 @@ export default function Dashboard() {
           <SkeletonChart height="h-72" />
           <SkeletonChart height="h-72" />
         </div>
+      </div>
+    )
+  }
+
+  // ── Empty state ──────────────────────────────────────
+
+  if (!totalEvaluados) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[65vh] text-center px-4 animate-fade-in">
+        <div className="w-20 h-20 bg-brand-50 rounded-2xl flex items-center justify-center mb-6 shadow-soft">
+          <ClipboardList className="w-10 h-10 text-brand-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800">Evalúa tu primer caso</h2>
+        <p className="text-gray-500 mt-2 max-w-sm text-sm leading-relaxed">
+          Aún no hay casos evaluados. Comienza cargando los datos clínicos de un paciente para obtener análisis y recomendaciones.
+        </p>
+        <button
+          onClick={() => navigate('/evaluar')}
+          className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white
+            font-semibold rounded-xl shadow-sm hover:bg-brand-700 active:scale-[0.97]
+            transition-all duration-150"
+        >
+          <Sparkles className="w-4 h-4" />
+          Evaluar primer caso
+        </button>
       </div>
     )
   }

@@ -1,4 +1,28 @@
+import { useEffect, useRef, useState } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+
+function useCountUp(target, duration = 600) {
+  const num = parseFloat(String(target).replace(/[^0-9.]/g, ''))
+  const isNum = !isNaN(num) && String(target).trim() !== ''
+  const [displayed, setDisplayed] = useState(isNum ? 0 : target)
+  const rafRef = useRef(null)
+
+  useEffect(() => {
+    if (!isNum) { setDisplayed(target); return }
+    const start = performance.now()
+    const tick = (now) => {
+      const pct = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - pct, 3)
+      const current = Math.round(eased * num)
+      setDisplayed(String(target).replace(/\d+(\.\d+)?/, current))
+      if (pct < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [target])
+
+  return displayed
+}
 
 export default function StatCard({
   value,
@@ -13,10 +37,11 @@ export default function StatCard({
 }) {
   const isPositive = change?.startsWith('+')
   const isNegative = change?.startsWith('-')
+  const animated = useCountUp(value)
 
   return (
     <div
-      className={`bg-white border rounded-xl p-6 shadow-card hover:shadow-soft transition-all duration-200 animate-slide-up ${
+      className={`bg-white border rounded-xl p-6 shadow-card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-200 animate-slide-up ${
         critical ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-100'
       }`}
     >
@@ -40,8 +65,8 @@ export default function StatCard({
         )}
       </div>
 
-      <div className={`text-[32px] font-bold leading-none mt-4 ${critical && Number(value) > 0 ? 'text-red-600' : valueColor}`}>
-        {value}
+      <div className={`text-[32px] font-bold leading-none mt-4 tabular-nums ${critical && Number(value) > 0 ? 'text-red-600' : valueColor}`}>
+        {animated}
       </div>
       <div className="text-sm font-normal text-gray-500 mt-1.5">{label}</div>
       {changeLabel && <div className="text-xs text-gray-400 mt-0.5">{changeLabel}</div>}

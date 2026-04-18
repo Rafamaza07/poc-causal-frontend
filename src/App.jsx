@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login from './pages/Login'
 import Layout from "./Components/Layout"
 import Dashboard from './pages/Dashboard'
@@ -13,7 +13,35 @@ import Chat from './pages/Chat'
 import CasoDetalle from './pages/CasoDetalle'
 import Reportes from './pages/Reportes'
 import Analytics from './pages/Analytics'
+import Normativa from './pages/Normativa'
+import NotFound from './pages/NotFound'
 import { ToastProvider } from './Components/Toast'
+
+const TITLE_MAP = {
+  '/dashboard':    'Dashboard',
+  '/evaluar':      'Evaluar caso',
+  '/historial':    'Historial',
+  '/alertas':      'Alertas',
+  '/chat':         'Chat IA',
+  '/analytics':    'Analytics',
+  '/reportes':     'Reportes',
+  '/normativa':    'Normativa',
+  '/configuracion':'Configuración',
+  '/comparar':     'Comparar',
+  '/logs':         'Logs',
+}
+
+function TitleManager() {
+  const location = useLocation()
+  useEffect(() => {
+    const match = location.pathname.match(/^\/historial\/(.+)/)
+    const label = match
+      ? `Caso ${match[1]}`
+      : TITLE_MAP[location.pathname] ?? null
+    document.title = label ? `${label} | IncapacidadIA` : 'IncapacidadIA'
+  }, [location.pathname])
+  return null
+}
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -39,6 +67,7 @@ export default function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <TitleManager />
         <Layout user={user} onLogout={logout}>
           <Routes>
             <Route path="/"          element={<Navigate to="/dashboard" />} />
@@ -53,6 +82,8 @@ export default function App() {
             <Route path="/chat"          element={<Chat />} />
             <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
             <Route path="/analytics"     element={<Analytics />} />
+            <Route path="/normativa"     element={<Normativa />} />
+            <Route path="*"              element={<NotFound />} />
           </Routes>
         </Layout>
       </BrowserRouter>

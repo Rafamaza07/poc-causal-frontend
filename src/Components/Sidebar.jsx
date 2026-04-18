@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Activity,
   LayoutDashboard, FileSearch, Clock, Bell,
-  MessageSquare, BarChart3, FileText, Settings,
-  LogOut, ChevronLeft, ChevronRight,
+  MessageSquare, BarChart3, FileText, Settings, BookOpen,
+  LogOut, ChevronLeft, ChevronRight, Menu, X,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
 
@@ -14,16 +14,30 @@ const ALL_NAV = [
   { to: '/historial', label: 'Historial',    icon: Clock,           permiso: 'ver_historial' },
   { to: '/alertas',   label: 'Alertas',      icon: Bell,            permiso: null, badge: true },
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
+  { to: '/normativa', label: 'Normativa',    icon: BookOpen,        permiso: null },
   { to: '/analytics', label: 'Analytics',    icon: BarChart3,       permiso: null },
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
   { to: '/logs',           label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
   { to: '/configuracion', label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
 ]
 
-const MOBILE_NAV = ['/dashboard', '/evaluar', '/historial', '/alertas', '/configuracion']
+const MOBILE_PRIMARY = ['/dashboard', '/evaluar', '/alertas', '/chat']
 
 export default function Sidebar({ user, onLogout, alertCount = 0 }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  )
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024) setCollapsed(false)
+      else if (window.innerWidth >= 768) setCollapsed(true)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
   const puede = (p) => !p || user.permisos?.includes(p)
 
   const nav = ALL_NAV.filter(n => puede(n.permiso) && (!n.adminOnly || user.rol === 'admin'))
@@ -156,15 +170,15 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
       </aside>
 
       {/* ── Mobile bottom nav ─────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-sidebar border-t border-white/10 flex z-50 safe-area-pb">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-sidebar border-t border-white/10 flex z-50">
         {nav
-          .filter(n => MOBILE_NAV.includes(n.to))
-          .slice(0, 5)
+          .filter(n => MOBILE_PRIMARY.includes(n.to))
+          .slice(0, 4)
           .map(n => {
             const Icon = n.icon
             return (
               <NavLink
-                key={`${n.to}-${n.label}-mobile`}
+                key={`${n.to}-mobile`}
                 to={n.to}
                 end={n.end !== false}
                 className={({ isActive }) =>
@@ -183,7 +197,80 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
               </NavLink>
             )
           })}
+
+        {/* Menú — opens drawer */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-medium text-slate-500 hover:text-slate-300 transition-colors duration-150"
+        >
+          <Menu className="w-5 h-5" />
+          <span>Menú</span>
+        </button>
       </nav>
+
+      {/* ── Mobile drawer ─────────────────────────────── */}
+      {drawerOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="md:hidden fixed inset-0 bg-black/50 z-[60] animate-fade-in"
+            onClick={() => setDrawerOpen(false)}
+          />
+          {/* Panel */}
+          <div className="md:hidden fixed bottom-0 inset-x-0 bg-sidebar rounded-t-2xl z-[70] animate-slide-up pb-6">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-white font-semibold text-sm">IncapacidadIA</span>
+              </div>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <nav className="grid grid-cols-2 gap-1 px-4 py-3">
+              {nav.map(n => {
+                const Icon = n.icon
+                return (
+                  <NavLink
+                    key={`drawer-${n.to}`}
+                    to={n.to}
+                    onClick={() => setDrawerOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                        isActive
+                          ? 'bg-brand-600/90 text-white'
+                          : 'text-slate-400 hover:text-white hover:bg-white/[0.07]'
+                      }`
+                    }
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Icon className="w-4 h-4" />
+                      {n.badge && alertCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                      )}
+                    </div>
+                    <span>{n.label}</span>
+                  </NavLink>
+                )
+              })}
+            </nav>
+            <div className="px-4 pb-4">
+              <button
+                onClick={() => { setDrawerOpen(false); onLogout() }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.07] transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   )
 }

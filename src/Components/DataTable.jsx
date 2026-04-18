@@ -33,8 +33,8 @@ export default function DataTable({
   })
 
   return (
-    <div className={`overflow-hidden ${className}`}>
-      <table className="w-full text-sm">
+    <div className={`overflow-x-auto ${className}`}>
+      <table className="w-full min-w-[480px] text-sm">
         <thead>
           <tr className="border-b border-gray-100">
             {columns.map(col => (
