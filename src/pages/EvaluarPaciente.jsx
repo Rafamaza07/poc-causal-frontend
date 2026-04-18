@@ -213,8 +213,8 @@ export default function EvaluarPaciente() {
       } else {
         toast('El archivo no contiene información legible', 'warning')
       }
-    } catch {
-      toast('No se pudo procesar el archivo', 'error')
+    } catch (err) {
+      toast(err.response?.data?.detail || 'No se pudo procesar el archivo', 'error')
       setUploadedFile(null)
     } finally {
       setFileLoading(false)
