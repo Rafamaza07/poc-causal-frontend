@@ -9,6 +9,7 @@ import Comparar from './pages/Comparar'
 import Logs from './pages/Logs'
 import Configuracion from './pages/Configuracion'
 import Alertas from './pages/Alertas'
+import Chat from './pages/Chat'
 import { ToastProvider } from './Components/Toast'
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
             <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
             <Route path="/alertas"       element={<Alertas />} />
+            <Route path="/chat"          element={<Chat />} />
           </Routes>
         </Layout>
       </BrowserRouter>
