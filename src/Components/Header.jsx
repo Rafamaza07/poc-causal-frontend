@@ -18,6 +18,7 @@ const ROUTE_LABELS = {
   '/configuracion':'Configuración',
   '/alertas':      'Alertas',
   '/reportes':     'Reportes',
+  '/analytics':    'Analytics',
 }
 
 const SEV_META = {

@@ -12,6 +12,7 @@ import Alertas from './pages/Alertas'
 import Chat from './pages/Chat'
 import CasoDetalle from './pages/CasoDetalle'
 import Reportes from './pages/Reportes'
+import Analytics from './pages/Analytics'
 import { ToastProvider } from './Components/Toast'
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/alertas"       element={<Alertas />} />
             <Route path="/chat"          element={<Chat />} />
             <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
+            <Route path="/analytics"     element={<Analytics />} />
           </Routes>
         </Layout>
       </BrowserRouter>

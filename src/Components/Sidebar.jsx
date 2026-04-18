@@ -14,7 +14,7 @@ const ALL_NAV = [
   { to: '/historial', label: 'Historial',    icon: Clock,           permiso: 'ver_historial' },
   { to: '/alertas',   label: 'Alertas',      icon: Bell,            permiso: null, badge: true },
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
-  { to: '/analisis',  label: 'Análisis',     icon: BarChart3,       permiso: null },
+  { to: '/analytics', label: 'Analytics',    icon: BarChart3,       permiso: null },
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
   { to: '/logs',           label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
   { to: '/configuracion', label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
