@@ -11,6 +11,7 @@ import Configuracion from './pages/Configuracion'
 import Alertas from './pages/Alertas'
 import Chat from './pages/Chat'
 import CasoDetalle from './pages/CasoDetalle'
+import Reportes from './pages/Reportes'
 import { ToastProvider } from './Components/Toast'
 
 export default function App() {
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
             <Route path="/alertas"       element={<Alertas />} />
             <Route path="/chat"          element={<Chat />} />
+            <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
           </Routes>
         </Layout>
       </BrowserRouter>

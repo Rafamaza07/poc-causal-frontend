@@ -17,6 +17,7 @@ const ROUTE_LABELS = {
   '/logs':         'Logs',
   '/configuracion':'Configuración',
   '/alertas':      'Alertas',
+  '/reportes':     'Reportes',
 }
 
 const SEV_META = {
