@@ -16,16 +16,17 @@ const ALL_NAV = [
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
   { to: '/analisis',  label: 'Análisis',     icon: BarChart3,       permiso: null },
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
-  { to: '/logs',      label: 'Configuración',icon: Settings,         permiso: 'ver_logs' },
+  { to: '/logs',           label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
+  { to: '/configuracion', label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
 ]
 
-const MOBILE_NAV = ['/dashboard', '/evaluar', '/historial', '/alertas', '/logs']
+const MOBILE_NAV = ['/dashboard', '/evaluar', '/historial', '/alertas', '/configuracion']
 
 export default function Sidebar({ user, onLogout, alertCount = 0 }) {
   const [collapsed, setCollapsed] = useState(false)
   const puede = (p) => !p || user.permisos?.includes(p)
 
-  const nav = ALL_NAV.filter(n => puede(n.permiso))
+  const nav = ALL_NAV.filter(n => puede(n.permiso) && (!n.adminOnly || user.rol === 'admin'))
 
   const initials = (user.nombre || '?')[0].toUpperCase()
 

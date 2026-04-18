@@ -7,6 +7,7 @@ import EvaluarPaciente from './pages/EvaluarPaciente'
 import Historial from './pages/Historial'
 import Comparar from './pages/Comparar'
 import Logs from './pages/Logs'
+import Configuracion from './pages/Configuracion'
 import { ToastProvider } from './Components/Toast'
 
 export default function App() {
@@ -40,7 +41,8 @@ export default function App() {
             <Route path="/evaluar"   element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
             <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
             <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
-            <Route path="/logs"      element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
+            <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
+            <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
           </Routes>
         </Layout>
       </BrowserRouter>
