@@ -233,34 +233,40 @@ export default function CIE10Search({ onSelect, value, showDetails = true, place
           {/* Details bars */}
           {showDetails && (
             <div className="mt-4 space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-gray-600">Días típicos</span>
-                  <span className="text-xs text-gray-500 font-mono">
-                    {selected.dias_tipicos_min} — {selected.dias_tipicos_max} días
-                  </span>
-                </div>
-                <BarVisual
-                  min={selected.dias_tipicos_min}
-                  max={selected.dias_tipicos_max}
-                  total={540}
-                  color="bg-emerald-500"
-                />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-gray-600">PCL típico</span>
-                  <span className="text-xs text-gray-500 font-mono">
-                    {selected.pcl_tipico_min}% — {selected.pcl_tipico_max}%
-                  </span>
-                </div>
-                <BarVisual
-                  min={selected.pcl_tipico_min}
-                  max={selected.pcl_tipico_max}
-                  total={100}
-                  color="bg-brand-500"
-                />
-              </div>
+              {selected.dias_tipicos_min != null ? (
+                <>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-600">Días típicos</span>
+                      <span className="text-xs text-gray-500 font-mono">
+                        {selected.dias_tipicos_min} — {selected.dias_tipicos_max} días
+                      </span>
+                    </div>
+                    <BarVisual
+                      min={selected.dias_tipicos_min}
+                      max={selected.dias_tipicos_max}
+                      total={540}
+                      color="bg-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-600">PCL típico</span>
+                      <span className="text-xs text-gray-500 font-mono">
+                        {selected.pcl_tipico_min}% — {selected.pcl_tipico_max}%
+                      </span>
+                    </div>
+                    <BarVisual
+                      min={selected.pcl_tipico_min}
+                      max={selected.pcl_tipico_max}
+                      total={100}
+                      color="bg-brand-500"
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-gray-400 italic">Sin datos de referencia en catálogo</p>
+              )}
             </div>
           )}
         </div>

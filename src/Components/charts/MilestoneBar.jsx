@@ -63,13 +63,13 @@ export default function MilestoneBar({ diasActuales = 0 }) {
         )}
       </div>
 
-      {/* Labels below */}
-      <div className="relative mt-5 h-9">
-        {MILESTONES.map((m) => (
+      {/* Labels below — odd-index milestones offset down to avoid overlap */}
+      <div className="relative mt-5 h-12">
+        {MILESTONES.map((m, i) => (
           <div
             key={m.days}
             className="absolute -translate-x-1/2 text-center"
-            style={{ left: `${pct(m.days)}%` }}
+            style={{ left: `${pct(m.days)}%`, top: i % 2 === 1 ? '18px' : '0px' }}
           >
             <p className="text-[10px] text-gray-500 whitespace-nowrap">{m.label}</p>
             <p className="text-[9px] text-gray-400">d.{m.days}</p>
