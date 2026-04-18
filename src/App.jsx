@@ -15,6 +15,7 @@ import Reportes from './pages/Reportes'
 import Analytics from './pages/Analytics'
 import Normativa from './pages/Normativa'
 import NotFound from './pages/NotFound'
+import PoliticaTratamiento from './pages/PoliticaTratamiento'
 import { ToastProvider } from './Components/Toast'
 
 const TITLE_MAP = {
@@ -43,6 +44,42 @@ function TitleManager() {
   return null
 }
 
+function AppRoutes({ user, login, logout }) {
+  const puede = (permiso) => user?.permisos?.includes(permiso)
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
+        <Route path="*" element={<Login onLogin={login} />} />
+      </Routes>
+    )
+  }
+
+  return (
+    <Layout user={user} onLogout={logout}>
+      <Routes>
+        <Route path="/"          element={<Navigate to="/dashboard" />} />
+        <Route path="/login"     element={<Navigate to="/dashboard" />} />
+        <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/evaluar"   element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
+        <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
+        <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
+        <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
+        <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
+        <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
+        <Route path="/alertas"       element={<Alertas />} />
+        <Route path="/chat"          element={<Chat />} />
+        <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
+        <Route path="/analytics"     element={<Analytics />} />
+        <Route path="/normativa"     element={<Normativa />} />
+        <Route path="*"              element={<NotFound />} />
+      </Routes>
+    </Layout>
+  )
+}
+
 export default function App() {
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
@@ -60,32 +97,11 @@ export default function App() {
     setUser(null)
   }
 
-  if (!user) return <Login onLogin={login} />
-
-  const puede = (permiso) => user.permisos?.includes(permiso)
-
   return (
     <ToastProvider>
       <BrowserRouter>
         <TitleManager />
-        <Layout user={user} onLogout={logout}>
-          <Routes>
-            <Route path="/"          element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/evaluar"   element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
-            <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
-            <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
-            <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
-            <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
-            <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
-            <Route path="/alertas"       element={<Alertas />} />
-            <Route path="/chat"          element={<Chat />} />
-            <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
-            <Route path="/analytics"     element={<Analytics />} />
-            <Route path="/normativa"     element={<Normativa />} />
-            <Route path="*"              element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <AppRoutes user={user} login={login} logout={logout} />
       </BrowserRouter>
     </ToastProvider>
   )

@@ -20,7 +20,8 @@ const ROUTE_LABELS = {
   '/chat':         'Chat IA',
   '/reportes':     'Reportes',
   '/analytics':    'Analytics',
-  '/normativa':    'Normativa',
+  '/normativa':            'Normativa',
+  '/politica-tratamiento': 'Política de Privacidad',
 }
 
 const SEV_META = {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Activity, User, Lock, Eye, EyeOff, Shield, Brain, Scale } from 'lucide-react'
 import API from '../api/client'
 
@@ -180,6 +181,12 @@ export default function Login({ onLogin }) {
 
           <p className="text-xs text-gray-400 text-center mt-12">
             Sistema exclusivo para entidades autorizadas
+          </p>
+          <p className="text-xs text-gray-400 text-center mt-2">
+            <Link to="/politica-tratamiento" className="text-brand-600 hover:underline">
+              Política de Tratamiento de Datos Personales
+            </Link>
+            {' '}—{' '}Ley 1581/2012
           </p>
         </div>
       </div>

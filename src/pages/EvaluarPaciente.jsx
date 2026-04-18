@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   Sparkles, FileText, ArrowRight, ArrowLeft,
   CheckCircle, Activity, Clock, AlertTriangle,
   Briefcase, Heart, Stethoscope, Plus, Minus,
   RotateCcw, Brain, Info, Tag, Paperclip, Loader2, X,
-  Scale, ChevronDown, ChevronUp,
+  Scale, ChevronDown, ChevronUp, ShieldCheck,
 } from 'lucide-react'
 import API from '../api/client'
 import { useToast } from '../Components/Toast'
@@ -168,6 +168,9 @@ export default function EvaluarPaciente() {
   const [uploadedFile, setUploadedFile] = useState(null)
   const [fileLoading, setFileLoading]   = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [consentChecked, setConsentChecked] = useState(false)
+  const [titular, setTitular] = useState({ nombre: '', cedula: '', email: '' })
+  const setTit = (k, v) => setTitular(t => ({ ...t, [k]: v }))
 
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
@@ -249,6 +252,17 @@ export default function EvaluarPaciente() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
+      // 1. Registrar consentimiento informado — Ley 1581/2012 Art. 9
+      await API.post('/api/v1/consentimientos', {
+        caso_id:        form.id_caso,
+        titular_nombre: titular.nombre,
+        titular_cedula: titular.cedula,
+        titular_email:  titular.email || undefined,
+        canal:          'digital',
+        texto_consentimiento_version: '1.0',
+      })
+
+      // 2. Evaluar caso
       const { data } = await API.post('/api/evaluar-caso', {
         id_caso:                      form.id_caso,
         edad:                         parseFloat(form.edad),
@@ -311,6 +325,8 @@ export default function EvaluarPaciente() {
     setCie10(null)
     setResult(null)
     setConfirmed(false)
+    setConsentChecked(false)
+    setTitular({ nombre: '', cedula: '', email: '' })
   }
 
   /* ──────────────────────────────────────────────────────── RESULT VIEW */
@@ -773,6 +789,70 @@ export default function EvaluarPaciente() {
             </div>
           </div>
 
+          {/* Consentimiento informado — Ley 1581/2012 */}
+          <div className="border border-blue-200 rounded-xl p-5 bg-blue-50/40 space-y-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <h3 className="text-sm font-semibold text-blue-900">
+                Consentimiento informado — Ley 1581/2012
+              </h3>
+            </div>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              Antes de procesar datos médicos, registre los datos del titular y confirme
+              que otorgó consentimiento informado. Obligatorio según la Ley 1581/2012 Art. 9.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Nombre del titular" required>
+                <input
+                  type="text"
+                  value={titular.nombre}
+                  onChange={e => setTit('nombre', e.target.value)}
+                  placeholder="Nombre completo del trabajador"
+                  className="input w-full"
+                />
+              </Field>
+              <Field label="Cédula del titular" required>
+                <input
+                  type="text"
+                  value={titular.cedula}
+                  onChange={e => setTit('cedula', e.target.value)}
+                  placeholder="Número de cédula"
+                  className="input w-full"
+                />
+              </Field>
+              <Field label="Correo del titular (opcional)">
+                <input
+                  type="email"
+                  value={titular.email}
+                  onChange={e => setTit('email', e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  className="input w-full"
+                />
+              </Field>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={e => setConsentChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-blue-600 rounded"
+              />
+              <span className="text-sm text-blue-800">
+                El titular <strong>{titular.nombre || '(nombre requerido)'}</strong> ha otorgado
+                consentimiento informado para el tratamiento de sus datos de salud.{' '}
+                <Link
+                  to="/politica-tratamiento"
+                  target="_blank"
+                  className="underline underline-offset-2 hover:no-underline"
+                >
+                  Ver política de privacidad
+                </Link>
+              </span>
+            </label>
+          </div>
+
           {/* Confirmation */}
           <label className="flex items-start gap-3 cursor-pointer select-none">
             <input
@@ -793,7 +873,7 @@ export default function EvaluarPaciente() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!confirmed || loading}
+              disabled={!confirmed || !consentChecked || !titular.nombre.trim() || !titular.cedula.trim() || loading}
               className="btn-primary flex items-center gap-2 px-7 py-2.5 text-base font-semibold disabled:opacity-50"
             >
               <Sparkles className="w-5 h-5" />
