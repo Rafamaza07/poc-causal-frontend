@@ -5,6 +5,7 @@ import {
   CheckCircle, Activity, Clock, AlertTriangle,
   Briefcase, Heart, Stethoscope, Plus, Minus,
   RotateCcw, Brain, Info, Tag, Paperclip, Loader2, X,
+  Scale, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import API from '../api/client'
 import { useToast } from '../Components/Toast'
@@ -13,6 +14,35 @@ import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import CIE10Search from '../Components/CIE10Search'
 import { RECOMENDACIONES, MILESTONES } from '../utils/constants'
+
+// ── Legal accordion item ──────────────────────────────────────────────────────
+function LegalAccordionItem({ article }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border border-blue-100 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-blue-50 transition-colors"
+      >
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold
+          bg-brand-50 text-brand-700 border border-brand-100 flex-shrink-0">
+          {article.source}
+        </span>
+        <span className="text-xs font-semibold text-gray-700 flex-shrink-0">{article.article}</span>
+        <span className="flex-1 text-xs text-gray-600 truncate">{article.title}</span>
+        {open
+          ? <ChevronUp className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+          : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+        }
+      </button>
+      {open && (
+        <div className="px-4 py-3 bg-blue-50/50 border-t border-blue-100">
+          <p className="text-xs text-gray-700 leading-relaxed">{article.content}</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const STEPS = [
   { id: 'datos',    label: 'Datos del paciente' },
@@ -320,6 +350,24 @@ export default function EvaluarPaciente() {
                 ))}
               </ul>
             )}
+          </div>
+        )}
+
+        {/* Marco legal */}
+        {result.fundamentacion_legal?.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Scale className="w-5 h-5 text-brand-600" />
+              <h2 className="text-sm font-semibold text-gray-800">Marco legal aplicable</h2>
+              <span className="ml-auto text-xs text-gray-400">
+                {result.fundamentacion_legal.length} artículo{result.fundamentacion_legal.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {result.fundamentacion_legal.map((art, i) => (
+                <LegalAccordionItem key={`${art.source}-${art.article}-${i}`} article={art} />
+              ))}
+            </div>
           </div>
         )}
 
