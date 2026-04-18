@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Bell, Search, ChevronRight, LogOut, Settings, User,
+  Bell, Search, ChevronRight, LogOut, Settings,
   AlertTriangle, AlertCircle, Info,
 } from 'lucide-react'
 import API from '../api/client'
@@ -271,10 +271,6 @@ export default function Header({ user, onLogout }) {
                 <p className="text-[11px] text-gray-400 capitalize mt-0.5">{user?.rol}</p>
               </div>
               <div className="py-1">
-                <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <User className="w-3.5 h-3.5 text-gray-400" />
-                  Mi perfil
-                </button>
                 {user?.rol === 'admin' && (
                   <button
                     onClick={() => { navigate('/configuracion'); setShowUser(false) }}

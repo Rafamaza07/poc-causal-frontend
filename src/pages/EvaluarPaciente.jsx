@@ -230,18 +230,18 @@ export default function EvaluarPaciente() {
     try {
       const { data } = await API.post('/api/v1/clasificar-cie10', { texto_clinico: form.texto_clinico })
       const obj = {
-        codigo:              data.codigo_cie10,
-        descripcion:         data.descripcion_oficial,
+        codigo:              data.codigo,
+        descripcion:         data.descripcion,
         categoria:           data.categoria,
-        dias_tipicos_min:    data.cie10_referencia?.dias_tipicos_min,
-        dias_tipicos_max:    data.cie10_referencia?.dias_tipicos_max,
-        pcl_tipico_min:      data.cie10_referencia?.pcl_tipico_min,
-        pcl_tipico_max:      data.cie10_referencia?.pcl_tipico_max,
-        frecuencia_colombia: data.cie10_referencia?.frecuencia_colombia,
+        dias_tipicos_min:    data.dias_tipicos?.min,
+        dias_tipicos_max:    data.dias_tipicos?.max,
+        pcl_tipico_min:      data.pcl_tipico?.min,
+        pcl_tipico_max:      data.pcl_tipico?.max,
+        frecuencia_colombia: data.frecuencia_colombia,
       }
       setCie10(obj)
-      set('codigo_cie10', data.codigo_cie10)
-      toast(`CIE-10 clasificado: ${data.codigo_cie10}`, 'success')
+      set('codigo_cie10', data.codigo)
+      toast(`CIE-10 clasificado: ${data.codigo}`, 'success')
     } catch (err) {
       toast(err.response?.data?.detail || 'Error al clasificar', 'error')
     } finally {
@@ -250,6 +250,10 @@ export default function EvaluarPaciente() {
   }
 
   const handleSubmit = async () => {
+    if (dias === 0) {
+      toast('Ingresa los días acumulados de incapacidad', 'error')
+      return
+    }
     setLoading(true)
     try {
       // 1. Registrar consentimiento informado — Ley 1581/2012 Art. 9
@@ -316,7 +320,7 @@ export default function EvaluarPaciente() {
   const acceptDisclaimer = async () => {
     localStorage.setItem('disclaimer_accepted', '1')
     setShowDisclaimer(false)
-    try { await API.post('/api/me/disclaimer') } catch { /* best-effort */ }
+    try { await API.post('/api/me/disclaimer') } catch (err) { console.warn('disclaimer POST failed:', err) }
   }
 
   const resetWizard = () => {

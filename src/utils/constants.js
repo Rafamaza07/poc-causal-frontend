@@ -21,10 +21,10 @@ export const SEVERITY = {
 }
 
 export const MILESTONES = [
-  { days: 90,  label: 'Evaluación EPS',      decreto: 'Decreto 1333/2021' },
-  { days: 120, label: 'Solicitud prórroga',   decreto: 'Decreto 1333/2021' },
-  { days: 180, label: 'Referencia a pensión', decreto: 'Ley 100/1993 Art. 67' },
-  { days: 540, label: 'Calificación PCL',     decreto: 'Decreto 019/2012' },
+  { days: 90,  label: 'Eval. EPS',    decreto: 'Decreto 1333/2021' },
+  { days: 120, label: 'Prórroga',     decreto: 'Decreto 1333/2021' },
+  { days: 180, label: 'Pensión',      decreto: 'Ley 100/1993 Art. 67' },
+  { days: 540, label: 'Calif. PCL',   decreto: 'Decreto 019/2012' },
 ]
 
 export const getScoreRange = (score) => {
