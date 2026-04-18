@@ -24,6 +24,12 @@ export default {
           light:   '#1e293b',
           accent:  '#334155',
         },
+        severity: {
+          critical: { light: '#fef2f2', DEFAULT: '#dc2626', dark: '#991b1b' },
+          warning:  { light: '#fffbeb', DEFAULT: '#f59e0b', dark: '#92400e' },
+          success:  { light: '#f0fdf4', DEFAULT: '#16a34a', dark: '#166534' },
+          info:     { light: '#eff6ff', DEFAULT: '#2563eb', dark: '#1e40af' },
+        },
       },
       boxShadow: {
         soft:    '0 2px 8px -2px rgba(0,0,0,0.08), 0 1px 3px -1px rgba(0,0,0,0.05)',
