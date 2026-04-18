@@ -62,7 +62,9 @@ export default function Header({ user, onLogout }) {
   const [showUser, setShowUser]         = useState(false)
   const userRef                         = useRef(null)
 
-  const pageLabel = ROUTE_LABELS[location.pathname] ?? 'Inicio'
+  const pageLabel = ROUTE_LABELS[location.pathname]
+    ?? ROUTE_LABELS[Object.keys(ROUTE_LABELS).find(k => location.pathname.startsWith(k + '/'))]
+    ?? 'Inicio'
   const avatarInitials = initials(user?.nombre)
 
   // Fetch alerts summary once on mount
