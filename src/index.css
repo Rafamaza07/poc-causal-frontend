@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply font-sans antialiased text-gray-800 bg-gray-50;
+    @apply font-sans antialiased text-gray-800 bg-gray-50 dark:text-gray-100 dark:bg-gray-950;
   }
 
   /* Scrollbar sutil */
@@ -28,13 +28,57 @@
   }
 }
 
+/* ── Dark mode — overrides globales ──────────────────────────────────────── */
+.dark body { background-color: #030712; color: #f3f4f6; }
+
+/* Texto */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5 { color: #f1f5f9; }
+
+/* Fondos */
+.dark .bg-white    { background-color: #111827 !important; }
+.dark .bg-gray-50  { background-color: #111827 !important; }
+.dark .bg-gray-100 { background-color: #1f2937 !important; }
+
+/* Bordes */
+.dark .border-gray-100 { border-color: #1f2937 !important; }
+.dark .border-gray-200 { border-color: #374151 !important; }
+
+/* Textos */
+.dark .text-gray-900 { color: #f9fafb !important; }
+.dark .text-gray-800 { color: #f1f5f9 !important; }
+.dark .text-gray-700 { color: #e2e8f0 !important; }
+.dark .text-gray-600 { color: #cbd5e1 !important; }
+.dark .text-gray-500 { color: #94a3b8 !important; }
+.dark .text-gray-400 { color: #64748b !important; }
+
+/* Divisores */
+.dark .divide-gray-100 > * + * { border-color: #1f2937; }
+.dark .divide-gray-200 > * + * { border-color: #374151; }
+
+/* Tablas */
+.dark thead, .dark .bg-gray-50\/80 { background-color: #1e293b !important; }
+.dark th { color: #94a3b8 !important; }
+.dark tbody tr { border-color: #1f2937; }
+.dark tbody tr:hover { background-color: rgba(30, 41, 59, 0.6) !important; }
+
+/* Controles nativos */
+.dark select, .dark textarea {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f1f5f9;
+}
+
+/* Dropdowns flotantes */
+.dark .shadow-lifted { box-shadow: 0 4px 20px -4px rgba(0,0,0,0.5); }
+
 @layer components {
   /* Input global refinado */
   .input {
     @apply w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm bg-white
            placeholder-gray-400
            focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500
-           transition-all duration-200;
+           transition-all duration-200
+           dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500;
   }
 
   /* Botón primario */
@@ -68,6 +112,7 @@
   .card {
     @apply bg-white rounded-xl shadow-card border border-gray-100
            transition-all duration-200
-           hover:shadow-lifted hover:-translate-y-0.5;
+           hover:shadow-lifted hover:-translate-y-0.5
+           dark:bg-gray-900 dark:border-gray-800;
   }
 }

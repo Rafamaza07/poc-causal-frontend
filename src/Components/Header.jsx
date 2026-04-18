@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Bell, Search, ChevronRight, LogOut, Settings,
-  AlertTriangle, AlertCircle, Info,
+  AlertTriangle, AlertCircle, Info, Sun, Moon,
 } from 'lucide-react'
 import API from '../api/client'
 import { useDebounce } from '../hooks/useDebounce'
@@ -40,7 +40,7 @@ function initials(nombre) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-export default function Header({ user, onLogout }) {
+export default function Header({ user, onLogout, dark = false, onToggleDark }) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -125,17 +125,17 @@ export default function Header({ user, onLogout }) {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-100 sticky top-0 z-30 px-6 flex items-center gap-4 flex-shrink-0">
+    <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30 px-4 sm:px-6 flex items-center gap-3 sm:gap-4 flex-shrink-0">
 
       {/* ── Breadcrumb ── */}
-      <nav className="flex items-center gap-1.5 text-sm flex-shrink-0">
+      <nav className="hidden sm:flex items-center gap-1.5 text-sm flex-shrink-0">
         <span className="text-gray-400">Inicio</span>
         <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
         <span className="font-medium text-gray-800">{pageLabel}</span>
       </nav>
 
       {/* ── Search ── */}
-      <div ref={searchRef} className="flex-1 max-w-md mx-auto relative">
+      <div ref={searchRef} className="flex-1 min-w-0 max-w-md mx-auto relative">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
@@ -185,8 +185,20 @@ export default function Header({ user, onLogout }) {
       {/* ── Right side ── */}
       <div className="flex items-center gap-1 ml-auto flex-shrink-0">
 
+        {/* Dark mode toggle */}
+        {onToggleDark && (
+          <button
+            onClick={onToggleDark}
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500
+              hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            title={dark ? 'Modo claro' : 'Modo oscuro'}
+          >
+            {dark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+          </button>
+        )}
+
         {/* Bell */}
-        <div ref={bellRef} className="relative">
+        <div ref={bellRef} className="relative" data-tour="bell">
           <button
             onClick={() => { setShowBell(!showBell); setShowUser(false) }}
             className="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-500

@@ -231,7 +231,7 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in">
 
       {/* ── Fila 1: Hero header ────────────────────────── */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-500 p-6 shadow-md">
+      <div data-tour="dashboard-hero" className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-500 p-6 shadow-md">
         {/* subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.07]"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
@@ -273,7 +273,7 @@ export default function Dashboard() {
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Resumen general</span>
         <div className="flex-1 h-px bg-gray-100" />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-tour="dashboard-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           value={totalEvaluados}
           label="Casos evaluados"

@@ -317,12 +317,12 @@ export default function Analytics() {
           <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
           <p className="text-sm text-gray-500 mt-0.5">Métricas y tendencias de tu organización</p>
         </div>
-        <div className="flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl">
+        <div className="flex flex-wrap items-center gap-0.5 p-1 bg-gray-100 rounded-xl">
           {PERIODOS.map(p => (
             <button
               key={p.value}
               onClick={() => setPeriodo(p.value)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
                 periodo === p.value
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileSearch, Clock, Bell,
   MessageSquare, BarChart3, FileText, Settings, BookOpen,
   LogOut, ChevronLeft, ChevronRight, Menu, X,
-  ClipboardCheck, Cpu,
+  ClipboardCheck, Cpu, Layers,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
 
@@ -14,8 +14,9 @@ const _badgeCount = (badge, alertCount, aprobCount) =>
 
 const ALL_NAV = [
   { to: '/dashboard', label: 'Dashboard',    icon: LayoutDashboard, permiso: null },
-  { to: '/evaluar',   label: 'Evaluar caso', icon: FileSearch,      permiso: 'evaluar' },
-  { to: '/historial', label: 'Historial',    icon: Clock,           permiso: 'ver_historial' },
+  { to: '/evaluar',      label: 'Evaluar caso',  icon: FileSearch, permiso: 'evaluar' },
+  { to: '/evaluar/lote', label: 'Eval. en lote', icon: Layers,     permiso: 'evaluar' },
+  { to: '/historial',    label: 'Historial',      icon: Clock,      permiso: 'ver_historial' },
   { to: '/alertas',   label: 'Alertas',      icon: Bell,            permiso: null, badge: true },
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
   { to: '/normativa', label: 'Normativa',    icon: BookOpen,        permiso: null },
@@ -50,6 +51,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
     <>
       {/* ── Desktop sidebar ────────────────────────────── */}
       <aside
+        data-tour="sidebar"
         style={{ width: collapsed ? 64 : 240 }}
         className="hidden md:flex flex-col flex-shrink-0 bg-sidebar transition-[width] duration-200 ease-out overflow-hidden"
       >
@@ -88,6 +90,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
                 <NavLink
                   to={n.to}
                   end={n.end !== false}
+                  {...(n.to === '/evaluar' ? { 'data-tour': 'nav-evaluar' } : {})}
                   className={({ isActive }) =>
                     `flex items-center rounded-lg transition-all duration-200 ${
                       collapsed ? 'justify-center w-10 h-10 mx-auto' : 'gap-3 px-3.5 py-2.5'

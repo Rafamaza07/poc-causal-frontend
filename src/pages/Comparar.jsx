@@ -123,7 +123,7 @@ export default function Comparar() {
         <p className="text-gray-500 text-sm mt-1">Evalúa dos casos y compara resultados lado a lado</p>
       </div>
       <form onSubmit={handleCompare} className="space-y-4">
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <PatientForm label="Paciente 1" form={p1} onChange={setP1} />
           <PatientForm label="Paciente 2" form={p2} onChange={setP2} />
         </div>
@@ -140,7 +140,7 @@ export default function Comparar() {
             <p className="text-sm text-slate-400 font-medium">Caso más crítico</p>
             <p className="text-xl font-bold mt-1">{result.mas_critico}</p>
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ResultCard data={result.detalle_paciente_1} isCritical={result.mas_critico === result.detalle_paciente_1?.id_caso} />
             <ResultCard data={result.detalle_paciente_2} isCritical={result.mas_critico === result.detalle_paciente_2?.id_caso} />
           </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login from './pages/Login'
+import Landing from './pages/Landing'
+import EvaluarLote from './pages/EvaluarLote'
 import Layout from "./Components/Layout"
 import Dashboard from './pages/Dashboard'
 import EvaluarPaciente from './pages/EvaluarPaciente'
@@ -32,8 +34,9 @@ const TITLE_MAP = {
   '/aprobaciones':      'Aprobaciones',
   '/modelo/performance':'Modelo IA',
   '/configuracion':     'Configuración',
-  '/comparar':     'Comparar',
-  '/logs':         'Logs',
+  '/comparar':       'Comparar',
+  '/evaluar/lote':   'Evaluación en lote',
+  '/logs':           'Logs',
 }
 
 function TitleManager() {
@@ -54,8 +57,10 @@ function AppRoutes({ user, login, logout }) {
   if (!user) {
     return (
       <Routes>
+        <Route path="/"                     element={<Landing />} />
+        <Route path="/login"                element={<Login onLogin={login} />} />
         <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
-        <Route path="*" element={<Login onLogin={login} />} />
+        <Route path="*"                     element={<Navigate to="/" />} />
       </Routes>
     )
   }
@@ -67,7 +72,8 @@ function AppRoutes({ user, login, logout }) {
         <Route path="/login"     element={<Navigate to="/dashboard" />} />
         <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/evaluar"   element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
+        <Route path="/evaluar"      element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
+        <Route path="/evaluar/lote" element={puede('evaluar') ? <EvaluarLote /> : <NoPermiso />} />
         <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
         <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
         <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
