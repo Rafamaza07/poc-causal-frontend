@@ -10,6 +10,7 @@ import Logs from './pages/Logs'
 import Configuracion from './pages/Configuracion'
 import Alertas from './pages/Alertas'
 import Chat from './pages/Chat'
+import CasoDetalle from './pages/CasoDetalle'
 import { ToastProvider } from './Components/Toast'
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/evaluar"   element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
             <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
+            <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
             <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
             <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
             <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
