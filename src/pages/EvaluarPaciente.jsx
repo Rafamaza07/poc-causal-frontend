@@ -4,7 +4,7 @@ import {
   Sparkles, FileText, ArrowRight, ArrowLeft,
   CheckCircle, Activity, Clock, AlertTriangle,
   Briefcase, Heart, Stethoscope, Plus, Minus,
-  RotateCcw, Brain, Info, Tag,
+  RotateCcw, Brain, Info, Tag, Paperclip, Loader2, X,
 } from 'lucide-react'
 import API from '../api/client'
 import { useToast } from '../Components/Toast'
@@ -135,6 +135,8 @@ export default function EvaluarPaciente() {
   const [loading, setLoading]   = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [fileLoading, setFileLoading]   = useState(false)
 
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
@@ -146,6 +148,32 @@ export default function EvaluarPaciente() {
   })
 
   const step1Valid = form.id_caso.trim() !== '' && form.edad !== ''
+
+  const handleFileUpload = async (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setUploadedFile(f)
+    setFileLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', f)
+      const { data } = await API.post('/api/analizar-pdf', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const texto = data.texto_extraido ?? data.text ?? data.contenido ?? ''
+      if (texto) {
+        set('texto_clinico', texto)
+        toast('Texto extraído del archivo', 'success')
+      } else {
+        toast('El archivo no contiene texto legible', 'warning')
+      }
+    } catch {
+      toast('No se pudo procesar el archivo', 'error')
+      setUploadedFile(null)
+    } finally {
+      setFileLoading(false)
+    }
+  }
 
   const autoClasificarCIE10 = async () => {
     if (!form.texto_clinico.trim()) {
@@ -401,6 +429,38 @@ export default function EvaluarPaciente() {
             </Field>
           </div>
 
+          <Field label="Documento clínico (opcional)">
+            <label className={`flex items-center gap-3 px-4 py-3 border-2 border-dashed rounded-xl
+              cursor-pointer transition-all duration-150 ${
+                uploadedFile
+                  ? 'border-brand-400 bg-brand-50/40'
+                  : 'border-gray-200 hover:border-brand-400 hover:bg-brand-50/30'
+              }`}>
+              <Paperclip className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="flex-1 text-sm truncate">
+                {uploadedFile
+                  ? <span className="font-medium text-gray-800">{uploadedFile.name}</span>
+                  : <span className="text-gray-500">Subir PDF, Word o imagen para extraer texto automáticamente</span>
+                }
+              </span>
+              {fileLoading
+                ? <Loader2 className="w-4 h-4 animate-spin text-brand-600 flex-shrink-0" />
+                : uploadedFile
+                  ? <button type="button" onClick={e => { e.preventDefault(); setUploadedFile(null) }}
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  : null
+              }
+              <input
+                type="file"
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                onChange={handleFileUpload}
+              />
+            </label>
+          </Field>
+
           <Field label="Descripción clínica">
             <textarea
               value={form.texto_clinico}
@@ -462,7 +522,7 @@ export default function EvaluarPaciente() {
               min={0}
               className="input w-full"
             />
-            <div className="mt-3 pb-8">
+            <div className="mt-3 pb-2">
               <MilestoneBar diasActuales={dias} />
             </div>
             {nearMilestone && (

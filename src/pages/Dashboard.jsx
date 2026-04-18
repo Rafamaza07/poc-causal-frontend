@@ -215,10 +215,14 @@ export default function Dashboard() {
         </div>
         <button
           onClick={() => navigate('/evaluar')}
-          className="btn-primary flex items-center gap-2 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white
+            text-sm font-semibold rounded-xl shadow-sm hover:bg-brand-700
+            active:scale-[0.97] transition-all duration-150
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40
+            self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          Evaluar caso
+          Nuevo caso
         </button>
       </div>
 

@@ -55,20 +55,48 @@ function TypingDots() {
 }
 
 // ── Message bubble ────────────────────────────────────────────────────────────
-function Bubble({ msg }) {
+function Bubble({ msg, isFirstInGroup }) {
   const isUser = msg.role === 'user'
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={[
-          'px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words',
-          isUser
-            ? 'bg-brand-600 text-white rounded-br-sm max-w-[70%]'
-            : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm max-w-[80%] shadow-sm',
-        ].join(' ')}
-      >
-        {msg.content}
+    <div className={`flex gap-2.5 items-end ${isUser ? 'justify-end' : 'justify-start'}`}>
+      {/* IA avatar */}
+      {!isUser && (
+        <div className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mb-0.5 ${
+          isFirstInGroup ? 'bg-brand-100' : 'opacity-0'
+        }`}>
+          <Brain className="w-3.5 h-3.5 text-brand-600" />
+        </div>
+      )}
+
+      <div className={`flex flex-col gap-0.5 ${isUser ? 'items-end' : 'items-start'} max-w-[75%]`}>
+        {isFirstInGroup && (
+          <span className="text-[10px] font-semibold text-gray-400 px-1">
+            {isUser ? 'Tú' : 'Asistente IA'}
+          </span>
+        )}
+        <div
+          className={[
+            'px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words',
+            isUser
+              ? 'bg-brand-600 text-white rounded-br-none'
+              : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm',
+          ].join(' ')}
+        >
+          {msg.content}
+        </div>
+        <span className="text-[10px] text-gray-400 px-1">
+          {msg.created_at ? timeAgo(msg.created_at) : ''}
+        </span>
       </div>
+
+      {/* User avatar */}
+      {isUser && (
+        <div className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center mb-0.5 ${
+          isFirstInGroup ? 'bg-brand-600' : 'opacity-0'
+        }`}>
+          <span className="text-[10px] font-bold text-white">Tú</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -492,7 +520,7 @@ export default function Chat() {
 
           {/* Conversation messages */}
           {!loadingMsgs && messages.map((msg, i) => (
-            <Bubble key={i} msg={msg} />
+            <Bubble key={i} msg={msg} isFirstInGroup={i === 0 || messages[i - 1].role !== msg.role} />
           ))}
 
           {/* Typing indicator */}

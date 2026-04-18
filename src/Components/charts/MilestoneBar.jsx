@@ -64,7 +64,7 @@ export default function MilestoneBar({ diasActuales = 0 }) {
       </div>
 
       {/* Labels below */}
-      <div className="relative mt-5">
+      <div className="relative mt-5 h-9">
         {MILESTONES.map((m) => (
           <div
             key={m.days}

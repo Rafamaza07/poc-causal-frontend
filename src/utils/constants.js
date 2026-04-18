@@ -10,6 +10,8 @@ export const RECOMENDACIONES = {
   REINCORPORACION_CON_TERAPIAS: { color: 'blue',    icon: 'Activity',      label: 'Reincorporación con terapias' },
   CONTINUAR_INCAPACIDAD:        { color: 'amber',   icon: 'Clock',         label: 'Continuar incapacidad' },
   PENSION_INVALIDEZ:            { color: 'red',     icon: 'AlertTriangle', label: 'Pensión por invalidez' },
+  CALIFICA_PENSION_INVALIDEZ:   { color: 'red',     icon: 'AlertTriangle', label: 'Evaluar pensión por invalidez' },
+  FORZAR_CALIFICACION_PCL:      { color: 'red',     icon: 'AlertTriangle', label: 'Forzar calificación PCL' },
 }
 
 export const SEVERITY = {

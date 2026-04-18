@@ -50,19 +50,19 @@ function SkeletonCard() {
 
 // ── Alert card ────────────────────────────────────────────────────────────────
 function AlertCard({ alert, onRead, onAcknowledge }) {
-  const sev = (alert.severity || alert.nivel_alerta || 'INFO').toUpperCase()
+  const sev = (alert.severity || 'INFO').toUpperCase()
   const { border, Icon, iconColor, badge } = SEV[sev] ?? SEV.INFO
-  const caseId = alert.case_id || alert.id_caso || alert.paciente_id
+  const isRead = !!alert.read_at
 
   return (
-    <div className={`bg-white border border-gray-100 border-l-4 ${border} rounded-xl shadow-card p-4 animate-fade-in`}>
+    <div className={`bg-white border border-gray-100 border-l-4 ${border} rounded-xl p-4 animate-fade-in`}>
       <div className="flex items-start gap-4">
         <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${iconColor}`} />
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <p className="font-medium text-gray-900 text-sm">
-            {alert.title || alert.mensaje || alert.message}
+            {alert.title}
           </p>
           {alert.description && (
             <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">{alert.description}</p>
@@ -70,36 +70,36 @@ function AlertCard({ alert, onRead, onAcknowledge }) {
 
           {/* Metadata row */}
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            {alert.dias_restantes != null && (
+            {alert.days_until_milestone != null && (
               <Badge variant={badge} size="sm">
-                Faltan {alert.dias_restantes} días
+                Faltan {alert.days_until_milestone} días
               </Badge>
             )}
-            {caseId && (
-              <span className="text-xs font-medium text-brand-600">{caseId}</span>
+            {alert.case_id && (
+              <span className="text-xs font-medium text-brand-600">{alert.case_id}</span>
             )}
             <span className="text-xs text-gray-400">
-              {timeAgo(alert.created_at || alert.timestamp)}
+              {alert.created_at ? timeAgo(alert.created_at) : ''}
             </span>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex flex-col gap-2 flex-shrink-0 items-end">
-          {!alert.is_read && (
+          {!isRead && !alert.acknowledged_at && (
             <Button variant="ghost" size="sm" onClick={() => onRead(alert.id)}>
               Marcar como leída
             </Button>
           )}
-          {alert.is_read && !alert.acknowledged_at && (
+          {isRead && !alert.acknowledged_at && (
             <Button variant="secondary" size="sm" onClick={() => onAcknowledge(alert)}>
               Reconocer
             </Button>
           )}
           {alert.acknowledged_at && (
             <span className="text-xs text-emerald-600 font-medium text-right leading-snug">
-              Reconocida por {alert.acknowledged_by ?? 'usuario'}<br />
-              el {formatDate(alert.acknowledged_at)}
+              Reconocida<br />
+              {formatDate(alert.acknowledged_at)}
             </span>
           )}
         </div>
@@ -125,30 +125,41 @@ export default function Alertas() {
   const [toAck, setToAck]           = useState(null)
   const [acking, setAcking]         = useState(false)
 
-  const fetch = useCallback(async () => {
+  const loadAlerts = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ page, limit: PAGE_SIZE })
-      if (sevFilter)    params.set('severity', sevFilter)
-      if (statusFilter) params.set('status', statusFilter)
+      const params = new URLSearchParams({
+        skip:  (page - 1) * PAGE_SIZE,
+        limit: PAGE_SIZE,
+      })
+      if (sevFilter) params.set('severity', sevFilter)
+      // solo_pendientes=false to see all; filter 'acknowledged' client-side
+      if (statusFilter !== 'acknowledged') {
+        params.set('solo_pendientes', statusFilter === 'unread' ? 'true' : 'false')
+      } else {
+        params.set('solo_pendientes', 'false')
+      }
       const { data } = await API.get(`/api/v1/alerts?${params}`)
-      setAlerts(data.alerts ?? data ?? [])
-      setTotal(data.total ?? 0)
+      let list = data.alertas ?? data.alerts ?? (Array.isArray(data) ? data : [])
+      if (statusFilter === 'acknowledged') list = list.filter(a => a.acknowledged_at)
+      setAlerts(list)
+      setTotal(data.total ?? list.length)
     } catch {
       setAlerts([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }
   }, [page, sevFilter, statusFilter])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { loadAlerts() }, [loadAlerts])
 
   // Reset to page 1 when filters change
   useEffect(() => { setPage(1) }, [sevFilter, statusFilter])
 
   const handleRead = async (id) => {
     await API.post(`/api/v1/alerts/${id}/read`).catch(() => {})
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, is_read: true } : a))
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, read_at: new Date().toISOString() } : a))
   }
 
   const handleConfirmAck = async () => {
