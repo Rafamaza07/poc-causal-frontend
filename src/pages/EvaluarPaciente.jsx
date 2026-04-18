@@ -157,16 +157,17 @@ export default function EvaluarPaciente() {
   const toast    = useToast()
   const navigate = useNavigate()
 
-  const [step, setStep]         = useState(0)
-  const [form, setForm]         = useState(INIT)
-  const [cie10, setCie10]       = useState(null)
+  const [step, setStep]             = useState(0)
+  const [form, setForm]             = useState(INIT)
+  const [cie10, setCie10]           = useState(null)
   const [cie10Loading, setCIE10Loading] = useState(false)
-  const [result, setResult]     = useState(null)
-  const [loading, setLoading]   = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
+  const [result, setResult]         = useState(null)
+  const [loading, setLoading]       = useState(false)
+  const [confirmed, setConfirmed]   = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
   const [fileLoading, setFileLoading]   = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
 
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
@@ -263,6 +264,7 @@ export default function EvaluarPaciente() {
         notas_adicionales:            form.notas_adicionales || undefined,
       })
       setResult(data)
+      if (!localStorage.getItem('disclaimer_accepted')) setShowDisclaimer(true)
       toast(
         data.caso_existente
           ? `Caso existente — Score: ${data.score_riesgo}/100`
@@ -297,6 +299,12 @@ export default function EvaluarPaciente() {
     }
   }
 
+  const acceptDisclaimer = async () => {
+    localStorage.setItem('disclaimer_accepted', '1')
+    setShowDisclaimer(false)
+    try { await API.post('/api/me/disclaimer') } catch { /* best-effort */ }
+  }
+
   const resetWizard = () => {
     setStep(0)
     setForm(INIT)
@@ -313,6 +321,38 @@ export default function EvaluarPaciente() {
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+
+        {/* ── Disclaimer modal ── */}
+        {showDisclaimer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-7">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900">Aviso médico-legal obligatorio</h2>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                Este resultado es generado por el motor de inferencia causal{' '}
+                <strong>IncapacidadIA</strong> como <strong>herramienta de apoyo a la decisión</strong>.
+              </p>
+              <ul className="text-sm text-gray-700 space-y-2 mb-5 list-disc list-inside">
+                <li>No sustituye el criterio del <strong>médico laboral certificado</strong>.</li>
+                <li>La decisión final es responsabilidad del <strong>profesional tratante</strong>.</li>
+                <li>No constituye dictamen oficial ni concepto jurídico vinculante.</li>
+                <li>Debe ser validado conforme a la normatividad colombiana vigente
+                  (Ley 100/1993, Decreto 2463/2001, Decreto 1333/2021).</li>
+              </ul>
+              <button
+                onClick={acceptDisclaimer}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl transition-colors"
+              >
+                Entiendo y acepto continuar
+              </button>
+            </div>
+          </div>
+        )}
+
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Resultado de evaluación</h1>
           <p className="text-gray-500 text-sm mt-1">Caso {result.id_caso}</p>
