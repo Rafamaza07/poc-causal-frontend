@@ -14,6 +14,8 @@ import CasoDetalle from './pages/CasoDetalle'
 import Reportes from './pages/Reportes'
 import Analytics from './pages/Analytics'
 import Normativa from './pages/Normativa'
+import Aprobaciones from './pages/Aprobaciones'
+import ModeloPerformance from './pages/ModeloPerformance'
 import NotFound from './pages/NotFound'
 import PoliticaTratamiento from './pages/PoliticaTratamiento'
 import { ToastProvider } from './Components/Toast'
@@ -26,8 +28,10 @@ const TITLE_MAP = {
   '/chat':         'Chat IA',
   '/analytics':    'Analytics',
   '/reportes':     'Reportes',
-  '/normativa':    'Normativa',
-  '/configuracion':'Configuración',
+  '/normativa':         'Normativa',
+  '/aprobaciones':      'Aprobaciones',
+  '/modelo/performance':'Modelo IA',
+  '/configuracion':     'Configuración',
   '/comparar':     'Comparar',
   '/logs':         'Logs',
 }
@@ -73,8 +77,10 @@ function AppRoutes({ user, login, logout }) {
         <Route path="/chat"          element={<Chat />} />
         <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
         <Route path="/analytics"     element={<Analytics />} />
-        <Route path="/normativa"     element={<Normativa />} />
-        <Route path="*"              element={<NotFound />} />
+        <Route path="/normativa"          element={<Normativa />} />
+        <Route path="/aprobaciones"       element={['medico','admin','superadmin'].includes(user?.rol) ? <Aprobaciones /> : <NoPermiso />} />
+        <Route path="/modelo/performance" element={['admin','superadmin'].includes(user?.rol) ? <ModeloPerformance /> : <NoPermiso />} />
+        <Route path="*"                   element={<NotFound />} />
       </Routes>
     </Layout>
   )

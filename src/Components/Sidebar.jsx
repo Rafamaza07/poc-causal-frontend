@@ -5,8 +5,12 @@ import {
   LayoutDashboard, FileSearch, Clock, Bell,
   MessageSquare, BarChart3, FileText, Settings, BookOpen,
   LogOut, ChevronLeft, ChevronRight, Menu, X,
+  ClipboardCheck, Cpu,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
+
+const _badgeCount = (badge, alertCount, aprobCount) =>
+  badge === 'aprobaciones' ? aprobCount : alertCount
 
 const ALL_NAV = [
   { to: '/dashboard', label: 'Dashboard',    icon: LayoutDashboard, permiso: null },
@@ -17,13 +21,15 @@ const ALL_NAV = [
   { to: '/normativa', label: 'Normativa',    icon: BookOpen,        permiso: null },
   { to: '/analytics', label: 'Analytics',    icon: BarChart3,       permiso: null },
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
-  { to: '/logs',           label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
-  { to: '/configuracion', label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
+  { to: '/aprobaciones',       label: 'Aprobaciones', icon: ClipboardCheck, permiso: null, rolesAllowed: ['medico', 'admin', 'superadmin'], badge: 'aprobaciones' },
+  { to: '/logs',               label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
+  { to: '/modelo/performance', label: 'Modelo IA',     icon: Cpu,        permiso: null, adminOnly: true },
+  { to: '/configuracion',      label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
 ]
 
 const MOBILE_PRIMARY = ['/dashboard', '/evaluar', '/alertas', '/chat']
 
-export default function Sidebar({ user, onLogout, alertCount = 0 }) {
+export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0 }) {
   const [collapsed, setCollapsed] = useState(() =>
     typeof window !== 'undefined' && window.innerWidth < 1024
   )
@@ -32,7 +38,11 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
 
   const puede = (p) => !p || user.permisos?.includes(p)
 
-  const nav = ALL_NAV.filter(n => puede(n.permiso) && (!n.adminOnly || user.rol === 'admin'))
+  const nav = ALL_NAV.filter(n =>
+    puede(n.permiso) &&
+    (!n.adminOnly || ['admin', 'superadmin'].includes(user.rol)) &&
+    (!n.rolesAllowed || n.rolesAllowed.includes(user.rol))
+  )
 
   const initials = (user.nombre || '?')[0].toUpperCase()
 
@@ -90,9 +100,9 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
                 >
                   <div className="relative flex-shrink-0">
                     <Icon className="w-[18px] h-[18px]" />
-                    {n.badge && collapsed && alertCount > 0 && (
+                    {n.badge && collapsed && _badgeCount(n.badge, alertCount, aprobCount) > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] text-white font-bold flex items-center justify-center">
-                        {alertCount > 9 ? '9+' : alertCount}
+                        {_badgeCount(n.badge, alertCount, aprobCount) > 9 ? '9+' : _badgeCount(n.badge, alertCount, aprobCount)}
                       </span>
                     )}
                   </div>
@@ -100,7 +110,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
                     <span className="flex-1 truncate">{n.label}</span>
                   )}
                   {!collapsed && n.badge && (
-                    <AlertBadge count={alertCount} />
+                    <AlertBadge count={_badgeCount(n.badge, alertCount, aprobCount)} />
                   )}
                 </NavLink>
 
@@ -109,9 +119,9 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
                     <div className="bg-gray-900 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-soft flex items-center gap-2">
                       {n.label}
-                      {n.badge && alertCount > 0 && (
+                      {n.badge && _badgeCount(n.badge, alertCount, aprobCount) > 0 && (
                         <span className="bg-red-500 text-white text-[9px] px-1.5 py-0 rounded-full font-bold">
-                          {alertCount}
+                          {_badgeCount(n.badge, alertCount, aprobCount)}
                         </span>
                       )}
                     </div>
@@ -181,7 +191,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0 }) {
               >
                 <div className="relative">
                   <Icon className="w-5 h-5" />
-                  {n.badge && alertCount > 0 && (
+                  {n.badge && _badgeCount(n.badge, alertCount, aprobCount) > 0 && (
                     <span className="absolute -top-1 -right-1.5 w-3 h-3 bg-red-500 rounded-full" />
                   )}
                 </div>

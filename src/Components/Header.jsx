@@ -21,6 +21,8 @@ const ROUTE_LABELS = {
   '/reportes':     'Reportes',
   '/analytics':    'Analytics',
   '/normativa':            'Normativa',
+  '/aprobaciones':         'Aprobaciones',
+  '/modelo/performance':   'Modelo IA',
   '/politica-tratamiento': 'Política de Privacidad',
 }
 
