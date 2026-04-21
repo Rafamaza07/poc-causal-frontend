@@ -61,7 +61,7 @@ export default function Landing() {
             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
               <Brain className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-lg">IncapacidadIA</span>
+            <span className="font-bold text-gray-900 text-lg">KausalIA</span>
           </div>
           <div className="flex items-center gap-3">
             <a href="mailto:rafamaza56@gmail.com"
@@ -90,11 +90,11 @@ export default function Landing() {
             <span className="text-brand-200"> con inteligencia causal</span>
           </h1>
           <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10">
-            IncapacidadIA automatiza el análisis de incapacidades para EPS, ARL y empleadores en Colombia.
+            KausalIA automatiza el análisis de incapacidades para EPS, ARL y empleadores en Colombia.
             Reduce tiempos, estandariza criterios y mantiene trazabilidad legal completa.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="mailto:rafamaza56@gmail.com?subject=Demo IncapacidadIA"
+            <a href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
                className="inline-flex items-center justify-center gap-2 bg-white text-brand-700 hover:bg-brand-50 font-semibold px-6 py-3 rounded-xl transition-colors shadow-lg">
               Solicitar demo gratuita <ArrowRight className="w-4 h-4" />
             </a>
@@ -119,7 +119,7 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Del proceso manual al criterio automatizado</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Tres problemas críticos que IncapacidadIA resuelve desde el día uno.</p>
+            <p className="text-gray-500 max-w-xl mx-auto">Tres problemas críticos que KausalIA resuelve desde el día uno.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PROBLEMS.map(({ icon: Icon, before, after }) => (
@@ -190,7 +190,7 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <a href="mailto:rafamaza56@gmail.com?subject=Plan IncapacidadIA"
+                <a href="mailto:rafamaza56@gmail.com?subject=Plan KausalIA"
                    className={`block text-center py-2.5 rounded-xl font-semibold text-sm transition-colors ${
                      plan.highlight
                        ? 'bg-white text-brand-700 hover:bg-brand-50'
@@ -209,7 +209,7 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-white mb-4">¿Listo para automatizar tu gestión de incapacidades?</h2>
           <p className="text-white/80 mb-8">Agenda una demo de 30 minutos y te mostramos el sistema con datos reales.</p>
-          <a href="mailto:rafamaza56@gmail.com?subject=Demo IncapacidadIA"
+          <a href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
              className="inline-flex items-center gap-2 bg-white text-brand-700 hover:bg-brand-50 font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-lg">
             Solicitar demo gratuita <ArrowRight className="w-4 h-4" />
           </a>
@@ -223,7 +223,7 @@ export default function Landing() {
             <div className="w-6 h-6 bg-brand-600 rounded flex items-center justify-center">
               <Brain className="w-3 h-3 text-white" />
             </div>
-            <span>IncapacidadIA © {new Date().getFullYear()}</span>
+            <span>KausalIA © {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="/politica-tratamiento" className="hover:text-brand-600 transition-colors">Política de datos</a>

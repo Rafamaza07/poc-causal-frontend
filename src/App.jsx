@@ -46,7 +46,7 @@ function TitleManager() {
     const label = match
       ? `Caso ${match[1]}`
       : TITLE_MAP[location.pathname] ?? null
-    document.title = label ? `${label} | IncapacidadIA` : 'IncapacidadIA'
+    document.title = label ? `${label} | KausalIA` : 'KausalIA'
   }, [location.pathname])
   return null
 }

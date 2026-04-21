@@ -8,10 +8,10 @@ const SECTIONS = [
     title: '1. Responsable del Tratamiento',
     content: (
       <div className="space-y-2 text-sm text-gray-700">
-        <p><span className="font-medium">Empresa:</span> IncapacidadIA [razón social pendiente de completar]</p>
+        <p><span className="font-medium">Empresa:</span> KausalIA [razón social pendiente de completar]</p>
         <p><span className="font-medium">Correo de atención:</span>{' '}
-          <a href="mailto:privacidad@incapacidadia.com" className="text-brand-600 underline">
-            privacidad@incapacidadia.com
+          <a href="mailto:privacidad@kausalia.com" className="text-brand-600 underline">
+            privacidad@kausalia.com
           </a>
         </p>
         <p className="text-xs text-gray-500 mt-2">
@@ -101,8 +101,8 @@ const SECTIONS = [
         <div className="mt-3 p-3 bg-brand-50 rounded-lg border border-brand-100">
           <p className="text-xs font-medium text-brand-800">
             Canal de atención:{' '}
-            <a href="mailto:privacidad@incapacidadia.com" className="underline">
-              privacidad@incapacidadia.com
+            <a href="mailto:privacidad@kausalia.com" className="underline">
+              privacidad@kausalia.com
             </a>
           </p>
           <p className="text-xs text-brand-700 mt-1">
@@ -224,8 +224,8 @@ const SECTIONS = [
         </p>
         <p>
           Para ejercer sus derechos ARCO o resolver dudas:{' '}
-          <a href="mailto:privacidad@incapacidadia.com" className="text-brand-600 underline">
-            privacidad@incapacidadia.com
+          <a href="mailto:privacidad@kausalia.com" className="text-brand-600 underline">
+            privacidad@kausalia.com
           </a>
         </p>
         <p className="text-xs text-gray-500 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
@@ -248,7 +248,7 @@ export default function PoliticaTratamiento() {
             <Shield className="w-8 h-8 text-brand-200" />
             <div>
               <p className="text-brand-200 text-xs font-medium uppercase tracking-wide">
-                IncapacidadIA
+                KausalIA
               </p>
               <h1 className="text-2xl font-bold">Política de Tratamiento de Datos Personales</h1>
             </div>

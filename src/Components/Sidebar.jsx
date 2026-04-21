@@ -62,7 +62,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
           </div>
           {!collapsed && (
             <div className="min-w-0 animate-fade-in">
-              <h1 className="text-white font-bold text-sm tracking-tight leading-tight">IncapacidadIA</h1>
+              <h1 className="text-white font-bold text-sm tracking-tight leading-tight">KausalIA</h1>
               <p className="text-slate-400 text-[10px] uppercase tracking-widest font-medium truncate">
                 Sistema de Evaluación
               </p>
@@ -228,7 +228,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
                 <div className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center">
                   <Activity className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-white font-semibold text-sm">IncapacidadIA</span>
+                <span className="text-white font-semibold text-sm">KausalIA</span>
               </div>
               <button
                 onClick={() => setDrawerOpen(false)}

@@ -354,7 +354,7 @@ export default function EvaluarPaciente() {
               </div>
               <p className="text-sm text-gray-700 leading-relaxed mb-3">
                 Este resultado es generado por el motor de inferencia causal{' '}
-                <strong>IncapacidadIA</strong> como <strong>herramienta de apoyo a la decisión</strong>.
+                <strong>KausalIA</strong> como <strong>herramienta de apoyo a la decisión</strong>.
               </p>
               <ul className="text-sm text-gray-700 space-y-2 mb-5 list-disc list-inside">
                 <li>No sustituye el criterio del <strong>médico laboral certificado</strong>.</li>

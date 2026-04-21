@@ -72,7 +72,7 @@ export default function Login({ onLogin }) {
             <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shadow-lg">
               <Activity className="w-8 h-8 text-white" />
             </div>
-            <span className="text-white text-3xl font-bold tracking-tight">IncapacidadIA</span>
+            <span className="text-white text-3xl font-bold tracking-tight">KausalIA</span>
           </div>
 
           {/* Tagline */}
@@ -102,7 +102,7 @@ export default function Login({ onLogin }) {
             <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
               <Activity className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-lg">IncapacidadIA</span>
+            <span className="font-bold text-gray-900 text-lg">KausalIA</span>
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
