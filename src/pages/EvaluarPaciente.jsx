@@ -5,7 +5,7 @@ import {
   CheckCircle, Activity, Clock, AlertTriangle,
   Briefcase, Heart, Stethoscope, Plus, Minus,
   RotateCcw, Brain, Info, Tag, Paperclip, Loader2, X,
-  Scale, ChevronDown, ChevronUp, ShieldCheck,
+  Scale, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert,
 } from 'lucide-react'
 import API from '../api/client'
 import { useToast } from '../Components/Toast'
@@ -17,7 +17,7 @@ import RutaTerminalCard from '../Components/data/RutaTerminalCard'
 import ScoreBloques from '../Components/data/ScoreBloques'
 import { RECOMENDACIONES, MILESTONES } from '../utils/constants'
 
-// ── Legal accordion item ──────────────────────────────────────────────────────
+// ── Legal accordion ───────────────────────────────────────────────────────────
 function LegalAccordionItem({ article }) {
   const [open, setOpen] = useState(false)
   return (
@@ -34,8 +34,7 @@ function LegalAccordionItem({ article }) {
         <span className="flex-1 text-xs text-gray-600 truncate">{article.title}</span>
         {open
           ? <ChevronUp className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-          : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-        }
+          : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />}
       </button>
       {open && (
         <div className="px-4 py-3 bg-blue-50/50 border-t border-blue-100">
@@ -46,56 +45,178 @@ function LegalAccordionItem({ article }) {
   )
 }
 
+// ── StepCasoEstado — auto-classify case state from form fields ────────────────
+const ESTADO_CONFIG = {
+  sin_calificacion:       { label: 'Sin calificación',            cls: 'bg-gray-100 text-gray-700 border-gray-300' },
+  en_calificacion:        { label: 'En calificación',             cls: 'bg-blue-100 text-blue-700 border-blue-300' },
+  calificado_sin_cierre:  { label: 'Calificado sin cierre',       cls: 'bg-amber-100 text-amber-700 border-amber-300' },
+  reintegrado_recurrente: { label: 'Reintegrado con recurrencia', cls: 'bg-orange-100 text-orange-700 border-orange-300' },
+  conflicto_entidades:    { label: 'Conflicto entre entidades',   cls: 'bg-red-100 text-red-700 border-red-300' },
+}
+
+function classifyEstadoCaso(form) {
+  if (form.conflicto_entre_entidades) return 'conflicto_entidades'
+  if (form.reintegrado && form.incapacidades_recurrentes_post_reintegro) return 'reintegrado_recurrente'
+  if (form.pcl_dictamen_emitido) return 'calificado_sin_cierre'
+  if (form.concepto_rehabilitacion === 'favorable' || form.concepto_rehabilitacion === 'desfavorable') return 'en_calificacion'
+  return 'sin_calificacion'
+}
+
+export function StepCasoEstado({ form }) {
+  const estado = classifyEstadoCaso(form)
+  const cfg    = ESTADO_CONFIG[estado]
+  return (
+    <div className="flex items-center gap-2">
+      <Tag className="w-3.5 h-3.5 text-gray-400" />
+      <span className="text-xs text-gray-500">Estado del caso:</span>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cfg.cls}`}>
+        {cfg.label}
+      </span>
+    </div>
+  )
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
 const STEPS = [
-  { id: 'datos',    label: 'Datos del paciente' },
-  { id: 'clinicos', label: 'Indicadores clínicos' },
-  { id: 'notas',    label: 'Notas y confirmación' },
+  { id: 'identificacion', label: 'Identificación' },
+  { id: 'temporal',       label: 'Línea temporal' },
+  { id: 'documentacion',  label: 'Documentación' },
+  { id: 'calificacion',   label: 'Calificación' },
+  { id: 'revision',       label: 'Revisión' },
 ]
 
 const TIPO_OPTIONS = [
-  { value: 'laboral',     label: 'Laboral',      Icon: Briefcase },
-  { value: 'comun',       label: 'Común',        Icon: Heart },
-  { value: 'profesional', label: 'Profesional',  Icon: Stethoscope },
-  { value: 'accidente',   label: 'Accidente',    Icon: AlertTriangle },
+  { value: 'laboral',     label: 'Laboral',     Icon: Briefcase },
+  { value: 'comun',       label: 'Común',       Icon: Heart },
+  { value: 'profesional', label: 'Profesional', Icon: Stethoscope },
+  { value: 'accidente',   label: 'Accidente',   Icon: AlertTriangle },
 ]
 
 const PRONOSTICO_OPTIONS = [
   { value: 'favorable', label: 'Favorable',    color: 'text-green-500' },
   { value: 'reservado', label: 'Reservado',    color: 'text-amber-500' },
-  { value: 'malo',      label: 'Desfavorable', color: 'text-red-500'   },
+  { value: 'malo',      label: 'Desfavorable', color: 'text-red-500' },
+]
+
+const CONCEPTO_REHAB_OPTIONS = [
+  { value: 'favorable',    label: 'Favorable' },
+  { value: 'desfavorable', label: 'Desfavorable' },
+  { value: 'pendiente',    label: 'Pendiente' },
+  { value: 'no_emitido',   label: 'No emitido' },
+]
+
+const ENTIDAD_CALIFICADORA_OPTIONS = [
+  { value: 'EPS',            label: 'EPS' },
+  { value: 'AFP',            label: 'AFP' },
+  { value: 'ARL',            label: 'ARL' },
+  { value: 'Junta_Regional', label: 'Junta Regional' },
+  { value: 'Junta_Nacional', label: 'Junta Nacional' },
+]
+
+// backendKey overrides the form key when POSTing to checklist endpoint
+const CHECKLIST_ITEMS = [
+  { key: 'historia_clinica_completa',   label: 'Historia clínica completa y actualizada' },
+  { key: 'epicrisis',                   label: 'Epicrisis, soportes de hospitalización y cirugías' },
+  { key: 'imagenes_y_laboratorios',     label: 'Imágenes, laboratorios y pruebas funcionales' },
+  { key: 'terapias_y_rehabilitacion',   label: 'Soporte de terapias y controles por especialista' },
+  { key: 'incapacidades_completas',     label: 'Incapacidades completas y radicaciones' },
+  { key: 'radicaciones_eps',            label: 'Radicaciones ante EPS con acuse de recibo' },
+  { key: 'radicaciones_afp',            label: 'Radicaciones ante AFP con acuse de recibo' },
+  { key: 'radicaciones_arl',            label: 'Radicaciones ante ARL con acuse de recibo' },
+  { key: 'concepto_rehabilitacion_doc', label: 'Concepto de rehabilitación emitido', backendKey: 'concepto_rehabilitacion' },
+  { key: 'dictamen_pcl_doc',            label: 'Dictamen PCL completo',              backendKey: 'dictamen_pcl' },
+  { key: 'recurso_o_impugnacion',       label: 'Recurso o impugnación (si aplica)' },
+  { key: 'perfil_del_cargo',            label: 'Perfil del cargo actualizado (APT)' },
+  { key: 'evaluacion_del_puesto',       label: 'Evaluación del puesto de trabajo' },
+  { key: 'acta_reintegro_o_reubicacion', label: 'Acta de reintegro o reubicación' },
 ]
 
 const REC_ICON_MAP = { CheckCircle, Activity, Clock, AlertTriangle }
-
 const REC_STYLES = {
   emerald: { card: 'bg-emerald-50 border-emerald-200 text-emerald-800', icon: 'text-emerald-600' },
-  blue:    { card: 'bg-blue-50 border-blue-200 text-blue-800',          icon: 'text-blue-600'    },
-  amber:   { card: 'bg-amber-50 border-amber-200 text-amber-800',       icon: 'text-amber-600'   },
-  red:     { card: 'bg-red-50 border-red-200 text-red-800',             icon: 'text-red-600'     },
+  blue:    { card: 'bg-blue-50 border-blue-200 text-blue-800',          icon: 'text-blue-600' },
+  amber:   { card: 'bg-amber-50 border-amber-200 text-amber-800',       icon: 'text-amber-600' },
+  red:     { card: 'bg-red-50 border-red-200 text-red-800',             icon: 'text-red-600' },
 }
 
 const INIT = {
-  id_caso: '',
-  edad: '',
-  tipo_enfermedad: 'comun',
-  texto_clinico: '',
-  codigo_cie10: '',
-  dias_incapacidad_acumulados: '',
-  porcentaje_pcl: 0,
-  pronostico_medico: 'reservado',
-  en_tratamiento_activo: true,
-  comorbilidades: 0,
+  // Core ML fields (existing)
+  id_caso:                      '',
+  edad:                         '',
+  tipo_enfermedad:              'comun',
+  texto_clinico:                '',
+  codigo_cie10:                 '',
+  dias_incapacidad_acumulados:  '',
+  porcentaje_pcl:               0,
+  pronostico_medico:            'reservado',
+  en_tratamiento_activo:        true,
+  comorbilidades:               0,
   requiere_reubicacion_laboral: false,
-  notas_adicionales: '',
+  notas_adicionales:            '',
+  // Schema 6.1 — Identification
+  nombre_trabajador: '',
+  documento:         '',
+  empresa:           '',
+  sede:              '',
+  cargo:             '',
+  jefe_directo:      '',
+  // Schema 6.1 — Entities
+  eps: '',
+  afp: '',
+  arl: '',
+  // Schema 6.1 — Timeline
+  fecha_inicio_incapacidad:     '',
+  dias_continuos:               '',
+  dias_discontinuos:            '',
+  // Schema 6.1 — Rehab concept
+  concepto_rehabilitacion:       'pendiente',
+  fecha_concepto_rehabilitacion: '',
+  // Schema 6.1 — PCL dictamen
+  pcl_dictamen_emitido:  false,
+  pcl_en_firme:          false,
+  fecha_dictamen:        '',
+  existe_recurso_pcl:    false,
+  entidad_calificadora:  '',
+  // Schema 6.1 — Occupational
+  reintegrado:                             false,
+  reubicado:                               false,
+  incapacidades_recurrentes_post_reintegro: false,
+  restricciones_vigentes:                  '',
+  perfil_cargo_actualizado:                false,
+  analisis_puesto_realizado:               false,
+  // Schema 6.1 — Legal
+  conflicto_entre_entidades:     false,
+  estabilidad_laboral_reforzada: false,
+  // Schema 6.1 — Management
+  responsable_interno: '',
+  proxima_accion:      '',
+  fecha_compromiso:    '',
+  // Checklist documental (14 items — saved separately via checklist endpoint)
+  historia_clinica_completa:    false,
+  epicrisis:                    false,
+  imagenes_y_laboratorios:      false,
+  terapias_y_rehabilitacion:    false,
+  incapacidades_completas:      false,
+  radicaciones_eps:             false,
+  radicaciones_afp:             false,
+  radicaciones_arl:             false,
+  concepto_rehabilitacion_doc:  false,
+  dictamen_pcl_doc:             false,
+  recurso_o_impugnacion:        false,
+  perfil_del_cargo:             false,
+  evaluacion_del_puesto:        false,
+  acta_reintegro_o_reubicacion: false,
 }
 
-function Field({ label, required, children }) {
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function Field({ label, required, hint, children }) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-gray-700">
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
+      {hint && <p className="text-xs text-gray-400">{hint}</p>}
     </div>
   )
 }
@@ -155,20 +276,38 @@ function BtnGhost({ children, onClick }) {
   )
 }
 
+function ChecklistItem({ label, checked, onChange }) {
+  return (
+    <label className={`flex items-start gap-3 cursor-pointer select-none p-2.5 rounded-lg
+      transition-colors border ${checked ? 'bg-brand-50/40 border-brand-100' : 'border-transparent hover:bg-gray-50 hover:border-gray-100'}`}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        className="mt-0.5 w-4 h-4 accent-brand-600 rounded flex-shrink-0"
+      />
+      <span className={`text-sm ${checked ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+        {label}
+      </span>
+    </label>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function EvaluarPaciente() {
   const toast    = useToast()
   const navigate = useNavigate()
 
-  const [step, setStep]             = useState(0)
-  const [form, setForm]             = useState(INIT)
-  const [cie10, setCie10]           = useState(null)
+  const [step, setStep]               = useState(0)
+  const [form, setForm]               = useState(INIT)
+  const [cie10, setCie10]             = useState(null)
   const [cie10Loading, setCIE10Loading] = useState(false)
-  const [result, setResult]         = useState(null)
-  const [loading, setLoading]       = useState(false)
-  const [confirmed, setConfirmed]   = useState(false)
-  const [pdfLoading, setPdfLoading] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState(null)
-  const [fileLoading, setFileLoading]   = useState(false)
+  const [result, setResult]           = useState(null)
+  const [loading, setLoading]         = useState(false)
+  const [confirmed, setConfirmed]     = useState(false)
+  const [pdfLoading, setPdfLoading]   = useState(false)
+  const [uploadedFile, setUploadedFile]   = useState(null)
+  const [fileLoading, setFileLoading]     = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const [consentChecked, setConsentChecked] = useState(false)
   const [titular, setTitular] = useState({ nombre: '', cedula: '', email: '' })
@@ -183,7 +322,11 @@ export default function EvaluarPaciente() {
     return diff > 0 && diff <= 20
   })
 
-  const step1Valid = form.id_caso.trim() !== '' && form.edad !== ''
+  const checklistCount = CHECKLIST_ITEMS.filter(({ key }) => form[key]).length
+  const checklistPct   = Math.round((checklistCount / CHECKLIST_ITEMS.length) * 100)
+
+  const step0Valid = form.id_caso.trim() !== '' && form.edad !== ''
+  const step4Valid = confirmed && consentChecked && titular.nombre.trim() !== '' && titular.cedula.trim() !== ''
 
   const handleFileUpload = async (e) => {
     const f = e.target.files[0]
@@ -198,8 +341,8 @@ export default function EvaluarPaciente() {
       })
       const c = data.campos_extraidos
       if (c) {
-        setForm(f => ({
-          ...f,
+        setForm(prev => ({
+          ...prev,
           ...(c.id_caso                      ? { id_caso: c.id_caso } : {}),
           ...(c.edad != null                 ? { edad: String(c.edad) } : {}),
           ...(c.dias_incapacidad_acumulados != null ? { dias_incapacidad_acumulados: String(c.dias_incapacidad_acumulados) } : {}),
@@ -210,8 +353,11 @@ export default function EvaluarPaciente() {
           ...(c.comorbilidades != null        ? { comorbilidades: parseInt(c.comorbilidades) || 0 } : {}),
           ...(c.requiere_reubicacion_laboral != null ? { requiere_reubicacion_laboral: Boolean(c.requiere_reubicacion_laboral) } : {}),
           ...(c.notas_adicionales            ? { notas_adicionales: c.notas_adicionales } : {}),
+          ...(c.nombre_trabajador            ? { nombre_trabajador: c.nombre_trabajador } : {}),
+          ...(c.empresa                      ? { empresa: c.empresa } : {}),
+          ...(c.cargo                        ? { cargo: c.cargo } : {}),
         }))
-        toast('Datos del paciente extraídos del PDF', 'success')
+        toast('Datos extraídos del PDF', 'success')
       } else {
         toast('El archivo no contiene información legible', 'warning')
       }
@@ -258,7 +404,6 @@ export default function EvaluarPaciente() {
     }
     setLoading(true)
     try {
-      // 1. Registrar consentimiento informado — Ley 1581/2012 Art. 9
       await API.post('/api/v1/consentimientos', {
         caso_id:        form.id_caso,
         titular_nombre: titular.nombre,
@@ -268,8 +413,8 @@ export default function EvaluarPaciente() {
         texto_consentimiento_version: '1.0',
       })
 
-      // 2. Evaluar caso
       const { data } = await API.post('/api/evaluar-caso', {
+        // Core ML fields
         id_caso:                      form.id_caso,
         edad:                         parseFloat(form.edad),
         tipo_enfermedad:              form.tipo_enfermedad,
@@ -282,8 +427,50 @@ export default function EvaluarPaciente() {
         comorbilidades:               form.comorbilidades,
         requiere_reubicacion_laboral: form.requiere_reubicacion_laboral ? 1 : 0,
         notas_adicionales:            form.notas_adicionales || undefined,
+        // Schema 6.1 fields
+        nombre_trabajador:            form.nombre_trabajador || undefined,
+        documento:                    form.documento || undefined,
+        empresa:                      form.empresa || undefined,
+        sede:                         form.sede || undefined,
+        cargo:                        form.cargo || undefined,
+        jefe_directo:                 form.jefe_directo || undefined,
+        eps:                          form.eps || undefined,
+        afp:                          form.afp || undefined,
+        arl:                          form.arl || undefined,
+        fecha_inicio_incapacidad:     form.fecha_inicio_incapacidad || undefined,
+        dias_continuos:               form.dias_continuos ? parseInt(form.dias_continuos) : undefined,
+        dias_discontinuos:            form.dias_discontinuos ? parseInt(form.dias_discontinuos) : undefined,
+        concepto_rehabilitacion:      form.concepto_rehabilitacion || undefined,
+        fecha_concepto_rehabilitacion: form.fecha_concepto_rehabilitacion || undefined,
+        pcl_dictamen_emitido:         form.pcl_dictamen_emitido,
+        pcl_en_firme:                 form.pcl_en_firme,
+        fecha_dictamen:               form.fecha_dictamen || undefined,
+        existe_recurso_pcl:           form.existe_recurso_pcl,
+        entidad_calificadora:         form.entidad_calificadora || undefined,
+        reintegrado:                  form.reintegrado,
+        reubicado:                    form.reubicado,
+        incapacidades_recurrentes_post_reintegro: form.incapacidades_recurrentes_post_reintegro,
+        restricciones_vigentes:       form.restricciones_vigentes || undefined,
+        perfil_cargo_actualizado:     form.perfil_cargo_actualizado,
+        analisis_puesto_realizado:    form.analisis_puesto_realizado,
+        conflicto_entre_entidades:    form.conflicto_entre_entidades,
+        estabilidad_laboral_reforzada: form.estabilidad_laboral_reforzada,
+        responsable_interno:          form.responsable_interno || undefined,
+        proxima_accion:               form.proxima_accion || undefined,
+        fecha_compromiso:             form.fecha_compromiso || undefined,
       })
+
       setResult(data)
+
+      // Save checklist (best-effort, silent fail)
+      try {
+        const checklistPayload = {}
+        CHECKLIST_ITEMS.forEach(({ key, backendKey }) => {
+          checklistPayload[backendKey || key] = form[key]
+        })
+        await API.put(`/api/v1/casos/${form.id_caso}/checklist`, checklistPayload)
+      } catch (_) { /* silent */ }
+
       if (!localStorage.getItem('disclaimer_accepted')) setShowDisclaimer(true)
       toast(
         data.caso_existente
@@ -302,10 +489,10 @@ export default function EvaluarPaciente() {
     if (!result) return
     setPdfLoading(true)
     try {
-      const res = await API.get(`/api/casos/${result.id_caso}/reporte-pdf`, { responseType: 'blob' })
+      const res  = await API.get(`/api/casos/${result.id_caso}/reporte-pdf`, { responseType: 'blob' })
       const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
       const link = document.createElement('a')
-      link.href = url
+      link.href  = url
       link.setAttribute('download', `reporte-${result.id_caso}.pdf`)
       document.body.appendChild(link)
       link.click()
@@ -335,16 +522,14 @@ export default function EvaluarPaciente() {
     setTitular({ nombre: '', cedula: '', email: '' })
   }
 
-  /* ──────────────────────────────────────────────────────── RESULT VIEW */
+  // ── Result view ──────────────────────────────────────────────────────────────
   if (result) {
-    const rec        = RECOMENDACIONES[result.recomendacion]
-    const RecIcon    = rec ? REC_ICON_MAP[rec.icon] : null
-    const recStyle   = rec ? REC_STYLES[rec.color] : { card: 'bg-gray-50 border-gray-200 text-gray-800', icon: 'text-gray-600' }
+    const rec      = RECOMENDACIONES[result.recomendacion]
+    const RecIcon  = rec ? REC_ICON_MAP[rec.icon] : null
+    const recStyle = rec ? REC_STYLES[rec.color] : { card: 'bg-gray-50 border-gray-200 text-gray-800', icon: 'text-gray-600' }
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-
-        {/* ── Disclaimer modal ── */}
         {showDisclaimer && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-7">
@@ -380,13 +565,13 @@ export default function EvaluarPaciente() {
           <p className="text-gray-500 text-sm mt-1">Caso {result.id_caso}</p>
         </div>
 
-        {/* Score + Recommendation */}
+        {/* Score ML + Recomendación clínica */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
             <ScoreGauge score={result.score_riesgo} size={240} />
           </div>
           <div className={`p-6 rounded-xl border-2 flex flex-col justify-center ${recStyle.card}`}>
-            <p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-2">Recomendación</p>
+            <p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-2">Recomendación clínica</p>
             <div className="flex items-start gap-3">
               {RecIcon && <RecIcon className={`w-8 h-8 flex-shrink-0 mt-0.5 ${recStyle.icon}`} />}
               <div>
@@ -414,7 +599,7 @@ export default function EvaluarPaciente() {
           <ScoreBloques scoring={result.scoring_bloques} />
         )}
 
-        {/* AI Analysis */}
+        {/* Análisis IA */}
         {(result.analisis_ia || result.explicacion?.resumen) && (
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-3">
@@ -455,13 +640,12 @@ export default function EvaluarPaciente() {
           </div>
         )}
 
-        {/* Milestone bar */}
+        {/* Hitos */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-800 mb-4">Progresión de hitos legales</h2>
           <MilestoneBar diasActuales={dias} />
         </div>
 
-        {/* Caso existente banner */}
         {result.caso_existente && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
             <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />
@@ -477,7 +661,6 @@ export default function EvaluarPaciente() {
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="flex flex-wrap gap-3">
           <button
             onClick={descargarPDF}
@@ -487,9 +670,7 @@ export default function EvaluarPaciente() {
             <FileText className="w-4 h-4" />
             {pdfLoading ? 'Generando...' : 'Descargar PDF'}
           </button>
-          <BtnSecondary onClick={() => navigate('/historial')}>
-            Ver en historial
-          </BtnSecondary>
+          <BtnSecondary onClick={() => navigate('/historial')}>Ver en historial</BtnSecondary>
           <BtnGhost onClick={resetWizard}>
             <RotateCcw className="w-4 h-4" />
             Evaluar otro caso
@@ -499,68 +680,85 @@ export default function EvaluarPaciente() {
     )
   }
 
-  /* ──────────────────────────────────────────────────────── WIZARD */
+  // ── Wizard ───────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Evaluar caso</h1>
 
-      {/* Stepper header */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      {/* Stepper + Estado chip */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
         <Stepper steps={STEPS} currentStep={step} />
+        <StepCasoEstado form={form} />
       </div>
 
-      {/* ── STEP 1: Datos del paciente ─────────────────────────────────── */}
+      {/* ── STEP 0: Identificación (§A) ──────────────────────────────────── */}
       {step === 0 && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-5">
-          <h2 className="text-base font-semibold text-gray-800">Datos del paciente</h2>
+          <h2 className="text-base font-semibold text-gray-800">Identificación del caso</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Field label="ID del caso" required>
-              <input
-                type="text"
-                value={form.id_caso}
-                onChange={e => set('id_caso', e.target.value)}
-                placeholder="CASO-2024-001"
-                className="input w-full"
-              />
+              <input type="text" value={form.id_caso} onChange={e => set('id_caso', e.target.value)}
+                placeholder="CASO-2024-001" className="input w-full" />
             </Field>
-
             <Field label="Edad" required>
-              <input
-                type="number"
-                value={form.edad}
-                onChange={e => set('edad', e.target.value)}
-                placeholder="45"
-                min={18}
-                max={100}
-                className="input w-full"
-              />
-              <input
-                type="range"
-                min={18}
-                max={100}
-                value={form.edad || 18}
-                onChange={e => set('edad', e.target.value)}
-                className="w-full accent-brand-600 h-2 mt-2"
-              />
+              <input type="number" value={form.edad} onChange={e => set('edad', e.target.value)}
+                placeholder="45" min={18} max={100} className="input w-full" />
+              <input type="range" min={18} max={100} value={form.edad || 18}
+                onChange={e => set('edad', e.target.value)} className="w-full accent-brand-600 h-2 mt-2" />
               <div className="flex justify-between text-xs text-gray-400">
                 <span>18 años</span><span>100 años</span>
               </div>
             </Field>
-
-            <Field label="Tipo de enfermedad">
-              <select
-                value={form.tipo_enfermedad}
-                onChange={e => set('tipo_enfermedad', e.target.value)}
-                className="input w-full"
-              >
-                {TIPO_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+            <Field label="Nombre del trabajador">
+              <input type="text" value={form.nombre_trabajador} onChange={e => set('nombre_trabajador', e.target.value)}
+                placeholder="Nombre completo" className="input w-full" />
+            </Field>
+            <Field label="Documento (cédula)">
+              <input type="text" value={form.documento} onChange={e => set('documento', e.target.value)}
+                placeholder="Número de identificación" className="input w-full" />
+            </Field>
+            <Field label="Empresa">
+              <input type="text" value={form.empresa} onChange={e => set('empresa', e.target.value)}
+                placeholder="Razón social" className="input w-full" />
+            </Field>
+            <Field label="Sede">
+              <input type="text" value={form.sede} onChange={e => set('sede', e.target.value)}
+                placeholder="Ciudad / sede" className="input w-full" />
+            </Field>
+            <Field label="Cargo">
+              <input type="text" value={form.cargo} onChange={e => set('cargo', e.target.value)}
+                placeholder="Cargo actual" className="input w-full" />
+            </Field>
+            <Field label="Jefe directo">
+              <input type="text" value={form.jefe_directo} onChange={e => set('jefe_directo', e.target.value)}
+                placeholder="Nombre del jefe directo" className="input w-full" />
             </Field>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Field label="EPS">
+              <input type="text" value={form.eps} onChange={e => set('eps', e.target.value)}
+                placeholder="EPS afiliada" className="input w-full" />
+            </Field>
+            <Field label="AFP">
+              <input type="text" value={form.afp} onChange={e => set('afp', e.target.value)}
+                placeholder="Fondo de pensiones" className="input w-full" />
+            </Field>
+            <Field label="ARL">
+              <input type="text" value={form.arl} onChange={e => set('arl', e.target.value)}
+                placeholder="ARL aseguradora" className="input w-full" />
+            </Field>
+          </div>
+
+          <Field label="Origen de la contingencia">
+            <select value={form.tipo_enfermedad} onChange={e => set('tipo_enfermedad', e.target.value)}
+              className="input w-full">
+              {TIPO_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </Field>
+
+          {/* PDF upload */}
           <Field label="Documento clínico (opcional)">
             <label className={`flex items-center gap-3 px-4 py-3 border-2 border-dashed rounded-xl
               cursor-pointer transition-all duration-150 ${
@@ -572,8 +770,7 @@ export default function EvaluarPaciente() {
               <span className="flex-1 text-sm truncate">
                 {uploadedFile
                   ? <span className="font-medium text-gray-800">{uploadedFile.name}</span>
-                  : <span className="text-gray-500">Subir PDF, Word o imagen para extraer texto automáticamente</span>
-                }
+                  : <span className="text-gray-500">Subir PDF, Word o imagen para extraer texto automáticamente</span>}
               </span>
               {fileLoading
                 ? <Loader2 className="w-4 h-4 animate-spin text-brand-600 flex-shrink-0" />
@@ -582,228 +779,342 @@ export default function EvaluarPaciente() {
                       className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
-                  : null
-              }
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-                onChange={handleFileUpload}
-              />
+                  : null}
+              <input type="file" className="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                onChange={handleFileUpload} />
             </label>
           </Field>
 
           <Field label="Descripción clínica">
-            <textarea
-              value={form.texto_clinico}
-              onChange={e => set('texto_clinico', e.target.value)}
+            <textarea value={form.texto_clinico} onChange={e => set('texto_clinico', e.target.value)}
               placeholder="Describa el cuadro clínico del paciente..."
-              className="input w-full resize-none h-32"
-            />
+              className="input w-full resize-none h-28" />
           </Field>
 
-          <button
-            type="button"
-            onClick={autoClasificarCIE10}
+          <button type="button" onClick={autoClasificarCIE10}
             disabled={cie10Loading || !form.texto_clinico.trim()}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium
               text-gray-700 bg-white border border-gray-300 rounded-lg
-              hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
+              hover:bg-gray-50 transition-colors disabled:opacity-50">
             <Tag className="w-4 h-4" />
             {cie10Loading ? 'Clasificando...' : 'Auto-clasificar CIE-10'}
           </button>
 
           <Field label="Código CIE-10">
-            <CIE10Search
-              value={cie10}
-              onSelect={item => {
-                setCie10(item)
-                set('codigo_cie10', item?.codigo ?? '')
-              }}
-              showDetails
-              placeholder="Buscar código CIE-10..."
-            />
+            <CIE10Search value={cie10}
+              onSelect={item => { setCie10(item); set('codigo_cie10', item?.codigo ?? '') }}
+              showDetails placeholder="Buscar código CIE-10..." />
           </Field>
 
           <div className="flex justify-end pt-2">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              disabled={!step1Valid}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50"
-            >
+            <button type="button" onClick={() => setStep(1)} disabled={!step0Valid}
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ── STEP 2: Indicadores clínicos ───────────────────────────────── */}
+      {/* ── STEP 1: Línea temporal (§B) ──────────────────────────────────── */}
       {step === 1 && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
-          <h2 className="text-base font-semibold text-gray-800">Indicadores clínicos</h2>
+          <h2 className="text-base font-semibold text-gray-800">Línea temporal</h2>
 
-          {/* Días de incapacidad */}
-          <Field label="Días de incapacidad acumulados">
-            <input
-              type="number"
-              value={form.dias_incapacidad_acumulados}
-              onChange={e => set('dias_incapacidad_acumulados', e.target.value)}
-              placeholder="120"
-              min={0}
-              className="input w-full"
-            />
-            <div className="mt-3 pb-2">
-              <MilestoneBar diasActuales={dias} />
-            </div>
-            {nearMilestone && (
-              <div className="mt-1 p-3 bg-amber-50 border border-amber-200 rounded-lg
-                text-sm text-amber-800 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                A {nearMilestone.days - dias} días del milestone de {nearMilestone.days} días ({nearMilestone.decreto})
-              </div>
-            )}
-            {cie10?.dias_tipicos_min && (
-              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg
-                text-sm text-blue-800 flex items-center gap-2">
-                <Info className="w-4 h-4 flex-shrink-0" />
-                Rango típico para {cie10.codigo}: {cie10.dias_tipicos_min}–{cie10.dias_tipicos_max} días
-              </div>
-            )}
-          </Field>
-
-          {/* PCL */}
-          <Field label={`Porcentaje PCL: ${pcl}%`}>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={0.5}
-              value={form.porcentaje_pcl}
-              onChange={e => set('porcentaje_pcl', parseFloat(e.target.value))}
-              className="w-full accent-brand-600 h-2"
-            />
-            {/* Color zones */}
-            <div className="relative w-full h-1.5 rounded-full overflow-hidden mt-2">
-              <div className="absolute left-0 top-0 h-full bg-emerald-300" style={{ width: '30%' }} />
-              <div className="absolute top-0 h-full bg-amber-300"   style={{ left: '30%', width: '20%' }} />
-              <div className="absolute top-0 h-full bg-red-300"     style={{ left: '50%', width: '50%' }} />
-            </div>
-            <div className="flex text-xs text-gray-400 mt-1">
-              <span className="w-[30%]">0–30%</span>
-              <span className="w-[20%]">30–50%</span>
-              <span className="flex-1 text-right">50–100%</span>
-            </div>
-            {pcl > 50 && (
-              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg
-                text-sm text-red-800 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                PCL ≥50% implica posible pensión por invalidez (Ley 100)
-              </div>
-            )}
-          </Field>
-
-          {/* Pronóstico */}
-          <Field label="Pronóstico médico">
-            <select
-              value={form.pronostico_medico}
-              onChange={e => set('pronostico_medico', e.target.value)}
-              className="input w-full"
-            >
-              {PRONOSTICO_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </Field>
-
-          {/* Toggles */}
-          <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
-            <ToggleRow
-              label="¿En tratamiento activo?"
-              checked={form.en_tratamiento_activo}
-              onChange={v => set('en_tratamiento_activo', v)}
-            />
-            <ToggleRow
-              label="¿Requiere reubicación laboral?"
-              checked={form.requiere_reubicacion_laboral}
-              onChange={v => set('requiere_reubicacion_laboral', v)}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="Fecha de inicio de incapacidad">
+              <input type="date" value={form.fecha_inicio_incapacidad}
+                onChange={e => set('fecha_inicio_incapacidad', e.target.value)} className="input w-full" />
+            </Field>
+            <Field label="Días acumulados de incapacidad">
+              <input type="number" value={form.dias_incapacidad_acumulados}
+                onChange={e => set('dias_incapacidad_acumulados', e.target.value)}
+                placeholder="120" min={0} className="input w-full" />
+            </Field>
+            <Field label="Días continuos">
+              <input type="number" value={form.dias_continuos}
+                onChange={e => set('dias_continuos', e.target.value)}
+                placeholder="0" min={0} className="input w-full" />
+            </Field>
+            <Field label="Días discontinuos">
+              <input type="number" value={form.dias_discontinuos}
+                onChange={e => set('dias_discontinuos', e.target.value)}
+                placeholder="0" min={0} className="input w-full" />
+            </Field>
           </div>
 
-          {/* Comorbilidades counter */}
-          <Field label="Comorbilidades">
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => set('comorbilidades', Math.max(0, form.comorbilidades - 1))}
-                className="w-9 h-9 rounded-lg border border-gray-200 flex items-center
-                  justify-center hover:bg-gray-50 transition-colors"
-              >
-                <Minus className="w-4 h-4 text-gray-600" />
-              </button>
-              <span className="text-2xl font-bold text-gray-800 w-8 text-center">
-                {form.comorbilidades}
-              </span>
-              <button
-                type="button"
-                onClick={() => set('comorbilidades', Math.min(10, form.comorbilidades + 1))}
-                className="w-9 h-9 rounded-lg border border-gray-200 flex items-center
-                  justify-center hover:bg-gray-50 transition-colors"
-              >
-                <Plus className="w-4 h-4 text-gray-600" />
-              </button>
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-3">Hitos legales alcanzados</p>
+            <MilestoneBar diasActuales={dias} />
+            {nearMilestone && (
+              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                A {nearMilestone.days - dias} días del hito de {nearMilestone.days} días ({nearMilestone.decreto})
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="Concepto de rehabilitación">
+              <select value={form.concepto_rehabilitacion}
+                onChange={e => set('concepto_rehabilitacion', e.target.value)} className="input w-full">
+                {CONCEPTO_REHAB_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <Field label="Fecha del concepto de rehabilitación">
+              <input type="date" value={form.fecha_concepto_rehabilitacion}
+                onChange={e => set('fecha_concepto_rehabilitacion', e.target.value)} className="input w-full" />
+            </Field>
+          </div>
+
+          {cie10?.dias_tipicos_min && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 flex items-center gap-2">
+              <Info className="w-4 h-4 flex-shrink-0" />
+              Rango típico para {cie10.codigo}: {cie10.dias_tipicos_min}–{cie10.dias_tipicos_max} días
             </div>
-          </Field>
+          )}
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(0)}>
-              <ArrowLeft className="w-4 h-4" /> Anterior
-            </BtnSecondary>
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm"
-            >
+            <BtnSecondary onClick={() => setStep(0)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={() => setStep(2)}
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ── STEP 3: Notas y confirmación ───────────────────────────────── */}
+      {/* ── STEP 2: Documentación clínica + SST (§C + §D) ───────────────── */}
       {step === 2 && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
-          <h2 className="text-base font-semibold text-gray-800">Notas y confirmación</h2>
+          <h2 className="text-base font-semibold text-gray-800">Documentación clínica y SST</h2>
 
-          <Field label="Notas adicionales (opcional)">
-            <textarea
-              value={form.notas_adicionales}
-              onChange={e => set('notas_adicionales', e.target.value)}
-              placeholder="Observaciones adicionales..."
-              className="input w-full resize-none h-24"
-            />
-          </Field>
+          {/* Checklist documental */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-gray-700">
+                Checklist documental ({checklistCount}/{CHECKLIST_ITEMS.length})
+              </p>
+              <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                checklistPct >= 80 ? 'bg-green-100 text-green-700 border-green-300' :
+                checklistPct >= 50 ? 'bg-amber-100 text-amber-700 border-amber-300' :
+                                     'bg-red-100 text-red-700 border-red-300'
+              }`}>{checklistPct}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-100 rounded-full mb-4">
+              <div className={`h-1.5 rounded-full transition-all duration-300 ${
+                checklistPct >= 80 ? 'bg-green-500' : checklistPct >= 50 ? 'bg-amber-500' : 'bg-red-500'
+              }`} style={{ width: `${checklistPct}%` }} />
+            </div>
+            <div className="grid grid-cols-1 gap-1">
+              {CHECKLIST_ITEMS.map(({ key, label }) => (
+                <ChecklistItem key={key} label={label} checked={form[key]} onChange={v => set(key, v)} />
+              ))}
+            </div>
+          </div>
 
-          {/* Summary card */}
+          <hr className="border-gray-100" />
+
+          {/* Indicadores clínicos */}
+          <div className="space-y-5">
+            <p className="text-sm font-medium text-gray-700">Indicadores clínicos</p>
+
+            <Field label="Pronóstico médico">
+              <select value={form.pronostico_medico} onChange={e => set('pronostico_medico', e.target.value)}
+                className="input w-full">
+                {PRONOSTICO_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+
+            <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+              <ToggleRow label="¿En tratamiento activo?" checked={form.en_tratamiento_activo}
+                onChange={v => set('en_tratamiento_activo', v)} />
+              <ToggleRow label="¿Requiere reubicación laboral?" checked={form.requiere_reubicacion_laboral}
+                onChange={v => set('requiere_reubicacion_laboral', v)} />
+              <ToggleRow label="Perfil de cargo actualizado" checked={form.perfil_cargo_actualizado}
+                onChange={v => set('perfil_cargo_actualizado', v)} />
+              <ToggleRow label="Análisis de puesto realizado (APT)" checked={form.analisis_puesto_realizado}
+                onChange={v => set('analisis_puesto_realizado', v)} />
+            </div>
+
+            <Field label="Comorbilidades">
+              <div className="flex items-center gap-4">
+                <button type="button"
+                  onClick={() => set('comorbilidades', Math.max(0, form.comorbilidades - 1))}
+                  className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                  <Minus className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-2xl font-bold text-gray-800 w-8 text-center">{form.comorbilidades}</span>
+                <button type="button"
+                  onClick={() => set('comorbilidades', Math.min(10, form.comorbilidades + 1))}
+                  className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                  <Plus className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            </Field>
+
+            <Field label="Restricciones vigentes">
+              <textarea value={form.restricciones_vigentes}
+                onChange={e => set('restricciones_vigentes', e.target.value)}
+                placeholder="Describe las restricciones funcionales actuales..."
+                className="input w-full resize-none h-24" />
+            </Field>
+          </div>
+
+          <div className="flex justify-between pt-2">
+            <BtnSecondary onClick={() => setStep(1)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={() => setStep(3)}
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
+              Siguiente <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 3: Calificación (§E) ─────────────────────────────────────── */}
+      {step === 3 && (
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+          <h2 className="text-base font-semibold text-gray-800">Estado de calificación</h2>
+
+          <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+            <ToggleRow label="¿Dictamen PCL emitido?" checked={form.pcl_dictamen_emitido}
+              onChange={v => set('pcl_dictamen_emitido', v)} />
+            {form.pcl_dictamen_emitido && (
+              <>
+                <ToggleRow label="¿Dictamen en firme?" checked={form.pcl_en_firme}
+                  onChange={v => set('pcl_en_firme', v)} />
+                <ToggleRow label="¿Existe recurso o impugnación?" checked={form.existe_recurso_pcl}
+                  onChange={v => set('existe_recurso_pcl', v)} />
+              </>
+            )}
+          </div>
+
+          {form.pcl_dictamen_emitido && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Field label={`Porcentaje PCL: ${pcl}%`}>
+                <input type="range" min={0} max={100} step={0.5} value={form.porcentaje_pcl}
+                  onChange={e => set('porcentaje_pcl', parseFloat(e.target.value))}
+                  className="w-full accent-brand-600 h-2" />
+                <div className="relative w-full h-1.5 rounded-full overflow-hidden mt-2">
+                  <div className="absolute left-0 top-0 h-full bg-emerald-300" style={{ width: '30%' }} />
+                  <div className="absolute top-0 h-full bg-amber-300" style={{ left: '30%', width: '20%' }} />
+                  <div className="absolute top-0 h-full bg-red-300"   style={{ left: '50%', width: '50%' }} />
+                </div>
+                <div className="flex text-xs text-gray-400 mt-1">
+                  <span className="w-[30%]">0–30%</span>
+                  <span className="w-[20%]">30–50%</span>
+                  <span className="flex-1 text-right">50–100%</span>
+                </div>
+                {pcl > 50 && (
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    PCL ≥50% implica posible pensión por invalidez (Ley 100)
+                  </div>
+                )}
+              </Field>
+              <div className="space-y-5">
+                <Field label="Fecha del dictamen">
+                  <input type="date" value={form.fecha_dictamen}
+                    onChange={e => set('fecha_dictamen', e.target.value)} className="input w-full" />
+                </Field>
+                <Field label="Entidad calificadora">
+                  <select value={form.entidad_calificadora}
+                    onChange={e => set('entidad_calificadora', e.target.value)} className="input w-full">
+                    <option value="">— Seleccionar —</option>
+                    {ENTIDAD_CALIFICADORA_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+              </div>
+            </div>
+          )}
+
+          <hr className="border-gray-100" />
+
+          {/* Estado ocupacional */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700">Estado ocupacional</p>
+            <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+              <ToggleRow label="¿Trabajador reintegrado?" checked={form.reintegrado}
+                onChange={v => set('reintegrado', v)} />
+              <ToggleRow label="¿Trabajador reubicado?" checked={form.reubicado}
+                onChange={v => set('reubicado', v)} />
+              {form.reintegrado && (
+                <ToggleRow
+                  label="¿Incapacidades recurrentes post-reintegro?"
+                  checked={form.incapacidades_recurrentes_post_reintegro}
+                  onChange={v => set('incapacidades_recurrentes_post_reintegro', v)}
+                />
+              )}
+            </div>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Flags jurídicos */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700">Flags jurídicos</p>
+            <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+              <ToggleRow label="¿Conflicto entre entidades (EPS/AFP/ARL)?"
+                checked={form.conflicto_entre_entidades} onChange={v => set('conflicto_entre_entidades', v)} />
+              <ToggleRow label="¿Estabilidad laboral reforzada?"
+                checked={form.estabilidad_laboral_reforzada} onChange={v => set('estabilidad_laboral_reforzada', v)} />
+            </div>
+            {form.estabilidad_laboral_reforzada && (
+              <div className="flex items-start gap-2.5 p-3 bg-orange-50 border border-orange-300 rounded-lg">
+                <ShieldAlert className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-orange-800">
+                  Requiere revisión jurídica estricta antes de cualquier decisión de terminación.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-between pt-2">
+            <BtnSecondary onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={() => setStep(4)}
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
+              Siguiente <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP 4: Revisión + confirmación ──────────────────────────────── */}
+      {step === 4 && (
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+          <h2 className="text-base font-semibold text-gray-800">Revisión y confirmación</h2>
+
+          {/* Estado auto-clasificado prominente */}
+          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-1">
+            <p className="text-xs text-gray-500">Clasificación automática del caso (§7 del marco)</p>
+            <StepCasoEstado form={form} />
+          </div>
+
+          {/* Resumen */}
           <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
             <h3 className="text-sm font-semibold text-gray-700 mb-4">Resumen del caso</h3>
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
               <div className="space-y-4">
-                <SummaryRow label="ID del caso"       value={form.id_caso} />
-                <SummaryRow label="Edad"              value={form.edad ? `${form.edad} años` : null} />
-                <SummaryRow label="Tipo de enfermedad" value={TIPO_OPTIONS.find(o => o.value === form.tipo_enfermedad)?.label} />
+                <SummaryRow label="ID del caso"     value={form.id_caso} />
+                <SummaryRow label="Trabajador"      value={form.nombre_trabajador} />
+                <SummaryRow label="Empresa"         value={form.empresa} />
+                <SummaryRow label="Cargo"           value={form.cargo} />
                 {cie10 && <SummaryRow label="CIE-10" value={`${cie10.codigo} — ${cie10.descripcion}`} />}
               </div>
               <div className="space-y-4">
-                <SummaryRow label="Días acumulados"   value={form.dias_incapacidad_acumulados ? `${form.dias_incapacidad_acumulados} días` : null} />
-                <SummaryRow label="PCL"               value={`${form.porcentaje_pcl}%`} />
-                <SummaryRow label="Pronóstico"        value={PRONOSTICO_OPTIONS.find(o => o.value === form.pronostico_medico)?.label} />
-                <SummaryRow label="Tratamiento activo" value={form.en_tratamiento_activo ? 'Sí' : 'No'} />
-                <SummaryRow label="Comorbilidades"    value={form.comorbilidades} />
+                <SummaryRow label="Edad"            value={form.edad ? `${form.edad} años` : null} />
+                <SummaryRow label="Días acumulados" value={form.dias_incapacidad_acumulados ? `${form.dias_incapacidad_acumulados} días` : null} />
+                <SummaryRow label="Concepto rehab." value={CONCEPTO_REHAB_OPTIONS.find(o => o.value === form.concepto_rehabilitacion)?.label} />
+                <SummaryRow label="PCL"             value={form.pcl_dictamen_emitido ? `${form.porcentaje_pcl}%` : null} />
+                <SummaryRow label="Pronóstico"      value={PRONOSTICO_OPTIONS.find(o => o.value === form.pronostico_medico)?.label} />
+                <SummaryRow label="Documentos"      value={`${checklistCount}/${CHECKLIST_ITEMS.length} (${checklistPct}%)`} />
               </div>
             </div>
           </div>
+
+          <Field label="Notas adicionales (opcional)">
+            <textarea value={form.notas_adicionales} onChange={e => set('notas_adicionales', e.target.value)}
+              placeholder="Observaciones adicionales..." className="input w-full resize-none h-24" />
+          </Field>
 
           {/* Consentimiento informado — Ley 1581/2012 */}
           <div className="border border-blue-200 rounded-xl p-5 bg-blue-50/40 space-y-4">
@@ -817,81 +1128,47 @@ export default function EvaluarPaciente() {
               Antes de procesar datos médicos, registre los datos del titular y confirme
               que otorgó consentimiento informado. Obligatorio según la Ley 1581/2012 Art. 9.
             </p>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Nombre del titular" required>
-                <input
-                  type="text"
-                  value={titular.nombre}
-                  onChange={e => setTit('nombre', e.target.value)}
-                  placeholder="Nombre completo del trabajador"
-                  className="input w-full"
-                />
+                <input type="text" value={titular.nombre} onChange={e => setTit('nombre', e.target.value)}
+                  placeholder="Nombre completo del trabajador" className="input w-full" />
               </Field>
               <Field label="Cédula del titular" required>
-                <input
-                  type="text"
-                  value={titular.cedula}
-                  onChange={e => setTit('cedula', e.target.value)}
-                  placeholder="Número de cédula"
-                  className="input w-full"
-                />
+                <input type="text" value={titular.cedula} onChange={e => setTit('cedula', e.target.value)}
+                  placeholder="Número de cédula" className="input w-full" />
               </Field>
               <Field label="Correo del titular (opcional)">
-                <input
-                  type="email"
-                  value={titular.email}
-                  onChange={e => setTit('email', e.target.value)}
-                  placeholder="correo@ejemplo.com"
-                  className="input w-full"
-                />
+                <input type="email" value={titular.email} onChange={e => setTit('email', e.target.value)}
+                  placeholder="correo@ejemplo.com" className="input w-full" />
               </Field>
             </div>
-
             <label className="flex items-start gap-3 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={consentChecked}
-                onChange={e => setConsentChecked(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-blue-600 rounded"
-              />
+              <input type="checkbox" checked={consentChecked} onChange={e => setConsentChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-blue-600 rounded" />
               <span className="text-sm text-blue-800">
                 El titular <strong>{titular.nombre || '(nombre requerido)'}</strong> ha otorgado
                 consentimiento informado para el tratamiento de sus datos de salud.{' '}
-                <Link
-                  to="/politica-tratamiento"
-                  target="_blank"
-                  className="underline underline-offset-2 hover:no-underline"
-                >
+                <Link to="/politica-tratamiento" target="_blank"
+                  className="underline underline-offset-2 hover:no-underline">
                   Ver política de privacidad
                 </Link>
               </span>
             </label>
           </div>
 
-          {/* Confirmation */}
           <label className="flex items-start gap-3 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={e => setConfirmed(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-brand-600 rounded"
-            />
+            <input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-brand-600 rounded" />
             <span className="text-sm text-gray-700">
               Confirmo que los datos ingresados son correctos
             </span>
           </label>
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(1)}>
-              <ArrowLeft className="w-4 h-4" /> Anterior
-            </BtnSecondary>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!confirmed || !consentChecked || !titular.nombre.trim() || !titular.cedula.trim() || loading}
-              className="btn-primary flex items-center gap-2 px-7 py-2.5 text-base font-semibold disabled:opacity-50"
-            >
+            <BtnSecondary onClick={() => setStep(3)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={handleSubmit}
+              disabled={!step4Valid || loading}
+              className="btn-primary flex items-center gap-2 px-7 py-2.5 text-base font-semibold disabled:opacity-50">
               <Sparkles className="w-5 h-5" />
               {loading ? 'Evaluando...' : 'Evaluar caso'}
             </button>
