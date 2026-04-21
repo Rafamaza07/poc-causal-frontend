@@ -6,7 +6,7 @@ import {
 } from 'recharts'
 import {
   ClipboardList, AlertTriangle, Bell, Calendar,
-  Plus, ChevronRight, Clock, Sparkles,
+  Plus, ChevronRight, Clock, Sparkles, TrendingDown,
 } from 'lucide-react'
 import API from '../api/client'
 import StatCard from '../Components/StatCard'
@@ -130,6 +130,7 @@ export default function Dashboard() {
   const [urgentAlerts, setUrgentAlerts] = useState([])
   const [historial, setHistorial]     = useState([])
   const [loading, setLoading]         = useState(true)
+  const [scoringDist, setScoringDist] = useState(null)
 
   const user = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('user') || '{}') } catch { return {} }
@@ -142,7 +143,8 @@ export default function Dashboard() {
       API.get('/api/v1/alerts/summary'),
       API.get('/api/v1/alerts?limit=5&severity=CRITICAL'),
       API.get('/api/historial?limite=90'),
-    ]).then(([statsRes, casosRes, summaryRes, alertsRes, histRes]) => {
+      API.get('/api/v1/analytics/score-bloques'),
+    ]).then(([statsRes, casosRes, summaryRes, alertsRes, histRes, scoringRes]) => {
       if (statsRes.status === 'fulfilled') setStats(statsRes.value.data)
       if (casosRes.status === 'fulfilled') setCasos(casosRes.value.data.casos || [])
       if (summaryRes.status === 'fulfilled') setAlertSummary(summaryRes.value.data)
@@ -151,6 +153,7 @@ export default function Dashboard() {
         setUrgentAlerts(d.alerts || d.alertas || [])
       }
       if (histRes.status === 'fulfilled') setHistorial(histRes.value.data.casos || [])
+      if (scoringRes.status === 'fulfilled') setScoringDist(scoringRes.value.data)
     }).finally(() => setLoading(false))
   }, [])
 
@@ -478,7 +481,61 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Fila 5: Pie de tendencia ────────────────────── */}
+      {/* ── Fila 5: Scoring por bloques ─────────────────── */}
+      {scoringDist && (
+        <div className="card p-5 animate-fade-in">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingDown className="w-4 h-4 text-brand-600" />
+            <h3 className="text-sm font-semibold text-gray-700">Scoring por bloques (Marco §8)</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-center">
+              <p className="text-2xl font-bold text-red-700">{scoringDist.distribucion.critico}</p>
+              <p className="text-xs text-red-600 mt-0.5">Crítico</p>
+            </div>
+            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-center">
+              <p className="text-2xl font-bold text-amber-700">{scoringDist.distribucion.seguimiento_activo}</p>
+              <p className="text-xs text-amber-600 mt-0.5">Seguimiento activo</p>
+            </div>
+            <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-center">
+              <p className="text-2xl font-bold text-green-700">{scoringDist.distribucion.listo_cierre}</p>
+              <p className="text-xs text-green-600 mt-0.5">Listo cierre</p>
+            </div>
+          </div>
+          {scoringDist.top_criticos.length > 0 && (
+            <>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Top 5 críticos</p>
+              <div className="divide-y divide-gray-50">
+                {scoringDist.top_criticos.map(c => (
+                  <div
+                    key={c.id_caso}
+                    onClick={() => navigate(`/historial/${c.id_caso}`)}
+                    className="flex items-center justify-between py-2.5 hover:bg-gray-50 rounded cursor-pointer px-1"
+                  >
+                    <span className="text-sm font-medium text-gray-800 truncate">{c.id_caso}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold text-gray-700">{c.score_bloques_total}/20</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        c.scoring_interpretacion === 'critico'
+                          ? 'bg-red-100 text-red-700'
+                          : c.scoring_interpretacion === 'seguimiento_activo'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {c.scoring_interpretacion === 'critico' ? 'Crítico'
+                          : c.scoring_interpretacion === 'seguimiento_activo' ? 'Seguimiento'
+                          : 'Listo cierre'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Pie de tendencia ────────────────────────────── */}
       {totalEvaluados > 0 && (
         <p className="text-xs text-gray-400 text-center pb-2 animate-fade-in">
           Basado en <strong className="text-gray-600">{totalEvaluados}</strong> casos evaluados

@@ -12,6 +12,7 @@ import {
 import API from '../api/client'
 import Tabs from '../Components/ui/Tabs'
 import RutaTerminalCard from '../Components/data/RutaTerminalCard'
+import ScoreBloques from '../Components/data/ScoreBloques'
 import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import ScoreBadge from '../Components/data/ScoreBadge'
@@ -526,6 +527,11 @@ export default function CasoDetalle() {
                 </ul>
               )}
             </div>
+          )}
+
+          {/* Scoring por bloques */}
+          {caso?.scoring_bloques && (
+            <ScoreBloques scoring={caso.scoring_bloques} />
           )}
 
           {/* MilestoneBar */}

@@ -14,6 +14,7 @@ import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import CIE10Search from '../Components/CIE10Search'
 import RutaTerminalCard from '../Components/data/RutaTerminalCard'
+import ScoreBloques from '../Components/data/ScoreBloques'
 import { RECOMENDACIONES, MILESTONES } from '../utils/constants'
 
 // ── Legal accordion item ──────────────────────────────────────────────────────
@@ -406,6 +407,11 @@ export default function EvaluarPaciente() {
         {/* Ruta de decisión — marco clínico-jurídico */}
         {result.ruta_terminal && (
           <RutaTerminalCard resultado={result} />
+        )}
+
+        {/* Scoring por bloques 0–20 */}
+        {result.scoring_bloques && (
+          <ScoreBloques scoring={result.scoring_bloques} />
         )}
 
         {/* AI Analysis */}
