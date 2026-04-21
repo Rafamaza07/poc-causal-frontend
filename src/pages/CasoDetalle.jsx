@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import API from '../api/client'
 import Tabs from '../Components/ui/Tabs'
+import RutaTerminalCard from '../Components/data/RutaTerminalCard'
 import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import ScoreBadge from '../Components/data/ScoreBadge'
@@ -21,11 +22,12 @@ import { formatDate } from '../utils/formatters'
 import { RECOMENDACIONES } from '../utils/constants'
 
 const TABS = [
-  { id: 'resumen',       label: 'Resumen' },
-  { id: 'evaluaciones',  label: 'Evaluaciones' },
-  { id: 'alertas',       label: 'Alertas' },
-  { id: 'documentacion', label: 'Documentación' },
-  { id: 'chat',          label: 'Chat' },
+  { id: 'resumen',        label: 'Resumen' },
+  { id: 'evaluaciones',   label: 'Evaluaciones' },
+  { id: 'alertas',        label: 'Alertas' },
+  { id: 'documentacion',  label: 'Documentación' },
+  { id: 'ruta_decision',  label: 'Ruta de decisión' },
+  { id: 'chat',           label: 'Chat' },
 ]
 
 const CHECKLIST_GROUPS = [
@@ -1030,6 +1032,51 @@ export default function CasoDetalle() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* TAB: RUTA DE DECISIÓN                                              */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'ruta_decision' && (
+        <div className="space-y-6 animate-fade-in">
+
+          {/* Ruta actual */}
+          {caso?.ruta_terminal ? (
+            <RutaTerminalCard resultado={caso} />
+          ) : (
+            <div className="card p-8 text-center">
+              <p className="text-sm text-gray-400">
+                Este caso aún no tiene una ruta de decisión calculada.
+                Re-evalúa el caso para generar la ruta según el marco clínico-jurídico.
+              </p>
+            </div>
+          )}
+
+          {/* Historial de rutas asignadas */}
+          {timelineItems.filter(t => t.ruta_terminal).length > 0 && (
+            <div className="card p-5">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">
+                Historial de rutas asignadas
+              </h3>
+              <div className="space-y-3">
+                {[...timelineItems].reverse().filter(t => t.ruta_terminal).map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                    <span className="text-xs text-gray-400 flex-shrink-0 w-24">
+                      {item.fecha ? formatDate(item.fecha) : '—'}
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
+                      bg-gray-100 text-gray-700 border border-gray-200">
+                      {item.ruta_terminal?.replace(/_/g, ' ')}
+                    </span>
+                    {item.evaluado_por && (
+                      <span className="text-xs text-gray-400 ml-auto">por {item.evaluado_por}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

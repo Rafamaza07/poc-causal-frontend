@@ -13,6 +13,7 @@ import Stepper from '../Components/ui/Stepper'
 import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import CIE10Search from '../Components/CIE10Search'
+import RutaTerminalCard from '../Components/data/RutaTerminalCard'
 import { RECOMENDACIONES, MILESTONES } from '../utils/constants'
 
 // ── Legal accordion item ──────────────────────────────────────────────────────
@@ -401,6 +402,11 @@ export default function EvaluarPaciente() {
             </div>
           </div>
         </div>
+
+        {/* Ruta de decisión — marco clínico-jurídico */}
+        {result.ruta_terminal && (
+          <RutaTerminalCard resultado={result} />
+        )}
 
         {/* AI Analysis */}
         {(result.analisis_ia || result.explicacion?.resumen) && (
