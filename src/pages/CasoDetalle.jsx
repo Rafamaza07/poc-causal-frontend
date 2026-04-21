@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Download, RefreshCw, Brain, Send, Loader2,
   ArrowUpRight, ArrowDownRight, Minus, CheckCircle,
+  FileText, Plus, Calendar, Building2, X, Clock,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -20,11 +21,57 @@ import { formatDate } from '../utils/formatters'
 import { RECOMENDACIONES } from '../utils/constants'
 
 const TABS = [
-  { id: 'resumen',      label: 'Resumen' },
-  { id: 'evaluaciones', label: 'Evaluaciones' },
-  { id: 'alertas',      label: 'Alertas' },
-  { id: 'chat',         label: 'Chat' },
+  { id: 'resumen',       label: 'Resumen' },
+  { id: 'evaluaciones',  label: 'Evaluaciones' },
+  { id: 'alertas',       label: 'Alertas' },
+  { id: 'documentacion', label: 'Documentación' },
+  { id: 'chat',          label: 'Chat' },
 ]
+
+const CHECKLIST_GROUPS = [
+  {
+    label: 'Clínico',
+    items: [
+      { key: 'historia_clinica_completa',   label: 'Historia clínica completa' },
+      { key: 'epicrisis',                   label: 'Epicrisis' },
+      { key: 'imagenes_y_laboratorios',     label: 'Imágenes y laboratorios' },
+      { key: 'terapias_y_rehabilitacion',   label: 'Terapias y rehabilitación' },
+      { key: 'incapacidades_completas',     label: 'Incapacidades completas' },
+    ],
+  },
+  {
+    label: 'Entidades y trámites',
+    items: [
+      { key: 'radicaciones_eps',            label: 'Radicaciones EPS' },
+      { key: 'radicaciones_afp',            label: 'Radicaciones AFP' },
+      { key: 'radicaciones_arl',            label: 'Radicaciones ARL' },
+      { key: 'concepto_rehabilitacion',     label: 'Concepto de rehabilitación' },
+      { key: 'dictamen_pcl',                label: 'Dictamen PCL' },
+      { key: 'recurso_o_impugnacion',       label: 'Recurso o impugnación' },
+    ],
+  },
+  {
+    label: 'Ocupacional / SST',
+    items: [
+      { key: 'perfil_del_cargo',            label: 'Perfil del cargo' },
+      { key: 'evaluacion_del_puesto',       label: 'Evaluación del puesto' },
+      { key: 'acta_reintegro_o_reubicacion', label: 'Acta de reintegro o reubicación' },
+      { key: 'seguimiento_posterior',       label: 'Seguimiento posterior' },
+    ],
+  },
+]
+
+const CANALES = ['email', 'portal', 'telefónico', 'personal', 'otro']
+
+const DEFAULT_GESTION = {
+  fecha_gestion: new Date().toISOString().split('T')[0],
+  entidad_contactada: '',
+  canal_usado: '',
+  respuesta_recibida: '',
+  pendiente_generado: '',
+  responsable_interno: '',
+  fecha_proxima_gestion: '',
+}
 
 const REC_STYLES = {
   REINCORPORACION_INMEDIATA:    'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -179,6 +226,14 @@ export default function CasoDetalle() {
   const [reeval,    setReeval]    = useState(false)
   const [descarga,  setDescarga]  = useState(false)
 
+  // ── Checklist + Bitácora (6.2) ──────────────────────────────────────────
+  const [checklist,     setChecklist]     = useState(null)
+  const [bitacora,      setBitacora]      = useState([])
+  const [savingCheck,   setSavingCheck]   = useState(false)
+  const [modalBitacora, setModalBitacora] = useState(false)
+  const [nuevaGestion,  setNuevaGestion]  = useState({ ...DEFAULT_GESTION })
+  const [savingGestion, setSavingGestion] = useState(false)
+
   useEffect(() => {
     setLoading(true)
     API.get(`/api/historial/${id}`)
@@ -199,6 +254,18 @@ export default function CasoDetalle() {
         const d = r.data
         setAlertas(Array.isArray(d) ? d : (d.alerts ?? d.items ?? []))
       })
+      .catch(() => {})
+  }, [id])
+
+  useEffect(() => {
+    API.get(`/api/v1/casos/${id}/checklist`)
+      .then(r => setChecklist(r.data))
+      .catch(() => {})
+  }, [id])
+
+  useEffect(() => {
+    API.get(`/api/v1/casos/${id}/bitacora`)
+      .then(r => setBitacora(r.data?.entradas ?? []))
       .catch(() => {})
   }, [id])
 
@@ -239,6 +306,46 @@ export default function CasoDetalle() {
     } catch {
       toast('Error al reconocer la alerta', 'error')
     }
+  }
+
+  const handleChecklistToggle = async (field, value) => {
+    setSavingCheck(true)
+    try {
+      const { data } = await API.put(`/api/v1/casos/${id}/checklist`, { [field]: value })
+      setChecklist(data)
+    } catch {
+      toast('Error al actualizar checklist', 'error')
+    } finally { setSavingCheck(false) }
+  }
+
+  const handleAgregarGestion = async () => {
+    if (!nuevaGestion.entidad_contactada.trim() || !nuevaGestion.fecha_gestion) {
+      toast('Entidad contactada y fecha son obligatorios', 'error')
+      return
+    }
+    setSavingGestion(true)
+    try {
+      const payload = {
+        fecha_gestion: nuevaGestion.fecha_gestion,
+        entidad_contactada: nuevaGestion.entidad_contactada,
+        canal_usado: nuevaGestion.canal_usado || null,
+        respuesta_recibida: nuevaGestion.respuesta_recibida || null,
+        pendiente_generado: nuevaGestion.pendiente_generado || null,
+        responsable_interno: nuevaGestion.responsable_interno || null,
+        fecha_proxima_gestion: nuevaGestion.fecha_proxima_gestion || null,
+      }
+      const { data } = await API.post(`/api/v1/casos/${id}/bitacora`, payload)
+      setBitacora(prev =>
+        [...prev, data].sort((a, b) =>
+          new Date(a.fecha_gestion) - new Date(b.fecha_gestion)
+        )
+      )
+      setModalBitacora(false)
+      setNuevaGestion({ ...DEFAULT_GESTION })
+      toast('Gestión registrada', 'success')
+    } catch {
+      toast('Error al registrar gestión', 'error')
+    } finally { setSavingGestion(false) }
   }
 
   // ── Loading skeleton ────────────────────────────────────────────────────────
@@ -304,6 +411,19 @@ export default function CasoDetalle() {
               <h1 className="text-2xl font-bold text-gray-900">{caso.id_caso}</h1>
               <ScoreBadge score={caso.score_riesgo} size="lg" />
               <SeverityTag severity={caso.nivel_riesgo} size="md" />
+              {checklist != null && (
+                <span className={[
+                  'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full',
+                  checklist.completitud_pct >= 75
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : checklist.completitud_pct >= 40
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-red-100 text-red-600',
+                ].join(' ')}>
+                  <FileText className="w-3 h-3" />
+                  {checklist.completitud_pct}% docs
+                </span>
+              )}
             </div>
             <p className="text-sm text-gray-500">
               {[
@@ -594,6 +714,322 @@ export default function CasoDetalle() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* TAB: DOCUMENTACIÓN                                                  */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'documentacion' && (
+        <div className="space-y-6 animate-fade-in">
+
+          {/* ── Checklist ─────────────────────────────────────────────────── */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-brand-600" />
+                <h3 className="text-sm font-semibold text-gray-700">Checklist documental</h3>
+              </div>
+              {checklist != null && (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500">
+                    {checklist.completitud_pct}% completado
+                  </span>
+                  {savingCheck && <Loader2 className="w-4 h-4 animate-spin text-brand-500" />}
+                </div>
+              )}
+            </div>
+
+            {/* Barra de progreso */}
+            {checklist != null && (
+              <div className="mb-5">
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={[
+                      'h-full rounded-full transition-all duration-500',
+                      checklist.completitud_pct >= 75
+                        ? 'bg-emerald-500'
+                        : checklist.completitud_pct >= 40
+                          ? 'bg-amber-400'
+                          : 'bg-red-400',
+                    ].join(' ')}
+                    style={{ width: `${checklist.completitud_pct}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {checklist.completitud_pct < 60
+                    ? 'Expediente incompleto — riesgo de demora en calificación'
+                    : checklist.completitud_pct < 100
+                      ? 'Expediente en progreso'
+                      : 'Expediente completo'}
+                </p>
+              </div>
+            )}
+
+            {/* Grupos de ítems */}
+            <div className="space-y-5">
+              {CHECKLIST_GROUPS.map(group => (
+                <div key={group.label}>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    {group.label}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {group.items.map(item => {
+                      const checked = checklist?.[item.key] ?? false
+                      return (
+                        <label
+                          key={item.key}
+                          className={[
+                            'flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer',
+                            'transition-colors hover:bg-gray-50 select-none',
+                            checked
+                              ? 'border-emerald-200 bg-emerald-50'
+                              : 'border-gray-200 bg-white',
+                            savingCheck ? 'pointer-events-none opacity-60' : '',
+                          ].join(' ')}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={e => handleChecklistToggle(item.key, e.target.checked)}
+                            className="w-4 h-4 rounded text-emerald-600 accent-emerald-600"
+                          />
+                          <span className={[
+                            'text-sm leading-snug',
+                            checked ? 'text-emerald-800 font-medium' : 'text-gray-600',
+                          ].join(' ')}>
+                            {item.label}
+                          </span>
+                          {checked && <CheckCircle className="w-3.5 h-3.5 text-emerald-500 ml-auto flex-shrink-0" />}
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Bitácora de gestión ────────────────────────────────────────── */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-brand-600" />
+                <h3 className="text-sm font-semibold text-gray-700">
+                  Bitácora de gestión
+                  {bitacora.length > 0 && (
+                    <span className="ml-2 text-xs text-gray-400 font-normal">
+                      {bitacora.length} {bitacora.length === 1 ? 'entrada' : 'entradas'}
+                    </span>
+                  )}
+                </h3>
+              </div>
+              <button
+                onClick={() => setModalBitacora(true)}
+                className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700
+                  font-medium transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Añadir gestión
+              </button>
+            </div>
+
+            {bitacora.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                <Clock className="w-8 h-8 mb-2 text-gray-200" />
+                <p className="text-sm">Aún no hay gestiones registradas</p>
+                <button
+                  onClick={() => setModalBitacora(true)}
+                  className="mt-3 text-sm text-brand-600 hover:underline"
+                >
+                  Registrar primera gestión →
+                </button>
+              </div>
+            ) : (
+              <div>
+                {bitacora.map((entry, i) => (
+                  <div key={entry.id} className="flex gap-3">
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-brand-400 mt-1.5 ring-4 ring-brand-50 flex-shrink-0" />
+                      {i < bitacora.length - 1 && (
+                        <div className="w-px flex-1 bg-gray-200 mt-1 min-h-[2rem]" />
+                      )}
+                    </div>
+                    <div className="pb-5 flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                            <Building2 className="w-3 h-3 text-gray-400" />
+                            {entry.entidad_contactada}
+                          </span>
+                          {entry.canal_usado && (
+                            <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                              {entry.canal_usado}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-400 flex items-center gap-1 flex-shrink-0">
+                          <Calendar className="w-3 h-3" />
+                          {entry.fecha_gestion}
+                        </span>
+                      </div>
+                      {entry.respuesta_recibida && (
+                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                          <span className="font-medium text-gray-500">Respuesta: </span>
+                          {entry.respuesta_recibida}
+                        </p>
+                      )}
+                      {entry.pendiente_generado && (
+                        <p className="text-sm text-amber-700 mt-1 bg-amber-50 px-2 py-1 rounded">
+                          <span className="font-medium">Pendiente: </span>
+                          {entry.pendiente_generado}
+                        </p>
+                      )}
+                      {entry.fecha_proxima_gestion && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Próxima gestión: {entry.fecha_proxima_gestion}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* MODAL: Añadir gestión                                               */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {modalBitacora && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setModalBitacora(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg animate-scale-in overflow-y-auto max-h-[90vh]">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-800">Registrar gestión</h3>
+              <button
+                onClick={() => setModalBitacora(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full
+                  hover:bg-gray-100 text-gray-400 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Fecha de gestión *
+                  </label>
+                  <input
+                    type="date"
+                    value={nuevaGestion.fecha_gestion}
+                    onChange={e => setNuevaGestion(p => ({ ...p, fecha_gestion: e.target.value }))}
+                    className="input w-full"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Canal
+                  </label>
+                  <select
+                    value={nuevaGestion.canal_usado}
+                    onChange={e => setNuevaGestion(p => ({ ...p, canal_usado: e.target.value }))}
+                    className="input w-full"
+                  >
+                    <option value="">Seleccionar</option>
+                    {CANALES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
+                  Entidad contactada *
+                </label>
+                <input
+                  type="text"
+                  value={nuevaGestion.entidad_contactada}
+                  onChange={e => setNuevaGestion(p => ({ ...p, entidad_contactada: e.target.value }))}
+                  placeholder="EPS, AFP, ARL, Junta, Empleador..."
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
+                  Respuesta recibida
+                </label>
+                <textarea
+                  value={nuevaGestion.respuesta_recibida}
+                  onChange={e => setNuevaGestion(p => ({ ...p, respuesta_recibida: e.target.value }))}
+                  placeholder="Describe la respuesta o resultado..."
+                  rows={3}
+                  className="input w-full resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
+                  Pendiente generado
+                </label>
+                <textarea
+                  value={nuevaGestion.pendiente_generado}
+                  onChange={e => setNuevaGestion(p => ({ ...p, pendiente_generado: e.target.value }))}
+                  placeholder="Acciones pendientes resultado de esta gestión..."
+                  rows={2}
+                  className="input w-full resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Responsable interno
+                  </label>
+                  <input
+                    type="text"
+                    value={nuevaGestion.responsable_interno}
+                    onChange={e => setNuevaGestion(p => ({ ...p, responsable_interno: e.target.value }))}
+                    placeholder="Nombre o cargo"
+                    className="input w-full"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Próxima gestión
+                  </label>
+                  <input
+                    type="date"
+                    value={nuevaGestion.fecha_proxima_gestion}
+                    onChange={e => setNuevaGestion(p => ({ ...p, fecha_proxima_gestion: e.target.value }))}
+                    className="input w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-5 pb-5">
+              <button
+                onClick={() => setModalBitacora(false)}
+                className="btn-secondary text-sm px-4 py-2"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleAgregarGestion}
+                disabled={savingGestion}
+                className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
+              >
+                {savingGestion
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+                  : <><Plus className="w-4 h-4" /> Registrar gestión</>
+                }
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
