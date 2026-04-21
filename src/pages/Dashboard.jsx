@@ -131,6 +131,7 @@ export default function Dashboard() {
   const [historial, setHistorial]     = useState([])
   const [loading, setLoading]         = useState(true)
   const [scoringDist, setScoringDist] = useState(null)
+  const [semaforo, setSemaforo]       = useState(null)
 
   const user = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('user') || '{}') } catch { return {} }
@@ -144,7 +145,8 @@ export default function Dashboard() {
       API.get('/api/v1/alerts?limit=5&severity=CRITICAL'),
       API.get('/api/historial?limite=90'),
       API.get('/api/v1/analytics/score-bloques'),
-    ]).then(([statsRes, casosRes, summaryRes, alertsRes, histRes, scoringRes]) => {
+      API.get('/api/v1/analytics/semaforo'),
+    ]).then(([statsRes, casosRes, summaryRes, alertsRes, histRes, scoringRes, semaforoRes]) => {
       if (statsRes.status === 'fulfilled') setStats(statsRes.value.data)
       if (casosRes.status === 'fulfilled') setCasos(casosRes.value.data.casos || [])
       if (summaryRes.status === 'fulfilled') setAlertSummary(summaryRes.value.data)
@@ -154,6 +156,7 @@ export default function Dashboard() {
       }
       if (histRes.status === 'fulfilled') setHistorial(histRes.value.data.casos || [])
       if (scoringRes.status === 'fulfilled') setScoringDist(scoringRes.value.data)
+      if (semaforoRes.status === 'fulfilled') setSemaforo(semaforoRes.value.data)
     }).finally(() => setLoading(false))
   }, [])
 
@@ -481,7 +484,83 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Fila 5: Scoring por bloques ─────────────────── */}
+      {/* ── Fila 5: Semáforo de casos (Marco §5) ───────── */}
+      {semaforo && (
+        <div className="animate-fade-in">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Semáforo de casos (Marco §5)</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Verde */}
+            <button
+              onClick={() => navigate('/historial')}
+              className="rounded-xl bg-green-50 border border-green-200 p-4 text-center hover:bg-green-100 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
+                <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Verde</span>
+              </div>
+              <p className="text-3xl font-bold text-green-700 group-hover:scale-105 transition-transform">{semaforo.verde}</p>
+              <p className="text-xs text-green-600 mt-1">Documentación completa · acción definida</p>
+            </button>
+            {/* Amarillo */}
+            <button
+              onClick={() => navigate('/historial')}
+              className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-center hover:bg-amber-100 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="w-3 h-3 rounded-full bg-amber-400 flex-shrink-0" />
+                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Amarillo</span>
+              </div>
+              <p className="text-3xl font-bold text-amber-700 group-hover:scale-105 transition-transform">{semaforo.amarillo}</p>
+              <p className="text-xs text-amber-600 mt-1">Faltan soportes · trámites en curso</p>
+            </button>
+            {/* Rojo */}
+            <button
+              onClick={() => navigate('/historial')}
+              className="rounded-xl bg-red-50 border border-red-200 p-4 text-center hover:bg-red-100 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
+                <span className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rojo</span>
+              </div>
+              <p className="text-3xl font-bold text-red-700 group-hover:scale-105 transition-transform">{semaforo.rojo}</p>
+              <p className="text-xs text-red-600 mt-1">Crítico · conflicto · recaída · &gt;180d sin ruta</p>
+            </button>
+          </div>
+          {semaforo.casos_rojo?.length > 0 && (
+            <div className="mt-3 bg-white border border-red-100 rounded-xl shadow-card overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-red-50">
+                <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Casos en rojo (primeros {semaforo.casos_rojo.length})</p>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {semaforo.casos_rojo.map(c => (
+                  <div
+                    key={c.id_caso}
+                    onClick={() => navigate(`/historial/${c.id_caso}`)}
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-red-50/40 cursor-pointer transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-800">{c.id_caso}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {c.score_bloques_total != null && (
+                        <span className="text-xs font-bold text-gray-600">{c.score_bloques_total}/20</span>
+                      )}
+                      {c.ruta_terminal && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium">
+                          {c.ruta_terminal}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Fila 6: Scoring por bloques ─────────────────── */}
       {scoringDist && (
         <div className="card p-5 animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
