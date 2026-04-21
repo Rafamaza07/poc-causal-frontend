@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import BrandName from '../Components/BrandName'
+import KausalIALogo from '../Components/KausalIALogo'
 import {
   Brain, Shield, Scale, FileText, Bell, BarChart3,
   Users, CheckCircle, ArrowRight, Activity, Zap, Lock
@@ -58,12 +58,7 @@ export default function Landing() {
       {/* ── Navbar ──────────────────────────────────────────────── */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <Brain className="w-4 h-4 text-white" />
-            </div>
-            <BrandName className="font-bold text-gray-900 text-lg" />
-          </div>
+          <KausalIALogo size={28} />
           <div className="flex items-center gap-3">
             <a href="mailto:rafamaza56@gmail.com"
                className="text-sm text-gray-600 hover:text-brand-600 transition-colors hidden sm:block">
@@ -221,10 +216,8 @@ export default function Landing() {
       <footer className="py-8 px-4 border-t border-gray-100 bg-white">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-brand-600 rounded flex items-center justify-center">
-              <Brain className="w-3 h-3 text-white" />
-            </div>
-            <span><BrandName className="text-gray-400" /> © {new Date().getFullYear()}</span>
+            <KausalIALogo size={14} />
+            <span className="text-gray-400">© {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="/politica-tratamiento" className="hover:text-brand-600 transition-colors">Política de datos</a>

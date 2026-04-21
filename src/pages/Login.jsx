@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Activity, User, Lock, Eye, EyeOff, Shield, Brain, Scale } from 'lucide-react'
+import { User, Lock, Eye, EyeOff, Shield, Brain, Scale } from 'lucide-react'
 import API from '../api/client'
-import BrandName from '../Components/BrandName'
+import KausalIALogo from '../Components/KausalIALogo'
 
 const FEATURES = [
   { icon: Shield, text: 'Aislamiento de datos por organización' },
@@ -69,11 +69,8 @@ export default function Login({ onLogin }) {
 
         <div className="relative z-10 max-w-sm w-full">
           {/* Logo */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shadow-lg">
-              <Activity className="w-8 h-8 text-white" />
-            </div>
-            <BrandName className="text-white text-3xl font-bold tracking-tight" />
+          <div className="mb-6">
+            <KausalIALogo size={42} dark />
           </div>
 
           {/* Tagline */}
@@ -99,11 +96,8 @@ export default function Login({ onLogin }) {
       <div className="flex-1 bg-white flex items-center justify-center px-8 sm:px-12 min-h-screen">
         <div className="w-full max-w-sm">
           {/* Mobile-only logo */}
-          <div className="flex md:hidden items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <BrandName className="font-bold text-gray-900 text-lg" />
+          <div className="flex md:hidden mb-8">
+            <KausalIALogo size={26} />
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
