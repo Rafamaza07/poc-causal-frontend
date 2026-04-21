@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Activity, User, Lock, Eye, EyeOff, Shield, Brain, Scale } from 'lucide-react'
 import API from '../api/client'
+import BrandName from '../Components/BrandName'
 
 const FEATURES = [
   { icon: Shield, text: 'Aislamiento de datos por organización' },
@@ -72,7 +73,7 @@ export default function Login({ onLogin }) {
             <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shadow-lg">
               <Activity className="w-8 h-8 text-white" />
             </div>
-            <span className="text-white text-3xl font-bold tracking-tight">KausalIA</span>
+            <BrandName className="text-white text-3xl font-bold tracking-tight" />
           </div>
 
           {/* Tagline */}
@@ -102,7 +103,7 @@ export default function Login({ onLogin }) {
             <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center">
               <Activity className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-lg">KausalIA</span>
+            <BrandName className="font-bold text-gray-900 text-lg" />
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>

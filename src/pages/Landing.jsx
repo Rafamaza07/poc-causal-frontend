@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import BrandName from '../Components/BrandName'
 import {
   Brain, Shield, Scale, FileText, Bell, BarChart3,
   Users, CheckCircle, ArrowRight, Activity, Zap, Lock
@@ -61,7 +62,7 @@ export default function Landing() {
             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
               <Brain className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-lg">KausalIA</span>
+            <BrandName className="font-bold text-gray-900 text-lg" />
           </div>
           <div className="flex items-center gap-3">
             <a href="mailto:rafamaza56@gmail.com"
@@ -223,7 +224,7 @@ export default function Landing() {
             <div className="w-6 h-6 bg-brand-600 rounded flex items-center justify-center">
               <Brain className="w-3 h-3 text-white" />
             </div>
-            <span>KausalIA © {new Date().getFullYear()}</span>
+            <span><BrandName className="text-gray-400" /> © {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="/politica-tratamiento" className="hover:text-brand-600 transition-colors">Política de datos</a>
