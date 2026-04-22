@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Download, RefreshCw, Brain, Send, Loader2,
   ArrowUpRight, ArrowDownRight, Minus, CheckCircle,
-  FileText, Plus, Calendar, Building2, X, Clock,
+  FileText, Plus, Calendar, Building2, X, Clock, FilePlus,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -237,6 +237,12 @@ export default function CasoDetalle() {
   const [nuevaGestion,  setNuevaGestion]  = useState({ ...DEFAULT_GESTION })
   const [savingGestion, setSavingGestion] = useState(false)
 
+  // ── Generador de documentos legales ────────────────────────────────────────
+  const [modalDoc,    setModalDoc]    = useState(false)
+  const [tiposDoc,    setTiposDoc]    = useState([])
+  const [tipoSel,     setTipoSel]     = useState('')
+  const [genDoc,      setGenDoc]      = useState(false)
+
   useEffect(() => {
     setLoading(true)
     API.get(`/api/historial/${id}`)
@@ -299,6 +305,41 @@ export default function CasoDetalle() {
     } catch {
       toast('Error al generar el reporte', 'error')
     } finally { setDescarga(false) }
+  }
+
+  const abrirModalDoc = async () => {
+    if (tiposDoc.length === 0) {
+      try {
+        const { data } = await API.get('/api/v1/documentos/tipos')
+        setTiposDoc(data)
+        setTipoSel(data[0]?.tipo || '')
+      } catch { toast('Error cargando tipos de documento', 'error'); return }
+    }
+    setModalDoc(true)
+  }
+
+  const generarDocumento = async () => {
+    if (!tipoSel) return
+    setGenDoc(true)
+    try {
+      const res = await API.post(
+        `/api/v1/casos/${id}/generar-documento`,
+        { tipo: tipoSel },
+        { responseType: 'blob' },
+      )
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href  = url
+      link.setAttribute('download', `${tipoSel}_${id}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast('Documento generado', 'success')
+      setModalDoc(false)
+    } catch {
+      toast('Error generando el documento', 'error')
+    } finally { setGenDoc(false) }
   }
 
   const acknowledgeAlerta = async (alertId) => {
@@ -451,6 +492,13 @@ export default function CasoDetalle() {
             >
               <Download className="w-4 h-4" />
               {descarga ? 'Generando...' : 'Descargar PDF'}
+            </button>
+            <button
+              onClick={abrirModalDoc}
+              className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5"
+            >
+              <FilePlus className="w-4 h-4" />
+              Generar documento
             </button>
             <button
               onClick={reevaluar}
@@ -1098,6 +1146,88 @@ export default function CasoDetalle() {
             </h3>
           </div>
           <ChatEmbebido caseId={id} />
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* MODAL: Generar documento legal                                      */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {modalDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setModalDoc(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md animate-scale-in">
+
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <FilePlus className="w-5 h-5 text-brand-600" />
+                <h3 className="font-semibold text-gray-800">Generar documento</h3>
+              </div>
+              <button
+                onClick={() => setModalDoc(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Selector de tipo */}
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-gray-500">
+                Selecciona el tipo de documento para el caso <span className="font-semibold text-gray-700">{id}</span>.
+              </p>
+              <div className="space-y-2">
+                {tiposDoc.map((t) => (
+                  <label
+                    key={t.tipo}
+                    className={[
+                      'flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all',
+                      tipoSel === t.tipo
+                        ? 'border-brand-400 bg-brand-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
+                    ].join(' ')}
+                  >
+                    <input
+                      type="radio"
+                      name="tipo_doc"
+                      value={t.tipo}
+                      checked={tipoSel === t.tipo}
+                      onChange={() => setTipoSel(t.tipo)}
+                      className="mt-0.5 accent-brand-600"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{t.label}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{t.asunto}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 pt-1">
+                El documento se genera automáticamente con los datos del caso y se descarga como PDF listo para revisar antes de firmar.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 px-5 pb-5">
+              <button
+                onClick={() => setModalDoc(false)}
+                className="btn-secondary text-sm px-4 py-2"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={generarDocumento}
+                disabled={genDoc || !tipoSel}
+                className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
+              >
+                {genDoc
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando...</>
+                  : <><FilePlus className="w-4 h-4" /> Generar y descargar</>
+                }
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
