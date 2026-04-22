@@ -121,6 +121,7 @@ export default function Header({ user, onLogout, dark = false, onToggleDark }) {
   const handleLogout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     onLogout()
   }
 

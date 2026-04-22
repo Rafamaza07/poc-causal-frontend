@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { handleUnauthorized } from './authRefresh'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
@@ -14,10 +15,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+    const status = err.response?.status
+    const url    = err.config?.url || ''
+    if (status === 401 && !url.includes('/api/auth/refresh')) {
+      return handleUnauthorized(err.config, api)
     }
     return Promise.reject(err)
   }

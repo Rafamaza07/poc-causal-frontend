@@ -1,25 +1,23 @@
 import axios from 'axios'
+import { handleUnauthorized } from '../services/authRefresh'
 
-// Usamos la variable de entorno de Vite. Si no existe (en local), usa localhost.
-const API = axios.create({ 
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' 
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
 })
 
-// Inyectar token JWT en cada request automáticamente
-API.interceptors.request.use(config => {
+API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Si el token expiró, limpiar sesión y redirigir al login
 API.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/'
+  (res) => res,
+  (err) => {
+    const status = err.response?.status
+    const url    = err.config?.url || ''
+    if (status === 401 && !url.includes('/api/auth/refresh')) {
+      return handleUnauthorized(err.config, API)
     }
     return Promise.reject(err)
   }

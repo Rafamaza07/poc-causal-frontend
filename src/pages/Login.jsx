@@ -28,6 +28,7 @@ export default function Login({ onLogin }) {
     setError('')
     try {
       const { data } = await API.post('/api/login', form)
+      if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
       onLogin({
         usuario:  data.usuario,
         nombre:   data.nombre,

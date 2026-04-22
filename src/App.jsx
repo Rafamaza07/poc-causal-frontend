@@ -106,6 +106,7 @@ export default function App() {
   const logout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     setUser(null)
   }
 
