@@ -171,7 +171,7 @@ export default function Dashboard() {
 
   const totalEvaluados = stats?.total_casos_evaluados ?? 0
   const casosCriticos  = stats?.casos_criticos ?? 0
-  const alertPending   = alertSummary?.total ?? alertSummary?.pending ?? 0
+  const alertPending   = (alertSummary?.critical ?? 0) + (alertSummary?.warning ?? 0)
   const diasPromedio   = stats?.dias_promedio ?? stats?.score_riesgo?.promedio ?? 0
 
   const fechaInicio = useMemo(() => {

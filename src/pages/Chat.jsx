@@ -21,7 +21,7 @@ function groupSessions(sessions) {
     { label: 'Anteriores',   items: [] },
   ]
   for (const s of sessions) {
-    const t = new Date(s.created_at ?? 0).getTime()
+    const t = new Date(s.last_message_at ?? s.created_at ?? 0).getTime()
     if (t >= tod.getTime())  groups[0].items.push(s)
     else if (t >= week.getTime()) groups[1].items.push(s)
     else groups[2].items.push(s)

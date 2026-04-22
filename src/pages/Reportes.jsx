@@ -230,7 +230,7 @@ export default function Reportes() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-800 truncate">{c.id_caso}</p>
                         <p className="text-xs text-gray-400">
-                          {formatDate(c.fecha_evaluacion)} · {c.evaluado_por || '—'}
+                          {formatDate(c.fecha ?? c.fecha_evaluacion)} · {c.evaluado_por || '—'}
                         </p>
                       </div>
                     </button>
@@ -259,7 +259,7 @@ export default function Reportes() {
                 <div className="flex-1 min-w-0">
                   <p className={`font-semibold text-sm ${r.text}`}>{selCase.id_caso}</p>
                   <p className="text-xs text-gray-600 mt-0.5 truncate">{rec}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{formatDate(selCase.fecha_evaluacion)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{formatDate(selCase.fecha ?? selCase.fecha_evaluacion)}</p>
                 </div>
                 <button
                   onClick={() => download(key, `/api/casos/${selCase.id_caso}/reporte-pdf`,

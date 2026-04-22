@@ -261,7 +261,7 @@ export default function CasoDetalle() {
     API.get(`/api/v1/alerts?case_id=${id}`)
       .then(r => {
         const d = r.data
-        setAlertas(Array.isArray(d) ? d : (d.alerts ?? d.items ?? []))
+        setAlertas(Array.isArray(d) ? d : (d.alerts ?? d.alertas ?? []))
       })
       .catch(() => {})
   }, [id])
@@ -344,7 +344,7 @@ export default function CasoDetalle() {
 
   const acknowledgeAlerta = async (alertId) => {
     try {
-      await API.patch(`/api/v1/alerts/${alertId}/acknowledge`)
+      await API.post(`/api/v1/alerts/${alertId}/acknowledge`)
       setAlertas(prev => prev.filter(a => a.id !== alertId))
       toast('Alerta reconocida', 'success')
     } catch {
@@ -423,11 +423,11 @@ export default function CasoDetalle() {
 
   const metaFields = [
     { label: 'Edad',             val: caso.edad != null ? `${caso.edad} años` : null },
-    { label: 'CIE-10',           val: caso.diagnostico_principal || caso.cie10 },
-    { label: 'Días incapacidad', val: caso.dias_incapacidad != null ? `${caso.dias_incapacidad} días` : null },
-    { label: 'PCL',              val: caso.pcl != null ? `${caso.pcl}%` : null },
-    { label: 'Pronóstico',       val: caso.pronostico },
-    { label: 'Tratamiento',      val: caso.tratamiento },
+    { label: 'CIE-10',           val: caso.codigo_cie10 },
+    { label: 'Días incapacidad', val: caso.dias_incapacidad_acumulados != null ? `${caso.dias_incapacidad_acumulados} días` : null },
+    { label: 'PCL',              val: caso.porcentaje_pcl != null ? `${caso.porcentaje_pcl}%` : null },
+    { label: 'Pronóstico',       val: caso.pronostico_medico },
+    { label: 'Tratamiento',      val: caso.en_tratamiento_activo != null ? (caso.en_tratamiento_activo ? 'Sí' : 'No') : null },
     { label: 'Comorbilidades',   val: comorbilidades },
     { label: 'Modelo',           val: caso.model_version },
   ].filter(f => f.val)
@@ -583,12 +583,12 @@ export default function CasoDetalle() {
           )}
 
           {/* MilestoneBar */}
-          {caso.dias_incapacidad != null && (
+          {caso.dias_incapacidad_acumulados != null && (
             <div className="card p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-5">
                 Posición en hitos normativos
               </h3>
-              <MilestoneBar diasActuales={caso.dias_incapacidad} />
+              <MilestoneBar diasActuales={caso.dias_incapacidad_acumulados} />
             </div>
           )}
 
@@ -597,9 +597,9 @@ export default function CasoDetalle() {
             <div className="card p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">
                 Tu caso vs referencia CIE-10
-                {(caso.diagnostico_principal || caso.cie10) && (
+                {caso.codigo_cie10 && (
                   <span className="ml-2 text-xs font-mono text-gray-400">
-                    {caso.diagnostico_principal || caso.cie10}
+                    {caso.codigo_cie10}
                   </span>
                 )}
               </h3>
@@ -607,7 +607,7 @@ export default function CasoDetalle() {
                 {caso.cie10_referencia.dias_tipico_min != null && (
                   <BarDual
                     label="Días de incapacidad"
-                    casoVal={caso.dias_incapacidad ?? 0}
+                    casoVal={caso.dias_incapacidad_acumulados ?? 0}
                     refMin={caso.cie10_referencia.dias_tipico_min}
                     refMax={caso.cie10_referencia.dias_tipico_max}
                   />

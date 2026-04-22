@@ -161,7 +161,7 @@ function TabUsuarios({ tenantId, tenantNombre }) {
         ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />Activo</span>
         : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500"><span className="w-1.5 h-1.5 rounded-full bg-gray-400" />Inactivo</span>
     },
-    { key: 'ultimo_acceso',  label: 'Último acceso', render: (v) => <span className="text-gray-500 text-xs">{timeAgo(v)}</span> },
+    { key: 'last_login',     label: 'Último acceso', render: (v) => <span className="text-gray-500 text-xs">{timeAgo(v)}</span> },
     { key: '_actions',       label: '', sortable: false,
       render: (_, row) => (
         <div className="flex items-center gap-1">
@@ -335,7 +335,7 @@ function TabOrganizacion({ tenantId }) {
     async function load() {
       try {
         const [meRes, statsRes] = await Promise.allSettled([
-          API.get('/api/me'),
+          API.get('/api/v1/users/me'),
           API.get('/api/estadisticas'),
         ])
         if (meRes.status === 'fulfilled') setInfo(meRes.value.data)
