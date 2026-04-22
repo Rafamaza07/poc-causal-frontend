@@ -91,7 +91,7 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
-               className="inline-flex items-center justify-center gap-2 bg-white text-brand-700 hover:bg-brand-50 font-semibold px-6 py-3 rounded-xl transition-colors shadow-lg">
+               className="inline-flex items-center justify-center gap-2 bg-white text-brand-700 hover:bg-brand-50 cta-on-dark font-semibold px-6 py-3 rounded-xl transition-colors shadow-lg">
               Solicitar demo gratuita <ArrowRight className="w-4 h-4" />
             </a>
             <button
@@ -206,7 +206,7 @@ export default function Landing() {
           <h2 className="text-3xl font-bold text-white mb-4">¿Listo para automatizar tu gestión de incapacidades?</h2>
           <p className="text-white/80 mb-8">Agenda una demo de 30 minutos y te mostramos el sistema con datos reales.</p>
           <a href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
-             className="inline-flex items-center gap-2 bg-white text-brand-700 hover:bg-brand-50 font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-lg">
+             className="inline-flex items-center gap-2 bg-white text-brand-700 hover:bg-brand-50 cta-on-dark font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-lg">
             Solicitar demo gratuita <ArrowRight className="w-4 h-4" />
           </a>
         </div>

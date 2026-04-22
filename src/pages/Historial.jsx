@@ -646,11 +646,11 @@ export default function Historial() {
 
             {/* Tiempo de recuperación */}
             {detalle.tiempo_recuperacion?.estimado_dias && (
-              <div className="p-3.5 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-xl border border-indigo-100 flex items-center gap-3">
-                <div className="text-2xl font-bold text-indigo-700">{detalle.tiempo_recuperacion.estimado_dias}d</div>
+              <div className="p-3.5 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-indigo-100 dark:border-gray-700 flex items-center gap-3">
+                <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{detalle.tiempo_recuperacion.estimado_dias}d</div>
                 <div>
-                  <p className="text-xs font-medium text-indigo-800">Estimado recuperación</p>
-                  <p className="text-xs text-indigo-500">{detalle.tiempo_recuperacion.rango}</p>
+                  <p className="text-xs font-medium text-indigo-800 dark:text-indigo-200">Estimado recuperación</p>
+                  <p className="text-xs text-indigo-500 dark:text-indigo-400">{detalle.tiempo_recuperacion.rango}</p>
                 </div>
               </div>
             )}
