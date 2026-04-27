@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   Sparkles, FileText, ArrowRight, ArrowLeft,
@@ -158,6 +158,7 @@ const INIT = {
   nombre_trabajador: '',
   documento:         '',
   empresa:           '',
+  empresa_id:        '',
   sede:              '',
   cargo:             '',
   jefe_directo:      '',
@@ -317,6 +318,17 @@ export default function EvaluarPaciente() {
   const [titular, setTitular] = useState({ nombre: '', cedula: '', email: '' })
   const setTit = (k, v) => setTitular(t => ({ ...t, [k]: v }))
 
+  const [empresas, setEmpresas]               = useState([])
+  const [empresasLoading, setEmpresasLoading] = useState(false)
+
+  useEffect(() => {
+    setEmpresasLoading(true)
+    API.get('/api/empresas')
+      .then(r => setEmpresas(r.data))
+      .catch(() => setEmpresas([]))
+      .finally(() => setEmpresasLoading(false))
+  }, [])
+
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
   const pcl  = parseFloat(form.porcentaje_pcl) || 0
@@ -435,6 +447,7 @@ export default function EvaluarPaciente() {
         nombre_trabajador:            form.nombre_trabajador || undefined,
         documento:                    form.documento || undefined,
         empresa:                      form.empresa || undefined,
+        empresa_id:                   form.empresa_id || undefined,
         sede:                         form.sede || undefined,
         cargo:                        form.cargo || undefined,
         jefe_directo:                 form.jefe_directo || undefined,
@@ -861,8 +874,24 @@ export default function EvaluarPaciente() {
                 placeholder="Número de identificación" className="input w-full" />
             </Field>
             <Field label="Empresa">
-              <input type="text" value={form.empresa} onChange={e => set('empresa', e.target.value)}
-                placeholder="Razón social" className="input w-full" />
+              <select
+                value={form.empresa_id}
+                onChange={e => {
+                  const id = e.target.value
+                  const found = empresas.find(emp => emp.id === id)
+                  set('empresa_id', id)
+                  set('empresa', found ? found.nombre : '')
+                }}
+                className="input w-full"
+                disabled={empresasLoading}
+              >
+                <option value="">
+                  {empresasLoading ? 'Cargando empresas…' : empresas.length === 0 ? 'Sin empresas registradas' : '— Seleccionar empresa —'}
+                </option>
+                {empresas.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.nombre}</option>
+                ))}
+              </select>
             </Field>
             <Field label="Sede">
               <input type="text" value={form.sede} onChange={e => set('sede', e.target.value)}
