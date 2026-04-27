@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Download, RefreshCw, Brain, Send, Loader2,
   ArrowUpRight, ArrowDownRight, Minus, CheckCircle,
-  FileText, Plus, Calendar, Building2, X, Clock, FilePlus,
+  FileText, Plus, Calendar, Building2, X, Clock, FilePlus, AlertTriangle,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -285,8 +285,13 @@ export default function CasoDetalle() {
       const { data } = await API.put(`/api/historial/${id}/reevaluar`)
       setCaso(data)
       toast('Caso re-evaluado exitosamente', 'success')
-    } catch {
-      toast('Error al re-evaluar', 'error')
+    } catch (err) {
+      if (err?.response?.status === 423) {
+        toast('Atiende las alertas CRITICAL antes de re-evaluar', 'error')
+        setActiveTab('alertas')
+      } else {
+        toast('Error al re-evaluar', 'error')
+      }
     } finally { setReeval(false) }
   }
 
@@ -338,8 +343,14 @@ export default function CasoDetalle() {
       window.URL.revokeObjectURL(url)
       toast('Documento generado', 'success')
       setModalDoc(false)
-    } catch {
-      toast('Error generando el documento', 'error')
+    } catch (err) {
+      if (err?.response?.status === 423) {
+        toast('Atiende las alertas CRITICAL antes de generar documentos', 'error')
+        setModalDoc(false)
+        setActiveTab('alertas')
+      } else {
+        toast('Error generando el documento', 'error')
+      }
     } finally { setGenDoc(false) }
   }
 
@@ -392,6 +403,9 @@ export default function CasoDetalle() {
       toast('Error al registrar gestión', 'error')
     } finally { setSavingGestion(false) }
   }
+
+  const criticalPendientes = alertas.filter(a => a.severity === 'CRITICAL')
+  const bloqueado = criticalPendientes.length > 0
 
   // ── Loading skeleton ────────────────────────────────────────────────────────
   if (loading) return (
@@ -448,6 +462,29 @@ export default function CasoDetalle() {
         <span className="text-gray-800 font-medium truncate">{caso.id_caso}</span>
       </nav>
 
+      {/* ── Banner CRITICAL pendiente ──────────────────────────────────────── */}
+      {bloqueado && (
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 animate-fade-in">
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-800">
+              {criticalPendientes.length === 1
+                ? 'Hay 1 alerta CRITICAL pendiente'
+                : `Hay ${criticalPendientes.length} alertas CRITICAL pendientes`}
+            </p>
+            <p className="text-xs text-red-600 mt-0.5">
+              Debes reconocerlas antes de re-evaluar o generar documentos.
+            </p>
+          </div>
+          <button
+            onClick={() => setActiveTab('alertas')}
+            className="flex-shrink-0 text-xs font-medium text-red-700 underline hover:text-red-900 transition-colors"
+          >
+            Ver alertas
+          </button>
+        </div>
+      )}
+
       {/* ── Header card ────────────────────────────────────────────────────── */}
       <div className="card p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -496,15 +533,18 @@ export default function CasoDetalle() {
             </button>
             <button
               onClick={abrirModalDoc}
-              className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5"
+              disabled={bloqueado}
+              title={bloqueado ? 'Atiende las alertas CRITICAL primero' : undefined}
+              className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FilePlus className="w-4 h-4" />
               Generar documento
             </button>
             <button
               onClick={reevaluar}
-              disabled={reeval}
-              className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5"
+              disabled={reeval || bloqueado}
+              title={bloqueado ? 'Atiende las alertas CRITICAL primero' : undefined}
+              className="btn-secondary text-sm px-4 py-2 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${reeval ? 'animate-spin' : ''}`} />
               {reeval ? 'Evaluando...' : 'Re-evaluar'}
