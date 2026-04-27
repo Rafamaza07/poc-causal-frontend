@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileSearch, Clock, Bell,
   MessageSquare, BarChart3, FileText, Settings, BookOpen,
   LogOut, ChevronLeft, ChevronRight, Menu, X,
-  ClipboardCheck, Cpu, Layers, Stethoscope,
+  ClipboardCheck, Cpu, Layers, Stethoscope, LayoutList,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
 import BrandName from './BrandName'
@@ -18,6 +18,7 @@ const ALL_NAV = [
   { to: '/evaluar',      label: 'Evaluar caso',  icon: FileSearch, permiso: 'evaluar' },
   { to: '/evaluar/lote', label: 'Eval. en lote', icon: Layers,     permiso: 'evaluar' },
   { to: '/historial',    label: 'Historial',      icon: Clock,      permiso: 'ver_historial' },
+  { to: '/resumen',      label: 'Resumen',        icon: LayoutList,  permiso: 'ver_historial' },
   { to: '/alertas',   label: 'Alertas',      icon: Bell,            permiso: null, badge: true },
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
   { to: '/normativa',  label: 'Normativa',    icon: BookOpen,     permiso: null },
