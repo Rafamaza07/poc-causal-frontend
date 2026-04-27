@@ -320,6 +320,8 @@ export default function EvaluarPaciente() {
 
   const [empresas, setEmpresas]               = useState([])
   const [empresasLoading, setEmpresasLoading] = useState(false)
+  const [previewId, setPreviewId]             = useState('')
+  const [previewLoading, setPreviewLoading]   = useState(false)
 
   useEffect(() => {
     setEmpresasLoading(true)
@@ -328,6 +330,15 @@ export default function EvaluarPaciente() {
       .catch(() => setEmpresas([]))
       .finally(() => setEmpresasLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!form.empresa_id) { setPreviewId(''); return }
+    setPreviewLoading(true)
+    API.get('/api/casos/preview-id', { params: { empresa_id: form.empresa_id } })
+      .then(r => setPreviewId(r.data.id_caso))
+      .catch(() => setPreviewId(''))
+      .finally(() => setPreviewLoading(false))
+  }, [form.empresa_id])
 
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
@@ -341,7 +352,7 @@ export default function EvaluarPaciente() {
   const checklistCount = CHECKLIST_ITEMS.filter(({ key }) => form[key]).length
   const checklistPct   = Math.round((checklistCount / CHECKLIST_ITEMS.length) * 100)
 
-  const step0Valid = form.id_caso.trim() !== '' && form.edad !== ''
+  const step0Valid = form.edad !== ''
   const step4Valid = confirmed && consentChecked && titular.nombre.trim() !== '' && titular.cedula.trim() !== ''
 
   const handleFileUpload = async (e) => {
@@ -420,14 +431,18 @@ export default function EvaluarPaciente() {
     }
     setLoading(true)
     try {
-      await API.post('/api/v1/consentimientos', {
-        caso_id:        form.id_caso,
-        titular_nombre: titular.nombre,
-        titular_cedula: titular.cedula,
-        titular_email:  titular.email || undefined,
-        canal:          'digital',
-        texto_consentimiento_version: '1.0',
-      })
+      // Consentimiento solo si el ID ya existe (flujo manual); con ID auto-generado
+      // se integrará en T1.3 como paso condicional del wizard.
+      if (form.id_caso) {
+        await API.post('/api/v1/consentimientos', {
+          caso_id:        form.id_caso,
+          titular_nombre: titular.nombre,
+          titular_cedula: titular.cedula,
+          titular_email:  titular.email || undefined,
+          canal:          'digital',
+          texto_consentimiento_version: '1.0',
+        })
+      }
 
       const { data } = await API.post('/api/evaluar-caso', {
         // Core ML fields
@@ -486,7 +501,7 @@ export default function EvaluarPaciente() {
         CHECKLIST_ITEMS.forEach(({ key, backendKey }) => {
           checklistPayload[backendKey || key] = form[key]
         })
-        await API.put(`/api/v1/casos/${form.id_caso}/checklist`, checklistPayload)
+        await API.put(`/api/v1/casos/${data.id_caso}/checklist`, checklistPayload)
       } catch (_) { /* silent */ }
 
       if (!localStorage.getItem('disclaimer_accepted')) setShowDisclaimer(true)
@@ -548,7 +563,7 @@ export default function EvaluarPaciente() {
         restricciones_medicas: form.restricciones_vigentes,
         profesiograma: form.profesiograma,
         cargo: form.cargo || undefined,
-        case_id: form.id_caso || undefined,
+        case_id: result?.id_caso || form.id_caso || undefined,
       })
       setMapaAjustes(data)
     } catch (err) {
@@ -852,27 +867,6 @@ export default function EvaluarPaciente() {
           <h2 className="text-base font-semibold text-gray-800">Identificación del caso</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Field label="ID del caso" required>
-              <input type="text" value={form.id_caso} onChange={e => set('id_caso', e.target.value)}
-                placeholder="CASO-2024-001" className="input w-full" />
-            </Field>
-            <Field label="Edad" required>
-              <input type="number" value={form.edad} onChange={e => set('edad', e.target.value)}
-                placeholder="45" min={18} max={100} className="input w-full" />
-              <input type="range" min={18} max={100} value={form.edad || 18}
-                onChange={e => set('edad', e.target.value)} className="w-full accent-brand-600 h-2 mt-2" />
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>18 años</span><span>100 años</span>
-              </div>
-            </Field>
-            <Field label="Nombre del trabajador">
-              <input type="text" value={form.nombre_trabajador} onChange={e => set('nombre_trabajador', e.target.value)}
-                placeholder="Nombre completo" className="input w-full" />
-            </Field>
-            <Field label="Documento (cédula)">
-              <input type="text" value={form.documento} onChange={e => set('documento', e.target.value)}
-                placeholder="Número de identificación" className="input w-full" />
-            </Field>
             <Field label="Empresa">
               <select
                 value={form.empresa_id}
@@ -892,6 +886,34 @@ export default function EvaluarPaciente() {
                   <option key={emp.id} value={emp.id}>{emp.nombre}</option>
                 ))}
               </select>
+            </Field>
+            <Field label="ID del caso (auto-generado)">
+              <div className="input w-full bg-gray-50 flex items-center gap-2 min-h-[38px]">
+                {previewLoading
+                  ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  : <span className="font-mono text-sm text-gray-600">
+                      {previewId || (form.empresa_id ? '…' : 'Seleccione empresa primero')}
+                    </span>
+                }
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Se asigna automáticamente al guardar.</p>
+            </Field>
+            <Field label="Edad" required>
+              <input type="number" value={form.edad} onChange={e => set('edad', e.target.value)}
+                placeholder="45" min={18} max={100} className="input w-full" />
+              <input type="range" min={18} max={100} value={form.edad || 18}
+                onChange={e => set('edad', e.target.value)} className="w-full accent-brand-600 h-2 mt-2" />
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>18 años</span><span>100 años</span>
+              </div>
+            </Field>
+            <Field label="Nombre del trabajador">
+              <input type="text" value={form.nombre_trabajador} onChange={e => set('nombre_trabajador', e.target.value)}
+                placeholder="Nombre completo" className="input w-full" />
+            </Field>
+            <Field label="Documento (cédula)">
+              <input type="text" value={form.documento} onChange={e => set('documento', e.target.value)}
+                placeholder="Número de identificación" className="input w-full" />
             </Field>
             <Field label="Sede">
               <input type="text" value={form.sede} onChange={e => set('sede', e.target.value)}
