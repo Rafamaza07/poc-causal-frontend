@@ -4,10 +4,11 @@ import { formatDate } from '../../utils/formatters'
 import { ChevronRight } from 'lucide-react'
 
 const RECOM_LABEL = {
-  REINCORPORACION_INMEDIATA:    'Reincorporación',
-  REINCORPORACION_CON_TERAPIAS: 'Con terapias',
-  CONTINUAR_INCAPACIDAD:        'Continuar inc.',
-  PENSION_INVALIDEZ:            'Pensión',
+  REINCORPORACION_INMEDIATA:                   'Reincorporación',
+  REINCORPORACION_CON_TERAPIAS:                'Con terapias',
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: 'Rest. médicas',
+  CONTINUAR_INCAPACIDAD:                       'Continuar inc.',
+  PENSION_INVALIDEZ:                           'Pensión',
 }
 
 export default function CaseRow({ caso, onClick }) {

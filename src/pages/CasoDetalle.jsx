@@ -77,12 +77,13 @@ const DEFAULT_GESTION = {
 }
 
 const REC_STYLES = {
-  REINCORPORACION_INMEDIATA:    'bg-emerald-50 text-emerald-800 border-emerald-200',
-  REINCORPORACION_CON_TERAPIAS: 'bg-blue-50 text-blue-800 border-blue-200',
-  CONTINUAR_INCAPACIDAD:        'bg-amber-50 text-amber-800 border-amber-200',
-  PENSION_INVALIDEZ:            'bg-red-50 text-red-800 border-red-200',
-  CALIFICA_PENSION_INVALIDEZ:   'bg-red-50 text-red-800 border-red-200',
-  FORZAR_CALIFICACION_PCL:      'bg-orange-50 text-orange-800 border-orange-200',
+  REINCORPORACION_INMEDIATA:                   'bg-emerald-50 text-emerald-800 border-emerald-200',
+  REINCORPORACION_CON_TERAPIAS:                'bg-blue-50 text-blue-800 border-blue-200',
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: 'bg-teal-50 text-teal-800 border-teal-200',
+  CONTINUAR_INCAPACIDAD:                       'bg-amber-50 text-amber-800 border-amber-200',
+  PENSION_INVALIDEZ:                           'bg-red-50 text-red-800 border-red-200',
+  CALIFICA_PENSION_INVALIDEZ:                  'bg-red-50 text-red-800 border-red-200',
+  FORZAR_CALIFICACION_PCL:                     'bg-orange-50 text-orange-800 border-orange-200',
 }
 
 // ─── Barra dual comparativa CIE-10 ───────────────────────────────────────────

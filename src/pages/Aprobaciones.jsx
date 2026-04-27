@@ -9,11 +9,12 @@ const TABS = [
 ]
 
 const REC_LABELS = {
-  CALIFICA_PENSION_INVALIDEZ:   { label: 'Califica pensión',    color: 'bg-red-100 text-red-700' },
-  FORZAR_CALIFICACION_PCL:      { label: 'Forzar calificación', color: 'bg-red-100 text-red-700' },
-  CONTINUAR_INCAPACIDAD:        { label: 'Continuar incap.',   color: 'bg-yellow-100 text-yellow-700' },
-  REINCORPORACION_CON_TERAPIAS: { label: 'Reincorp. c/ ter.',  color: 'bg-blue-100 text-blue-700' },
-  REINCORPORACION_INMEDIATA:    { label: 'Reincorp. inmediata',color: 'bg-green-100 text-green-700' },
+  CALIFICA_PENSION_INVALIDEZ:                  { label: 'Califica pensión',    color: 'bg-red-100 text-red-700' },
+  FORZAR_CALIFICACION_PCL:                     { label: 'Forzar calificación', color: 'bg-red-100 text-red-700' },
+  CONTINUAR_INCAPACIDAD:                       { label: 'Continuar incap.',    color: 'bg-yellow-100 text-yellow-700' },
+  REINCORPORACION_CON_TERAPIAS:                { label: 'Reincorp. c/ ter.',   color: 'bg-blue-100 text-blue-700' },
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: { label: 'Rest. médicas',       color: 'bg-teal-100 text-teal-700' },
+  REINCORPORACION_INMEDIATA:                   { label: 'Reincorp. inmediata', color: 'bg-green-100 text-green-700' },
 }
 
 function ScoreBar({ value }) {

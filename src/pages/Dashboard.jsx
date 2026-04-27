@@ -18,16 +18,18 @@ import { SkeletonStatCard, SkeletonChart, SkeletonAlertItem } from '../Component
 // ── Constants ──────────────────────────────────────────
 
 const REC_LABELS = {
-  CALIFICA_PENSION_INVALIDEZ:   'Pensión invalidez',
-  CONTINUAR_INCAPACIDAD:        'Continuar',
-  REINCORPORACION_CON_TERAPIAS: 'Reincorporación',
-  FORZAR_CALIFICACION_PCL:      'Forzar PCL',
+  CALIFICA_PENSION_INVALIDEZ:                  'Pensión invalidez',
+  CONTINUAR_INCAPACIDAD:                       'Continuar',
+  REINCORPORACION_CON_TERAPIAS:                'Reincorporación',
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: 'Rest. médicas',
+  FORZAR_CALIFICACION_PCL:                     'Forzar PCL',
 }
 const REC_COLORS = {
-  CALIFICA_PENSION_INVALIDEZ:   '#ef4444',
-  CONTINUAR_INCAPACIDAD:        '#f59e0b',
-  REINCORPORACION_CON_TERAPIAS: '#22c55e',
-  FORZAR_CALIFICACION_PCL:      '#f97316',
+  CALIFICA_PENSION_INVALIDEZ:                  '#ef4444',
+  CONTINUAR_INCAPACIDAD:                       '#f59e0b',
+  REINCORPORACION_CON_TERAPIAS:                '#22c55e',
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: '#0d9488',
+  FORZAR_CALIFICACION_PCL:                     '#f97316',
 }
 const RISK_STYLES = {
   BAJO:     'bg-green-100 text-green-800',

@@ -14,10 +14,11 @@ const RISK_STYLES = {
   CRÍTICO:  'bg-red-100 text-red-800',
 }
 const REC_LABELS = {
-  'CALIFICA_PENSION_INVALIDEZ':   'Pensión',
-  'CONTINUAR_INCAPACIDAD':        'Continuar',
-  'REINCORPORACION_CON_TERAPIAS': 'Reincorporar',
-  'FORZAR_CALIFICACION_PCL':      'Forzar PCL',
+  'CALIFICA_PENSION_INVALIDEZ':                  'Pensión',
+  'CONTINUAR_INCAPACIDAD':                       'Continuar',
+  'REINCORPORACION_CON_TERAPIAS':                'Reincorporar',
+  'REINCORPORACION_CON_RECOMENDACIONES_MEDICAS': 'Restricciones médicas',
+  'FORZAR_CALIFICACION_PCL':                     'Forzar PCL',
 }
 
 // ─── Score de retorno al trabajo ─────────────────────────────────────────────
@@ -558,6 +559,7 @@ export default function Historial() {
           <option value="CALIFICA_PENSION_INVALIDEZ">Pensión</option>
           <option value="CONTINUAR_INCAPACIDAD">Continuar</option>
           <option value="REINCORPORACION_CON_TERAPIAS">Reincorporar</option>
+          <option value="REINCORPORACION_CON_RECOMENDACIONES_MEDICAS">Restricciones médicas</option>
           <option value="FORZAR_CALIFICACION_PCL">Forzar PCL</option>
         </select>
         <button onClick={cargar} className="btn-primary text-sm px-4 py-2">

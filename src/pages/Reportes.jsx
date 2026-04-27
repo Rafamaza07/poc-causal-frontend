@@ -10,11 +10,12 @@ import { getScoreRange } from '../utils/constants'
 import { formatDate } from '../utils/formatters'
 
 const REC_LABELS = {
-  REINCORPORACION_INMEDIATA:    'Reincorporación inmediata',
-  REINCORPORACION_CON_TERAPIAS: 'Reincorporación con terapias',
-  CONTINUAR_INCAPACIDAD:        'Continuar incapacidad',
-  CALIFICA_PENSION_INVALIDEZ:   'Pensión por invalidez',
-  FORZAR_CALIFICACION_PCL:      'Forzar calificación PCL',
+  REINCORPORACION_INMEDIATA:                   'Reincorporación inmediata',
+  REINCORPORACION_CON_TERAPIAS:                'Reincorporación con terapias',
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: 'Reincorporación con restricciones médicas',
+  CONTINUAR_INCAPACIDAD:                       'Continuar incapacidad',
+  CALIFICA_PENSION_INVALIDEZ:                  'Pensión por invalidez',
+  FORZAR_CALIFICACION_PCL:                     'Forzar calificación PCL',
 }
 
 const today = new Date().toISOString().slice(0, 10)

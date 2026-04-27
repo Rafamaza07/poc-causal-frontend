@@ -6,12 +6,13 @@ export const SCORE_RANGES = {
 }
 
 export const RECOMENDACIONES = {
-  REINCORPORACION_INMEDIATA:    { color: 'emerald', icon: 'CheckCircle',   label: 'Reincorporación inmediata' },
-  REINCORPORACION_CON_TERAPIAS: { color: 'blue',    icon: 'Activity',      label: 'Reincorporación con terapias' },
-  CONTINUAR_INCAPACIDAD:        { color: 'amber',   icon: 'Clock',         label: 'Continuar incapacidad' },
-  PENSION_INVALIDEZ:            { color: 'red',     icon: 'AlertTriangle', label: 'Pensión por invalidez' },
-  CALIFICA_PENSION_INVALIDEZ:   { color: 'red',     icon: 'AlertTriangle', label: 'Evaluar pensión por invalidez' },
-  FORZAR_CALIFICACION_PCL:      { color: 'red',     icon: 'AlertTriangle', label: 'Forzar calificación PCL' },
+  REINCORPORACION_INMEDIATA:                   { color: 'emerald', icon: 'CheckCircle',   label: 'Reincorporación inmediata' },
+  REINCORPORACION_CON_TERAPIAS:                { color: 'blue',    icon: 'Activity',      label: 'Reincorporación con terapias' },
+  REINCORPORACION_CON_RECOMENDACIONES_MEDICAS: { color: 'teal',    icon: 'Shield',        label: 'Reincorporación con restricciones médicas' },
+  CONTINUAR_INCAPACIDAD:                       { color: 'amber',   icon: 'Clock',         label: 'Continuar incapacidad' },
+  PENSION_INVALIDEZ:                           { color: 'red',     icon: 'AlertTriangle', label: 'Pensión por invalidez' },
+  CALIFICA_PENSION_INVALIDEZ:                  { color: 'red',     icon: 'AlertTriangle', label: 'Evaluar pensión por invalidez' },
+  FORZAR_CALIFICACION_PCL:                     { color: 'red',     icon: 'AlertTriangle', label: 'Forzar calificación PCL' },
 }
 
 export const SEVERITY = {
