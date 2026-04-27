@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import API from '../api/client'
 import Header from './Header'
@@ -12,18 +12,42 @@ export default function Layout({ user, onLogout, children }) {
   const [showTour, setShowTour] = useState(false)
   const location = useLocation()
   const { dark, toggle: toggleDark } = useTheme()
+  const intervalRef = useRef(null)
 
+  // Polling 30s + pausa cuando pestaña está en background
   useEffect(() => {
-    API.get('/api/v1/alerts/summary')
-      .then(r => setAlertCount(r.data?.unread ?? 0))
-      .catch(() => {})
-
-    if (['medico', 'admin', 'superadmin'].includes(user?.rol)) {
-      API.get('/api/v1/aprobaciones/summary')
-        .then(r => setAprobCount(r.data?.pendientes ?? 0))
+    function fetchCounts() {
+      API.get('/api/v1/alerts/summary')
+        .then(r => setAlertCount(r.data?.unread ?? 0))
         .catch(() => {})
+      if (['medico', 'admin', 'superadmin'].includes(user?.rol)) {
+        API.get('/api/v1/aprobaciones/summary')
+          .then(r => setAprobCount(r.data?.pendientes ?? 0))
+          .catch(() => {})
+      }
     }
 
+    function handleVisibility() {
+      if (document.hidden) {
+        clearInterval(intervalRef.current)
+      } else {
+        fetchCounts()
+        intervalRef.current = setInterval(fetchCounts, 30_000)
+      }
+    }
+
+    fetchCounts()
+    intervalRef.current = setInterval(fetchCounts, 30_000)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      clearInterval(intervalRef.current)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [user?.rol])
+
+  // Tour de onboarding (one-shot)
+  useEffect(() => {
     if (!localStorage.getItem('tour_done')) {
       const t = setTimeout(() => setShowTour(true), 800)
       return () => clearTimeout(t)
