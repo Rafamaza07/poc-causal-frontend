@@ -78,13 +78,7 @@ export function StepCasoEstado({ form }) {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const STEPS = [
-  { id: 'identificacion', label: 'Identificación' },
-  { id: 'temporal',       label: 'Línea temporal' },
-  { id: 'documentacion',  label: 'Documentación' },
-  { id: 'calificacion',   label: 'Calificación' },
-  { id: 'revision',       label: 'Revisión' },
-]
+// Steps computed dynamically in the component (T1.3: consentimiento is conditional)
 
 const TIPO_OPTIONS = [
   { value: 'laboral',     label: 'Laboral',     Icon: Briefcase },
@@ -301,7 +295,7 @@ export default function EvaluarPaciente() {
   const toast    = useToast()
   const navigate = useNavigate()
 
-  const [step, setStep]               = useState(0)
+  const [step, setStep]               = useState('identificacion')
   const [form, setForm]               = useState(INIT)
   const [cie10, setCie10]             = useState(null)
   const [cie10Loading, setCIE10Loading] = useState(false)
@@ -352,8 +346,23 @@ export default function EvaluarPaciente() {
   const checklistCount = CHECKLIST_ITEMS.filter(({ key }) => form[key]).length
   const checklistPct   = Math.round((checklistCount / CHECKLIST_ITEMS.length) * 100)
 
-  const step0Valid = form.edad !== ''
-  const step4Valid = confirmed && consentChecked && titular.nombre.trim() !== '' && titular.cedula.trim() !== ''
+  const hasPdf = !!uploadedFile
+
+  const visibleSteps = [
+    { id: 'identificacion', label: 'Identificación' },
+    { id: 'temporal',       label: 'Línea temporal' },
+    { id: 'documentacion',  label: 'Documentación' },
+    ...(hasPdf ? [{ id: 'consentimiento', label: 'Consentimiento' }] : []),
+    { id: 'calificacion',   label: 'Calificación' },
+    { id: 'revision',       label: 'Revisión' },
+  ]
+  const currentStepIndex = visibleSteps.findIndex(s => s.id === step)
+  const goNext = () => { const n = visibleSteps[currentStepIndex + 1]; if (n) setStep(n.id) }
+  const goPrev = () => { const p = visibleSteps[currentStepIndex - 1]; if (p) setStep(p.id) }
+
+  const step0Valid       = form.edad !== ''
+  const stepConsentValid = consentChecked && titular.nombre.trim() !== '' && titular.cedula.trim() !== ''
+  const revisionValid    = confirmed
 
   const handleFileUpload = async (e) => {
     const f = e.target.files[0]
@@ -431,19 +440,6 @@ export default function EvaluarPaciente() {
     }
     setLoading(true)
     try {
-      // Consentimiento solo si el ID ya existe (flujo manual); con ID auto-generado
-      // se integrará en T1.3 como paso condicional del wizard.
-      if (form.id_caso) {
-        await API.post('/api/v1/consentimientos', {
-          caso_id:        form.id_caso,
-          titular_nombre: titular.nombre,
-          titular_cedula: titular.cedula,
-          titular_email:  titular.email || undefined,
-          canal:          'digital',
-          texto_consentimiento_version: '1.0',
-        })
-      }
-
       const { data } = await API.post('/api/evaluar-caso', {
         // Core ML fields
         id_caso:                      form.id_caso,
@@ -494,6 +490,20 @@ export default function EvaluarPaciente() {
       })
 
       setResult(data)
+
+      // Consentimiento: solo si el wizard mostró el paso (PDF adjunto); usa el ID ya generado
+      if (uploadedFile) {
+        try {
+          await API.post('/api/v1/consentimientos', {
+            caso_id:        data.id_caso,
+            titular_nombre: titular.nombre,
+            titular_cedula: titular.cedula,
+            titular_email:  titular.email || undefined,
+            canal:          'digital',
+            texto_consentimiento_version: '1.0',
+          })
+        } catch (_) { /* silent — el caso ya está guardado, no bloquear por consentimiento */ }
+      }
 
       // Save checklist (best-effort, silent fail)
       try {
@@ -546,7 +556,7 @@ export default function EvaluarPaciente() {
   }
 
   const resetWizard = () => {
-    setStep(0)
+    setStep('identificacion')
     setForm(INIT)
     setCie10(null)
     setResult(null)
@@ -857,12 +867,12 @@ export default function EvaluarPaciente() {
 
       {/* Stepper + Estado chip */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <Stepper steps={STEPS} currentStep={step} />
+        <Stepper steps={visibleSteps} currentStep={currentStepIndex} />
         <StepCasoEstado form={form} />
       </div>
 
-      {/* ── STEP 0: Identificación (§A) ──────────────────────────────────── */}
-      {step === 0 && (
+      {/* ── STEP: Identificación ─────────────────────────────────────────── */}
+      {step === 'identificacion' && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-5">
           <h2 className="text-base font-semibold text-gray-800">Identificación del caso</h2>
 
@@ -1000,7 +1010,7 @@ export default function EvaluarPaciente() {
           </Field>
 
           <div className="flex justify-end pt-2">
-            <button type="button" onClick={() => setStep(1)} disabled={!step0Valid}
+            <button type="button" onClick={goNext} disabled={!step0Valid}
               className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -1008,8 +1018,8 @@ export default function EvaluarPaciente() {
         </div>
       )}
 
-      {/* ── STEP 1: Línea temporal (§B) ──────────────────────────────────── */}
-      {step === 1 && (
+      {/* ── STEP: Línea temporal ─────────────────────────────────────────── */}
+      {step === 'temporal' && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Línea temporal</h2>
 
@@ -1067,8 +1077,8 @@ export default function EvaluarPaciente() {
           )}
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(0)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={() => setStep(2)}
+            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={goNext}
               className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -1076,8 +1086,8 @@ export default function EvaluarPaciente() {
         </div>
       )}
 
-      {/* ── STEP 2: Documentación clínica + SST (§C + §D) ───────────────── */}
-      {step === 2 && (
+      {/* ── STEP: Documentación clínica + SST ───────────────────────────── */}
+      {step === 'documentacion' && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Documentación clínica y SST</h2>
 
@@ -1164,8 +1174,8 @@ export default function EvaluarPaciente() {
           </div>
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(1)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={() => setStep(3)}
+            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={goNext}
               className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -1173,8 +1183,64 @@ export default function EvaluarPaciente() {
         </div>
       )}
 
-      {/* ── STEP 3: Calificación (§E) ─────────────────────────────────────── */}
-      {step === 3 && (
+      {/* ── STEP: Consentimiento informado (condicional — solo si hay PDF) ── */}
+      {step === 'consentimiento' && (
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+          <h2 className="text-base font-semibold text-gray-800">Consentimiento informado</h2>
+
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-900 mb-1">Ley 1581/2012 — Tratamiento de datos de salud</p>
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Adjuntó una historia clínica. Antes de procesar los datos médicos, registre los datos
+                del titular y confirme que otorgó consentimiento informado. Obligatorio según la
+                Ley 1581/2012 Art. 9.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Nombre del titular" required>
+              <input type="text" value={titular.nombre} onChange={e => setTit('nombre', e.target.value)}
+                placeholder="Nombre completo del trabajador" className="input w-full" />
+            </Field>
+            <Field label="Cédula del titular" required>
+              <input type="text" value={titular.cedula} onChange={e => setTit('cedula', e.target.value)}
+                placeholder="Número de cédula" className="input w-full" />
+            </Field>
+            <Field label="Correo del titular (opcional)">
+              <input type="email" value={titular.email} onChange={e => setTit('email', e.target.value)}
+                placeholder="correo@ejemplo.com" className="input w-full" />
+            </Field>
+          </div>
+
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input type="checkbox" checked={consentChecked} onChange={e => setConsentChecked(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-blue-600 rounded" />
+            <span className="text-sm text-blue-800">
+              El titular <strong>{titular.nombre || '(nombre requerido)'}</strong> ha otorgado
+              consentimiento informado para el tratamiento de sus datos de salud.{' '}
+              <Link to="/politica-tratamiento" target="_blank"
+                className="underline underline-offset-2 hover:no-underline">
+                Ver política de privacidad
+              </Link>
+            </span>
+          </label>
+
+          <div className="flex justify-between pt-2">
+            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={goNext}
+              disabled={!stepConsentValid}
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
+              Siguiente <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── STEP: Calificación ───────────────────────────────────────────── */}
+      {step === 'calificacion' && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Estado de calificación</h2>
 
@@ -1272,8 +1338,8 @@ export default function EvaluarPaciente() {
           </div>
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={() => setStep(4)}
+            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <button type="button" onClick={goNext}
               className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
               Siguiente <ArrowRight className="w-4 h-4" />
             </button>
@@ -1281,8 +1347,8 @@ export default function EvaluarPaciente() {
         </div>
       )}
 
-      {/* ── STEP 4: Revisión + confirmación ──────────────────────────────── */}
-      {step === 4 && (
+      {/* ── STEP: Revisión + confirmación ────────────────────────────────── */}
+      {step === 'revision' && (
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Revisión y confirmación</h2>
 
@@ -1319,46 +1385,6 @@ export default function EvaluarPaciente() {
               placeholder="Observaciones adicionales..." className="input w-full resize-none h-24" />
           </Field>
 
-          {/* Consentimiento informado — Ley 1581/2012 */}
-          <div className="border border-blue-200 rounded-xl p-5 bg-blue-50/40 space-y-4">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
-              <h3 className="text-sm font-semibold text-blue-900">
-                Consentimiento informado — Ley 1581/2012
-              </h3>
-            </div>
-            <p className="text-xs text-blue-700 leading-relaxed">
-              Antes de procesar datos médicos, registre los datos del titular y confirme
-              que otorgó consentimiento informado. Obligatorio según la Ley 1581/2012 Art. 9.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Nombre del titular" required>
-                <input type="text" value={titular.nombre} onChange={e => setTit('nombre', e.target.value)}
-                  placeholder="Nombre completo del trabajador" className="input w-full" />
-              </Field>
-              <Field label="Cédula del titular" required>
-                <input type="text" value={titular.cedula} onChange={e => setTit('cedula', e.target.value)}
-                  placeholder="Número de cédula" className="input w-full" />
-              </Field>
-              <Field label="Correo del titular (opcional)">
-                <input type="email" value={titular.email} onChange={e => setTit('email', e.target.value)}
-                  placeholder="correo@ejemplo.com" className="input w-full" />
-              </Field>
-            </div>
-            <label className="flex items-start gap-3 cursor-pointer select-none">
-              <input type="checkbox" checked={consentChecked} onChange={e => setConsentChecked(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-blue-600 rounded" />
-              <span className="text-sm text-blue-800">
-                El titular <strong>{titular.nombre || '(nombre requerido)'}</strong> ha otorgado
-                consentimiento informado para el tratamiento de sus datos de salud.{' '}
-                <Link to="/politica-tratamiento" target="_blank"
-                  className="underline underline-offset-2 hover:no-underline">
-                  Ver política de privacidad
-                </Link>
-              </span>
-            </label>
-          </div>
-
           <label className="flex items-start gap-3 cursor-pointer select-none">
             <input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)}
               className="mt-0.5 w-4 h-4 accent-brand-600 rounded" />
@@ -1368,9 +1394,9 @@ export default function EvaluarPaciente() {
           </label>
 
           <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={() => setStep(3)}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
+            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
             <button type="button" onClick={handleSubmit}
-              disabled={!step4Valid || loading}
+              disabled={!revisionValid || loading}
               className="btn-primary flex items-center gap-2 px-7 py-2.5 text-base font-semibold disabled:opacity-50">
               <Sparkles className="w-5 h-5" />
               {loading ? 'Evaluando...' : 'Evaluar caso'}
