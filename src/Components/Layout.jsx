@@ -5,6 +5,7 @@ import Header from './Header'
 import Sidebar from './Sidebar'
 import OnboardingTour from './OnboardingTour'
 import { useTheme } from '../hooks/useTheme'
+import { registerAndSubscribe } from '../utils/push'
 
 export default function Layout({ user, onLogout, children }) {
   const [alertCount, setAlertCount] = useState(0)
@@ -45,6 +46,11 @@ export default function Layout({ user, onLogout, children }) {
       document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [user?.rol])
+
+  // Registro Web Push (one-shot por sesión)
+  useEffect(() => {
+    if (user?.sub_id) registerAndSubscribe()
+  }, [user?.sub_id])
 
   // Tour de onboarding (one-shot)
   useEffect(() => {
