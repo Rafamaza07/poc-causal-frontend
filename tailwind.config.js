@@ -58,6 +58,7 @@ export default {
         'slide-down':  'slideDown 0.25s ease-out',
         'scale-in':    'scaleIn 0.2s ease-out',
         'tooltip-in':  'tooltipIn 0.15s ease-out',
+        'page-in':     'pageIn 0.18s ease-out',
       },
       keyframes: {
         fadeIn:    { from: { opacity: '0' },                                          to: { opacity: '1' } },
@@ -65,6 +66,7 @@ export default {
         slideDown: { from: { opacity: '0', transform: 'translateY(-6px)' },            to: { opacity: '1', transform: 'translateY(0)' } },
         scaleIn:   { from: { opacity: '0', transform: 'scale(0.95)' },                 to: { opacity: '1', transform: 'scale(1)' } },
         tooltipIn: { from: { opacity: '0', transform: 'scale(0.92) translateY(2px)' }, to: { opacity: '1', transform: 'scale(1) translateY(0)' } },
+        pageIn:    { from: { opacity: '0', transform: 'translateY(5px)' },             to: { opacity: '1', transform: 'translateY(0)' } },
       },
     },
   },

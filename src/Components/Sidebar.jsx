@@ -42,14 +42,15 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-
   const puede = (p) => !p || user.permisos?.includes(p)
 
-  const nav = ALL_NAV.filter(n =>
+  const allFiltered = ALL_NAV.filter(n =>
     puede(n.permiso) &&
     (!n.adminOnly || ['admin', 'superadmin'].includes(user.rol)) &&
     (!n.rolesAllowed || n.rolesAllowed.includes(user.rol))
   )
+  const nav       = allFiltered.filter(n => !n.adminOnly)
+  const adminNav  = allFiltered.filter(n =>  n.adminOnly)
 
   const initials = (user.nombre || '?')[0].toUpperCase()
 
@@ -89,7 +90,15 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
 
         {/* Navigation */}
         <nav className={`flex-1 overflow-y-auto space-y-0.5 ${collapsed ? 'px-2 py-1' : 'px-3 py-1'}`}>
-          {nav.map(n => {
+          {[...nav, ...(adminNav.length ? [{ _separator: true }] : []), ...adminNav].map((n, idx) => {
+            if (n._separator) return (
+              <div key="sep-admin" className={`${collapsed ? 'py-1' : 'py-1.5'}`}>
+                {!collapsed && (
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 px-3 mb-0.5">Admin</p>
+                )}
+                <div className="border-t border-white/5 mx-1" />
+              </div>
+            )
             const Icon = n.icon
             return (
               <div key={`${n.to}-${n.label}`} className="relative group/item">
@@ -98,12 +107,16 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
                   end={n.end !== false}
                   {...(n.to === '/evaluar' ? { 'data-tour': 'nav-evaluar' } : {})}
                   className={({ isActive }) =>
-                    `flex items-center rounded-lg transition-all duration-200 ${
-                      collapsed ? 'justify-center w-10 h-10 mx-auto' : 'gap-3 px-3.5 py-2.5'
+                    `flex items-center rounded-lg transition-colors duration-150 ${
+                      collapsed ? 'justify-center w-10 h-10 mx-auto' : 'gap-3 py-2.5'
                     } text-sm font-medium ${
                       isActive
-                        ? 'bg-brand-600/90 text-white shadow-sm shadow-brand-600/25'
-                        : 'text-slate-400 hover:text-white hover:bg-white/[0.07]'
+                        ? collapsed
+                          ? 'bg-brand-600/90 text-white shadow-sm shadow-brand-600/25'
+                          : 'bg-brand-600/90 text-white shadow-sm shadow-brand-600/25 border-l-[3px] border-brand-300 pl-[11px] pr-3.5'
+                        : collapsed
+                          ? 'text-slate-400 hover:text-white hover:bg-white/[0.07]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/[0.07] pl-3.5 pr-3.5'
                     }`
                   }
                 >
@@ -152,6 +165,9 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
                 <div className="min-w-0 flex-1">
                   <p className="text-white text-sm font-medium truncate leading-tight">{user.nombre}</p>
                   <p className="text-slate-400 text-xs capitalize">{user.rol}</p>
+                  {(user.tenant_nombre || user.empresa) && (
+                    <p className="text-slate-500 text-[10px] truncate mt-0.5">{user.tenant_nombre || user.empresa}</p>
+                  )}
                 </div>
               </div>
               <button

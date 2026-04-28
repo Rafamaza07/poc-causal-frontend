@@ -67,7 +67,7 @@ export default function Layout({ user, onLogout, children }) {
         <Header user={user} onLogout={onLogout} dark={dark} onToggleDark={toggleDark} />
         <main
           key={location.pathname}
-          className="flex-1 overflow-auto p-6 pb-24 md:pb-6 animate-fade-in"
+          className="flex-1 overflow-auto p-6 pb-24 md:pb-6 animate-page-in"
         >
           {children}
         </main>
