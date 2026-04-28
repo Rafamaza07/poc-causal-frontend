@@ -12,7 +12,7 @@ export default function Layout({ user, onLogout, children }) {
   const [aprobCount, setAprobCount] = useState(0)
   const [showTour, setShowTour] = useState(false)
   const location = useLocation()
-  const { dark, toggle: toggleDark } = useTheme()
+  const { dark, mode, setMode } = useTheme()
   const intervalRef = useRef(null)
 
   // Polling 30s + pausa cuando pestaña está en background
@@ -64,7 +64,7 @@ export default function Layout({ user, onLogout, children }) {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
       <Sidebar user={user} onLogout={onLogout} alertCount={alertCount} aprobCount={aprobCount} />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <Header user={user} onLogout={onLogout} dark={dark} onToggleDark={toggleDark} />
+        <Header user={user} onLogout={onLogout} dark={dark} mode={mode} onSetMode={setMode} />
         <main
           key={location.pathname}
           className="flex-1 overflow-auto p-6 pb-24 md:pb-6 animate-page-in"

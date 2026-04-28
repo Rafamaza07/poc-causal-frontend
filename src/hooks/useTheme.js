@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react'
 
+const systemIsDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches
+
 export function useTheme() {
-  const [dark, setDark] = useState(
-    () => localStorage.getItem('theme') === 'dark'
+  const [mode, setModeState] = useState(
+    () => localStorage.getItem('theme') ?? 'system'
   )
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-    localStorage.setItem('theme', dark ? 'dark' : 'light')
-  }, [dark])
+    const apply = (isDark) => document.documentElement.classList.toggle('dark', isDark)
 
-  return { dark, toggle: () => setDark(d => !d) }
+    if (mode === 'dark')  { apply(true);  localStorage.setItem('theme', mode); return }
+    if (mode === 'light') { apply(false); localStorage.setItem('theme', mode); return }
+
+    // system — follow OS preference + watch changes
+    apply(systemIsDark())
+    localStorage.setItem('theme', mode)
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = (e) => apply(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [mode])
+
+  const setMode = (m) => setModeState(m)
+  const dark = mode === 'dark' || (mode === 'system' && systemIsDark())
+
+  return { dark, mode, setMode }
 }

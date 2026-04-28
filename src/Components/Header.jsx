@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Bell, Search, ChevronRight, LogOut, Settings,
-  AlertTriangle, AlertCircle, Info, Sun, Moon,
+  AlertTriangle, AlertCircle, Info, Sun, Moon, Monitor,
 } from 'lucide-react'
 import API from '../api/client'
 import { useDebounce } from '../hooks/useDebounce'
@@ -41,7 +41,11 @@ function initials(nombre) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-export default function Header({ user, onLogout, dark = false, onToggleDark }) {
+const NEXT_MODE = { light: 'system', system: 'dark', dark: 'light' }
+const THEME_ICON = { light: Sun, system: Monitor, dark: Moon }
+const THEME_TITLE = { light: 'Cambiar a sistema', system: 'Cambiar a oscuro', dark: 'Cambiar a claro' }
+
+export default function Header({ user, onLogout, dark = false, mode = 'light', onSetMode }) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -188,16 +192,19 @@ export default function Header({ user, onLogout, dark = false, onToggleDark }) {
       <div className="flex items-center gap-1 ml-auto flex-shrink-0">
 
         {/* Dark mode toggle */}
-        {onToggleDark && (
-          <button
-            onClick={onToggleDark}
-            className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500
-              hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-            title={dark ? 'Modo claro' : 'Modo oscuro'}
-          >
-            {dark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-          </button>
-        )}
+        {onSetMode && (() => {
+          const ThemeIcon = THEME_ICON[mode] ?? Sun
+          return (
+            <button
+              onClick={() => onSetMode(NEXT_MODE[mode] ?? 'system')}
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500
+                hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              title={THEME_TITLE[mode] ?? 'Cambiar tema'}
+            >
+              <ThemeIcon className="w-[18px] h-[18px]" />
+            </button>
+          )
+        })()}
 
         {/* Bell */}
         <div ref={bellRef} className="relative" data-tour="bell">
