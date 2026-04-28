@@ -13,6 +13,7 @@ import DistributionPie from '../Components/charts/DistributionPie'
 import DataTable from '../Components/DataTable'
 import CIE10Search from '../Components/CIE10Search'
 import EmptyState from '../Components/EmptyState'
+import { SkeletonStatCard, SkeletonChart } from '../Components/LoadingSkeleton'
 import { RECOMENDACIONES } from '../utils/constants'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -60,25 +61,15 @@ const PROD_COLS = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function CardSkeleton({ height = 64 }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse`} style={{ height }} />
-}
-
-function Spinner() {
-  return (
-    <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-  )
-}
-
 function SectionCard({ title, subtitle, loading, children, action }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-gray-800">{title}</h2>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{title}</h2>
           {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
         </div>
-        {loading && <Spinner />}
+        {loading && <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />}
         {action}
       </div>
       {children}
@@ -338,13 +329,7 @@ export default function Analytics() {
       {/* ── ROW 1: Stat cards ───────────────────────────────────────────── */}
       {ovLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-6 animate-pulse">
-              <div className="w-10 h-10 bg-gray-200 rounded-lg mb-4" />
-              <div className="h-8 bg-gray-200 rounded w-16 mb-2" />
-              <div className="h-3.5 bg-gray-100 rounded w-28" />
-            </div>
-          ))}
+          {[1, 2, 3, 4].map(i => <SkeletonStatCard key={i} />)}
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -389,10 +374,10 @@ export default function Analytics() {
         loading={tLoading}
       >
         {tLoading ? (
-          <CardSkeleton height={300} />
+          <SkeletonChart height="h-[300px]" />
         ) : tendenciasChart.length === 0 ? (
-          <div className="h-[300px] flex items-center justify-center text-sm text-gray-400">
-            Sin datos para este período
+          <div className="h-[300px] flex items-center justify-center">
+            <EmptyState title="Sin datos para este período" description="Selecciona un período con más evaluaciones." />
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>

@@ -5,6 +5,8 @@ import {
   ArrowRight, ShieldAlert, Activity, UserCheck, Briefcase,
 } from 'lucide-react'
 import API from '../api/client'
+import { SkeletonResumenCard } from '../Components/Skeleton'
+import EmptyState from '../Components/EmptyState'
 
 // ---------------------------------------------------------------------------
 // Helpers de visualización
@@ -147,7 +149,9 @@ export default function ResumenCasos() {
 
       {/* ── Loading / Error ─────────────────────────────────────────────── */}
       {loading && (
-        <div className="max-w-6xl mx-auto py-20 text-center text-slate-400 font-bold">Cargando casos...</div>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(6)].map((_, i) => <SkeletonResumenCard key={i} />)}
+        </div>
       )}
       {error && (
         <div className="max-w-6xl mx-auto py-10 text-center text-red-500 font-bold">{error}</div>
@@ -244,8 +248,16 @@ export default function ResumenCasos() {
 
       {/* ── Estado vacío ────────────────────────────────────────────────── */}
       {!loading && !error && filtered.length === 0 && (
-        <div className="max-w-6xl mx-auto py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-200">
-          <p className="text-slate-400 font-bold italic">No se encontraron registros para los filtros aplicados.</p>
+        <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-dashed border-slate-200 py-4">
+          <EmptyState
+            icon={ShieldAlert}
+            title={all.length === 0 ? 'Sin casos registrados' : 'Sin resultados'}
+            description={
+              all.length === 0
+                ? 'Evalúa un caso para verlo aquí con su ruta de gestión.'
+                : 'Prueba ajustando los filtros o el término de búsqueda.'
+            }
+          />
         </div>
       )}
 
