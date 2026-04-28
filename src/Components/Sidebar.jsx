@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileSearch, Clock, Bell,
   MessageSquare, BarChart3, FileText, Settings, BookOpen,
   LogOut, ChevronLeft, ChevronRight, Menu, X,
-  ClipboardCheck, Cpu, Layers, Stethoscope, LayoutList, ShieldAlert,
+  ClipboardCheck, Cpu, Layers, Stethoscope, LayoutList, ShieldAlert, Library,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
 import BrandName from './BrandName'
@@ -22,12 +22,14 @@ const ALL_NAV = [
   { to: '/alertas',   label: 'Alertas',      icon: Bell,            permiso: null, badge: true },
   { to: '/chat',      label: 'Chat IA',      icon: MessageSquare,   permiso: null },
   { to: '/normativa',  label: 'Normativa',    icon: BookOpen,     permiso: null },
+  { to: '/biblioteca', label: 'Biblioteca',   icon: Library,      permiso: null },
   { to: '/traductor',  label: 'Ajustes razonables', icon: Stethoscope, permiso: null },
   { to: '/analytics',  label: 'Analytics',    icon: BarChart3,    permiso: null },
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
   { to: '/aprobaciones',       label: 'Aprobaciones', icon: ClipboardCheck, permiso: null, rolesAllowed: ['medico', 'admin', 'superadmin'], badge: 'aprobaciones' },
   { to: '/logs',               label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
   { to: '/admin/alertas-pendientes', label: 'Alertas usuarios', icon: ShieldAlert, permiso: null, adminOnly: true },
+  { to: '/admin/biblioteca',         label: 'Subir a biblioteca', icon: Library,    permiso: null, adminOnly: true },
   { to: '/modelo/performance',       label: 'Modelo IA',        icon: Cpu,         permiso: null, adminOnly: true },
   { to: '/configuracion',            label: 'Configuración',    icon: Settings,    permiso: null, adminOnly: true },
 ]

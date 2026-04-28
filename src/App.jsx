@@ -23,6 +23,8 @@ import PoliticaTratamiento from './pages/PoliticaTratamiento'
 import TraductorClinico from './pages/TraductorClinico'
 import ResumenCasos from './pages/ResumenCasos'
 import AdminAlertasPendientes from './pages/admin/AdminAlertasPendientes'
+import Biblioteca from './pages/Biblioteca'
+import BibliotecaAdmin from './pages/admin/BibliotecaAdmin'
 import { ToastProvider } from './Components/Toast'
 
 const TITLE_MAP = {
@@ -43,6 +45,8 @@ const TITLE_MAP = {
   '/traductor':      'Traductor clínico',
   '/resumen':                   'Resumen de casos',
   '/admin/alertas-pendientes':  'Alertas pendientes',
+  '/biblioteca':                'Biblioteca legal',
+  '/admin/biblioteca':          'Subir documento',
 }
 
 function TitleManager() {
@@ -95,6 +99,8 @@ function AppRoutes({ user, login, logout }) {
         <Route path="/traductor"          element={<TraductorClinico />} />
         <Route path="/resumen"                   element={<ResumenCasos />} />
         <Route path="/admin/alertas-pendientes" element={['admin','superadmin'].includes(user?.rol) ? <AdminAlertasPendientes /> : <NoPermiso />} />
+        <Route path="/biblioteca"              element={<Biblioteca />} />
+        <Route path="/admin/biblioteca"        element={['admin','superadmin'].includes(user?.rol) ? <BibliotecaAdmin /> : <NoPermiso />} />
         <Route path="*"                         element={<NotFound />} />
       </Routes>
     </Layout>
