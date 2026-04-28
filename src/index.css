@@ -1,3 +1,5 @@
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -152,8 +154,9 @@
 }
 
 /* ── Dropdowns y sombras ──────────────────────────────────────────────────── */
-.dark .shadow-lifted { box-shadow: 0 4px 20px -4px rgba(0,0,0,0.5); }
-.dark .shadow-card   { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.2); }
+.dark .shadow-lifted   { box-shadow: 0 4px 20px -4px rgba(0,0,0,0.5); }
+.dark .shadow-card     { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.2); }
+.dark .shadow-elevated { box-shadow: 0 8px 40px -8px rgba(0,0,0,0.6), 0 4px 12px -4px rgba(0,0,0,0.4); }
 
 /* ── Headings ─────────────────────────────────────────────────────────────── */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5 { color: #f1f5f9; }

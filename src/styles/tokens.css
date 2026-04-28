@@ -1,0 +1,56 @@
+/* Design tokens — CSS custom properties para light y dark */
+
+:root {
+  /* Colores primarios */
+  --color-primary:       #3b76f6;
+  --color-primary-hover: #2258db;
+  --color-accent:        #8b5cf6;
+  --color-accent-hover:  #7c3aed;
+
+  /* Superficies */
+  --surface-bg:      #ffffff;
+  --surface-raised:  #f9fafb;
+  --surface-sunken:  #f3f4f6;
+
+  /* Texto */
+  --text-base:    #111827;
+  --text-muted:   #6b7280;
+  --text-subtle:  #9ca3af;
+
+  /* Bordes */
+  --border-subtle:  #f3f4f6;
+  --border-default: #e5e7eb;
+  --border-strong:  #d1d5db;
+
+  /* Radios */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* Transiciones */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 200ms ease-out;
+  --transition-slow: 350ms ease-out;
+}
+
+.dark {
+  --color-primary:       #5996ff;
+  --color-primary-hover: #3b76f6;
+  --color-accent:        #a78bfa;
+  --color-accent-hover:  #8b5cf6;
+
+  --surface-bg:      #111827;
+  --surface-raised:  #1f2937;
+  --surface-sunken:  #0d1117;
+
+  --text-base:    #f9fafb;
+  --text-muted:   #9ca3af;
+  --text-subtle:  #6b7280;
+
+  --border-subtle:  #1f2937;
+  --border-default: #374151;
+  --border-strong:  #4b5563;
+}

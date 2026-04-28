@@ -19,7 +19,7 @@ export default function Tooltip({ content, children, placement = 'top' }) {
       {children}
       {visible && content && (
         <div className={`absolute z-50 pointer-events-none ${PLACEMENT[placement]}`}>
-          <div className="px-2.5 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">
+          <div className="px-2.5 py-1.5 text-xs font-medium text-white bg-gray-900/95 dark:bg-gray-700 rounded-lg shadow-lg ring-1 ring-white/10 whitespace-nowrap animate-tooltip-in">
             {content}
           </div>
         </div>

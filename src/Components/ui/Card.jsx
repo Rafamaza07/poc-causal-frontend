@@ -1,8 +1,8 @@
 const VARIANTS = {
-  default:  'bg-white border border-gray-100 shadow-card',
-  elevated: 'bg-white border border-gray-100 shadow-lifted',
-  outlined: 'bg-white border border-gray-200',
-  flat:     'bg-gray-50',
+  default:  'bg-white border border-gray-100 shadow-card dark:bg-gray-900 dark:border-gray-800',
+  elevated: 'bg-white border border-gray-100 shadow-lifted dark:bg-gray-900 dark:border-gray-800',
+  outlined: 'bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-700',
+  flat:     'bg-gray-50 dark:bg-gray-800/50',
 }
 
 const PADDING = {
@@ -27,7 +27,7 @@ export default function Card({
         'rounded-xl transition-all duration-200',
         VARIANTS[variant],
         PADDING[padding],
-        interactive ? 'cursor-pointer hover:shadow-lifted' : '',
+        interactive ? 'cursor-pointer hover:shadow-elevated hover:-translate-y-0.5' : '',
         className,
       ].join(' ')}
     >
