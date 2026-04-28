@@ -445,7 +445,7 @@ export default function Analytics() {
           loading={ovLoading}
         >
           {ovLoading ? (
-            <CardSkeleton height={260} />
+            <SkeletonChart height="h-[260px]" />
           ) : pieData.length === 0 ? (
             <div className="h-[260px] flex items-center justify-center text-sm text-gray-400">
               Sin datos disponibles
@@ -469,7 +469,7 @@ export default function Analytics() {
           loading={ovLoading}
         >
           {ovLoading ? (
-            <CardSkeleton height={260} />
+            <SkeletonChart height="h-[260px]" />
           ) : cie10Data.length === 0 ? (
             <div className="h-[260px] flex items-center justify-center text-sm text-gray-400">
               Sin diagnósticos CIE-10 registrados
@@ -528,7 +528,7 @@ export default function Analytics() {
           placeholder="Buscar diagnóstico para comparar..."
         />
 
-        {cLoading && <CardSkeleton height={140} />}
+        {cLoading && <SkeletonChart height="h-[140px]" />}
 
         {!cLoading && comparativo && <ComparativoCard c={comparativo} />}
 
