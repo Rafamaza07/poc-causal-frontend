@@ -2,48 +2,178 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, CheckCircle, Clock, Search, FileText,
-  ArrowRight, ShieldAlert, Activity, UserCheck, Briefcase,
+  ArrowRight, Activity, UserCheck, Briefcase, ChevronRight,
+  Filter, TrendingUp, Calendar,
 } from 'lucide-react'
 import API from '../api/client'
 import { SkeletonResumenCard } from '../Components/Skeleton'
 import EmptyState from '../Components/EmptyState'
 
-// ---------------------------------------------------------------------------
-// Helpers de visualización
-// ---------------------------------------------------------------------------
+/* ── Lookups ────────────────────────────────────────────────────────────── */
 
 const ORIGEN_DISPLAY = {
-  laboral:            'ACCIDENTE LABORAL',
-  accidente_trabajo:  'ACCIDENTE LABORAL',
-  accidente_laboral:  'ACCIDENTE LABORAL',
-  enfermedad_laboral: 'ENFERMEDAD LABORAL',
-  comun:              'ENFERMEDAD COMÚN',
-  enfermedad_comun:   'ENFERMEDAD COMÚN',
+  laboral:            'Accidente laboral',
+  accidente_trabajo:  'Accidente laboral',
+  accidente_laboral:  'Accidente laboral',
+  enfermedad_laboral: 'Enfermedad laboral',
+  comun:              'Enfermedad común',
+  enfermedad_comun:   'Enfermedad común',
 }
 
 const getOrigen = (tipo) => {
   if (!tipo) return '—'
-  return ORIGEN_DISPLAY[tipo.toLowerCase()] ?? tipo.toUpperCase()
+  return ORIGEN_DISPLAY[tipo.toLowerCase()] ?? tipo
 }
 
 const getEstado = (c) => {
-  if (c.reintegrado) return 'REINTEGRADO'
-  if (c.reubicado)   return 'REUBICADO'
-  if ((c.dias_incapacidad_acumulados ?? 0) > 0) return 'INCAPACITADO'
-  return 'PRODUCTIVO'
+  if (c.reintegrado) return 'Reintegrado'
+  if (c.reubicado)   return 'Reubicado'
+  if ((c.dias_incapacidad_acumulados ?? 0) > 0) return 'Incapacitado'
+  return 'Productivo'
 }
 
-const SEV_CARD = {
-  ROJO:     { bar: 'bg-red-500',    icon: 'bg-red-100 text-red-600',    badge: 'bg-red-50 text-red-700 border-red-200'   },
-  AMARILLO: { bar: 'bg-yellow-500', icon: 'bg-yellow-100 text-yellow-600', badge: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  VERDE:    { bar: 'bg-green-500',  icon: 'bg-green-100 text-green-600',  badge: 'bg-green-50 text-green-700 border-green-200'  },
+const SEV = {
+  ROJO: {
+    border:    '#ef4444',
+    iconBg:    'bg-red-50',
+    iconColor: 'text-red-500',
+    badge:     'bg-red-50 text-red-700 border-red-200',
+    dot:       'bg-red-400',
+    label:     'Urgente',
+  },
+  AMARILLO: {
+    border:    '#f59e0b',
+    iconBg:    'bg-amber-50',
+    iconColor: 'text-amber-500',
+    badge:     'bg-amber-50 text-amber-700 border-amber-200',
+    dot:       'bg-amber-400',
+    label:     'Seguimiento',
+  },
+  VERDE: {
+    border:    '#10b981',
+    iconBg:    'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+    badge:     'bg-emerald-50 text-emerald-700 border-emerald-200',
+    dot:       'bg-emerald-400',
+    label:     'Listo',
+  },
 }
 
-const DEFAULT_SEV = { bar: 'bg-gray-300', icon: 'bg-gray-100 text-gray-500', badge: 'bg-gray-50 text-gray-600 border-gray-200' }
+const DEFAULT_SEV = {
+  border:    '#d1d5db',
+  iconBg:    'bg-gray-100',
+  iconColor: 'text-gray-400',
+  badge:     'bg-gray-50 text-gray-600 border-gray-200',
+  dot:       'bg-gray-300',
+  label:     '—',
+}
 
-// ---------------------------------------------------------------------------
-// Componente principal
-// ---------------------------------------------------------------------------
+const FILTERS = [
+  { value: 'ALL',      label: 'Todos' },
+  { value: 'ROJO',     label: 'Urgentes' },
+  { value: 'AMARILLO', label: 'Seguimiento' },
+  { value: 'VERDE',    label: 'Listos' },
+]
+
+/* ── Case card ──────────────────────────────────────────────────────────── */
+
+function CaseCard({ c, onClick }) {
+  const sev    = SEV[c.semaforo] ?? DEFAULT_SEV
+  const origen = getOrigen(c.tipo_enfermedad)
+  const estado = getEstado(c)
+  const esLaboral = origen.toLowerCase().includes('laboral')
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group overflow-hidden"
+      style={{ borderLeft: `3px solid ${sev.border}` }}
+    >
+      <div className="p-5">
+
+        {/* ── Row 1: Avatar + Nombre + Badge ── */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${sev.iconBg}`}>
+              <UserCheck className={`w-4.5 h-4.5 ${sev.iconColor}`} size={18} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-bold text-gray-900 text-sm leading-tight truncate group-hover:text-brand-600 transition-colors">
+                {c.nombre_trabajador || c.id_caso}
+              </h3>
+              <p className="text-[10px] text-gray-400 font-medium mt-0.5">
+                CC {c.documento || c.id_caso}
+              </p>
+            </div>
+          </div>
+          <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-full border flex-shrink-0 uppercase tracking-wide ${sev.badge}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+            {sev.label}
+          </span>
+        </div>
+
+        {/* ── Row 2: Metadata chips ── */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide mb-1">Diagnóstico</p>
+            <p className="text-[11px] font-bold text-gray-800 truncate">{c.codigo_cie10 || '—'}</p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide mb-1">Origen</p>
+            <p className={`text-[11px] font-bold truncate ${esLaboral ? 'text-brand-600' : 'text-gray-700'}`}>
+              {origen}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-2.5 border border-gray-100">
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide mb-1">Estado</p>
+            <p className="text-[11px] font-bold text-gray-700 truncate">{estado}</p>
+          </div>
+        </div>
+
+        {/* ── Row 3: Días + Pendiente ── */}
+        <div className="flex items-center gap-3 mb-4">
+          {(c.dias_incapacidad_acumulados ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+              <span className="font-bold text-gray-700">{c.dias_incapacidad_acumulados}</span>
+              <span>días acum.</span>
+            </div>
+          )}
+          {c.faltante && c.faltante !== 'Sin pendientes' && (
+            <div className="flex items-center gap-1.5 text-xs text-amber-600 min-w-0">
+              <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="font-medium truncate">{c.faltante}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Row 4: Pregunta orientadora ── */}
+        {c.pregunta && (
+          <div className="bg-brand-50 border border-brand-100 rounded-xl p-3 flex items-start gap-2 mb-4">
+            <ArrowRight className="w-3.5 h-3.5 text-brand-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-[9px] font-bold text-brand-400 uppercase tracking-widest mb-0.5">Acción sugerida</p>
+              <p className="text-[11px] text-brand-800 font-medium leading-snug">{c.pregunta}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Row 5: Ruta + Ver detalle ── */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide truncate max-w-[60%]">
+            {c.ruta || '—'}
+          </span>
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-brand-600 group-hover:gap-2 transition-all">
+            Ver detalle <ChevronRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+/* ── Main ───────────────────────────────────────────────────────────────── */
 
 export default function ResumenCasos() {
   const navigate = useNavigate()
@@ -61,6 +191,10 @@ export default function ResumenCasos() {
       .finally(() => setLoading(false))
   }, [])
 
+  const rojos    = all.filter(c => c.semaforo === 'ROJO').length
+  const amarillos = all.filter(c => c.semaforo === 'AMARILLO').length
+  const verdes   = all.filter(c => c.semaforo === 'VERDE').length
+
   const filtered = all.filter(c => {
     const term = search.toLowerCase()
     const matchSearch =
@@ -72,185 +206,134 @@ export default function ResumenCasos() {
     return matchSearch && matchFilter
   })
 
-  const rojos    = all.filter(c => c.semaforo === 'ROJO').length
-  const amarillos = all.filter(c => c.semaforo === 'AMARILLO').length
-  const verdes   = all.filter(c => c.semaforo === 'VERDE').length
-
   return (
-    <div className="min-h-screen bg-slate-100 p-4 font-sans text-slate-900">
+    <div className="space-y-6 animate-fade-in">
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-6 mb-6 border-t-4 border-indigo-600">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-3 rounded-lg shadow-lg">
-              <ShieldAlert className="text-white" size={24} />
-            </div>
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+        {/* Gradient accent bar */}
+        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #3b76f6 0%, #8b5cf6 50%, #10b981 100%)' }} />
+
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-xl font-bold italic">Resumen de Gestión SST</h1>
-              <p className="text-slate-500 text-xs">Vista ejecutiva de casos activos por ruta de acción</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Resumen ejecutivo</h1>
+              <p className="text-sm text-gray-500 mt-0.5">Vista consolidada de casos activos por ruta de gestión</p>
+            </div>
+            <div className="flex items-center gap-2 bg-brand-50 border border-brand-100 px-4 py-2 rounded-xl">
+              <Activity className="w-4 h-4 text-brand-500" />
+              <span className="text-sm font-bold text-brand-700">
+                {loading ? '…' : all.length} casos
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3 bg-indigo-50 p-2 rounded-lg border border-indigo-100">
-            <Activity className="text-indigo-500" size={18} />
-            <span className="text-sm font-black text-indigo-700">{all.length} Casos cargados</span>
-          </div>
-        </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <div className="bg-red-50 border border-red-100 p-4 rounded-xl">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-red-700 text-[10px] font-bold uppercase tracking-wider">Urgente (Hitos Legales)</span>
-              <AlertTriangle className="text-red-500" size={16} />
+          {/* KPI strip */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Urgentes */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-red-50 border border-red-100">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <div className="text-3xl font-extrabold text-red-700 tabular-nums leading-none mb-0.5">{rojos}</div>
+                <div className="text-xs text-red-500 font-semibold">Urgente · hitos legales</div>
+              </div>
             </div>
-            <div className="text-2xl font-black text-red-800">{rojos}</div>
-          </div>
-          <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-yellow-700 text-[10px] font-bold uppercase tracking-wider">Seguimiento / Fueros</span>
-              <Clock className="text-yellow-500" size={16} />
+            {/* Seguimiento */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <div className="text-3xl font-extrabold text-amber-700 tabular-nums leading-none mb-0.5">{amarillos}</div>
+                <div className="text-xs text-amber-500 font-semibold">Seguimiento · fueros</div>
+              </div>
             </div>
-            <div className="text-2xl font-black text-yellow-800">{amarillos}</div>
-          </div>
-          <div className="bg-green-50 border border-green-100 p-4 rounded-xl">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-green-700 text-[10px] font-bold uppercase tracking-wider">Listos para Cierre</span>
-              <CheckCircle className="text-green-500" size={16} />
+            {/* Listos */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-3xl font-extrabold text-emerald-700 tabular-nums leading-none mb-0.5">{verdes}</div>
+                <div className="text-xs text-emerald-500 font-semibold">Listos para cierre</div>
+              </div>
             </div>
-            <div className="text-2xl font-black text-green-800">{verdes}</div>
           </div>
         </div>
       </div>
 
-      {/* ── Controls ───────────────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row gap-4">
+      {/* ── Controls ────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Search */}
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Filtrar por nombre, cédula, diagnóstico..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm"
+            placeholder="Buscar por nombre, cédula o diagnóstico CIE-10..."
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all shadow-sm"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <select
-          className="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm outline-none cursor-pointer"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        >
-          <option value="ALL">Todos los estados</option>
-          <option value="ROJO">Riesgo Alto (Rojo)</option>
-          <option value="AMARILLO">Seguimiento (Amarillo)</option>
-          <option value="VERDE">Cerrados (Verde)</option>
-        </select>
+
+        {/* Filter pills */}
+        <div className="flex items-center gap-0.5 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl flex-shrink-0">
+          {FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
+                filter === f.value
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {f.label}
+              {f.value !== 'ALL' && !loading && (
+                <span className="ml-1.5 text-[10px] tabular-nums font-bold opacity-60">
+                  {f.value === 'ROJO' ? rojos : f.value === 'AMARILLO' ? amarillos : verdes}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ── Loading / Error ─────────────────────────────────────────────── */}
+      {/* ── Loading ─────────────────────────────────────────────────── */}
       {loading && (
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(6)].map((_, i) => <SkeletonResumenCard key={i} />)}
         </div>
       )}
+
+      {/* ── Error ───────────────────────────────────────────────────── */}
       {error && (
-        <div className="max-w-6xl mx-auto py-10 text-center text-red-500 font-bold">{error}</div>
-      )}
-
-      {/* ── Grid de tarjetas ────────────────────────────────────────────── */}
-      {!loading && !error && (
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filtered.map(c => {
-            const sev    = SEV_CARD[c.semaforo] ?? DEFAULT_SEV
-            const origen = getOrigen(c.tipo_enfermedad)
-            const estado = getEstado(c)
-            const cc     = c.documento || c.id_caso
-
-            return (
-              <div
-                key={c.id}
-                onClick={() => navigate(`/historial/${c.id_caso}`)}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-400 transition-all group cursor-pointer"
-              >
-                <div className={`h-1.5 w-full ${sev.bar}`} />
-                <div className="p-4">
-
-                  {/* Nombre + ruta badge */}
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${sev.icon}`}>
-                        <UserCheck size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-800 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
-                          {c.nombre_trabajador || c.id_caso}
-                        </h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase">CC: {cc}</p>
-                      </div>
-                    </div>
-                    <span className={`text-[9px] font-black px-2 py-1 rounded-full uppercase border ${sev.badge}`}>
-                      {c.ruta}
-                    </span>
-                  </div>
-
-                  {/* Diagnóstico + Origen */}
-                  <div className="grid grid-cols-2 gap-4 mb-3 text-[10px]">
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                      <p className="text-slate-400 font-bold uppercase mb-0.5">Diagnóstico</p>
-                      <p className="font-bold text-slate-700 truncate">{c.codigo_cie10 || '—'}</p>
-                    </div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                      <p className="text-slate-400 font-bold uppercase mb-0.5 tracking-tighter">Origen Contingencia</p>
-                      <p className={`font-black ${origen.includes('LABORAL') ? 'text-indigo-600' : 'text-slate-600'}`}>
-                        {origen}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Estado + Días */}
-                  <div className="flex items-center justify-between mb-3 px-1">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Estado</span>
-                      <span className="text-[11px] font-bold text-slate-600">{estado}</span>
-                    </div>
-                    <div className="flex flex-col text-right">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Incapacidad</span>
-                      <span className="text-[11px] font-black text-slate-800">
-                        {(c.dias_incapacidad_acumulados ?? 0) > 0 ? `${c.dias_incapacidad_acumulados} Días` : '0'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Faltante */}
-                  <div className="border-t border-slate-100 pt-3 mb-3">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Documento Faltante:</p>
-                    <div className="flex items-center gap-2 text-indigo-700 bg-indigo-50 p-2 rounded-lg border border-indigo-100">
-                      <FileText size={14} className="shrink-0" />
-                      <span className="text-[11px] font-black leading-tight">{c.faltante || 'Sin pendientes'}</span>
-                    </div>
-                  </div>
-
-                  {/* Pregunta orientadora */}
-                  <div className="bg-slate-900 p-3 rounded-lg flex items-start gap-2 shadow-inner">
-                    <ArrowRight className="text-indigo-400 mt-0.5 shrink-0" size={16} />
-                    <div>
-                      <p className="text-[8px] font-bold text-indigo-300 uppercase tracking-widest">Pregunta de Gestión:</p>
-                      <p className="text-[11px] text-white italic leading-tight">"{c.pregunta}"</p>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            )
-          })}
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
+          <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-red-700">{error}</p>
         </div>
       )}
 
-      {/* ── Estado vacío ────────────────────────────────────────────────── */}
+      {/* ── Grid de tarjetas ────────────────────────────────────────── */}
+      {!loading && !error && filtered.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filtered.map(c => (
+            <CaseCard
+              key={c.id}
+              c={c}
+              onClick={() => navigate(`/historial/${c.id_caso}`)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Estado vacío ────────────────────────────────────────────── */}
       {!loading && !error && filtered.length === 0 && (
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-dashed border-slate-200 py-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 py-4">
           <EmptyState
-            icon={ShieldAlert}
+            icon={Activity}
             title={all.length === 0 ? 'Sin casos registrados' : 'Sin resultados'}
             description={
               all.length === 0
@@ -261,19 +344,21 @@ export default function ResumenCasos() {
         </div>
       )}
 
-      {/* ── Footer legal ────────────────────────────────────────────────── */}
+      {/* ── Footer legal ────────────────────────────────────────────── */}
       {!loading && all.length > 0 && (
-        <div className="max-w-6xl mx-auto mt-6 text-[10px] text-slate-500 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
-          <Briefcase className="text-slate-400 shrink-0" size={18} />
+        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 flex items-start gap-4">
+          <div className="w-9 h-9 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Briefcase className="w-4 h-4 text-gray-500" />
+          </div>
           <div>
-            <p className="font-bold mb-1 text-slate-700 uppercase">
-              Resumen de Exposición Médico-Legal ({all.length} Casos):
+            <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              Exposición médico-legal · {all.length} casos
             </p>
-            <p>
-              {rojos} caso(s) en estado urgente requieren atención inmediata por hitos legales.{' '}
-              {amarillos} caso(s) en seguimiento activo con posibles fueros de estabilidad reforzada.{' '}
-              {verdes} caso(s) listos para cierre formal. Toda decisión de cierre o terminación debe
-              estar motivada legalmente bajo el concepto de Estabilidad Laboral Reforzada.
+            <p className="text-xs text-gray-500 leading-relaxed">
+              <span className="font-semibold text-red-600">{rojos}</span> caso(s) urgente(s) con hitos legales inminentes.{' '}
+              <span className="font-semibold text-amber-600">{amarillos}</span> en seguimiento con posibles fueros de estabilidad reforzada.{' '}
+              <span className="font-semibold text-emerald-600">{verdes}</span> listos para cierre formal.
+              Toda decisión debe estar motivada bajo el concepto de Estabilidad Laboral Reforzada.
             </p>
           </div>
         </div>
