@@ -246,4 +246,76 @@
            hover:shadow-lifted hover:-translate-y-0.5
            dark:bg-gray-900 dark:border-gray-800;
   }
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-md border border-white/10;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-accent-400 bg-clip-text text-transparent;
+  }
+  .gradient-text-warm {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+  .dark .shimmer {
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+  }
+
+  /* Feature icon containers con gradiente */
+  .icon-gradient-blue    { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+  .icon-gradient-purple  { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+  .icon-gradient-green   { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+  .icon-gradient-orange  { background: linear-gradient(135deg, #ffedd5, #fed7aa); }
+  .icon-gradient-pink    { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+  .icon-gradient-teal    { background: linear-gradient(135deg, #ccfbf1, #99f6e4); }
+
+  .dark .icon-gradient-blue   { background: linear-gradient(135deg, #1e3a8a40, #1d4ed840); }
+  .dark .icon-gradient-purple { background: linear-gradient(135deg, #4c1d9540, #5b21b640); }
+  .dark .icon-gradient-green  { background: linear-gradient(135deg, #14532d40, #15803d40); }
+  .dark .icon-gradient-orange { background: linear-gradient(135deg, #7c2d1240, #9a341240); }
+  .dark .icon-gradient-pink   { background: linear-gradient(135deg, #83184340, #9d174d40); }
+  .dark .icon-gradient-teal   { background: linear-gradient(135deg, #134e4a40, #0f766e40); }
+
+  /* Glow hover button */
+  .btn-glow {
+    @apply relative overflow-hidden;
+    box-shadow: 0 0 0 0 rgba(59,118,246,0);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 0 24px 4px rgba(59,118,246,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-glow:active {
+    transform: translateY(0);
+  }
+
+  /* Bordered gradient card */
+  .card-gradient-border {
+    position: relative;
+    border-radius: 1rem;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #3b76f6, #8b5cf6) border-box;
+    border: 2px solid transparent;
+  }
+  .dark .card-gradient-border {
+    background: linear-gradient(#111827, #111827) padding-box,
+                linear-gradient(135deg, #3b76f6, #8b5cf6) border-box;
+  }
 }

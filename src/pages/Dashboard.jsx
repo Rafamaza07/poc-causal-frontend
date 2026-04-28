@@ -240,34 +240,49 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in">
 
       {/* ── Fila 1: Hero header ────────────────────────── */}
-      <div data-tour="dashboard-hero" className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-500 p-6 shadow-md">
-        {/* subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.07]"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <div
+        data-tour="dashboard-hero"
+        className="relative rounded-2xl overflow-hidden p-6 shadow-elevated"
+        style={{ background: 'linear-gradient(135deg, #0d1b3e 0%, #1d47b8 50%, #1a0a3d 100%)' }}
+      >
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+        {/* Floating orb */}
+        <div
+          className="absolute right-0 top-0 w-64 h-full opacity-20 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at right center, #8b5cf6 0%, transparent 70%)' }}
+        />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-brand-200 text-xs font-medium uppercase tracking-widest mb-1 capitalize">{formatDate()}</p>
-            <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+            <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-1.5 capitalize">{formatDate()}</p>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
               {getGreeting()}{user.nombre ? `, ${user.nombre}` : ''}
             </h1>
             <div className="flex items-center gap-4 mt-3">
-              <span className="text-white/80 text-sm flex items-center gap-1.5">
-                <ClipboardList className="w-4 h-4 text-brand-200" />
-                <strong className="text-white">{totalEvaluados}</strong> casos evaluados
+              <span className="text-white/60 text-sm flex items-center gap-1.5">
+                <ClipboardList className="w-3.5 h-3.5 text-blue-300" />
+                <strong className="text-white font-bold">{totalEvaluados}</strong>
+                <span className="text-white/40">casos evaluados</span>
               </span>
               {casosCriticos > 0 && (
-                <span className="text-white/80 text-sm flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-300" />
-                  <strong className="text-amber-200">{casosCriticos}</strong> críticos
+                <span className="bg-red-500/20 text-red-200 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-red-400/20">
+                  <AlertTriangle className="w-3 h-3 text-red-300" />
+                  {casosCriticos} críticos
                 </span>
               )}
             </div>
           </div>
           <button
             onClick={() => navigate('/evaluar')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-brand-700
-              text-sm font-bold rounded-xl shadow-sm hover:bg-brand-50
-              active:scale-[0.97] transition-all duration-150
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900
+              text-sm font-bold rounded-xl shadow-lg shadow-black/20
+              hover:bg-gray-100 active:scale-[0.97] transition-all duration-150
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
               self-start sm:self-auto flex-shrink-0"
           >
@@ -287,7 +302,7 @@ export default function Dashboard() {
           value={totalEvaluados}
           label="Casos evaluados"
           icon={ClipboardList}
-          iconBg="bg-blue-100"
+          iconBg="icon-gradient-blue"
           iconColor="text-blue-600"
           valueColor="text-gray-900"
           changeLabel="Total histórico"
@@ -298,8 +313,8 @@ export default function Dashboard() {
           value={casosCriticos}
           label="Casos críticos activos"
           icon={AlertTriangle}
-          iconBg={casosCriticos > 0 ? 'bg-red-100' : 'bg-gray-100'}
-          iconColor={casosCriticos > 0 ? 'text-red-600' : 'text-gray-400'}
+          iconBg={casosCriticos > 0 ? 'icon-gradient-orange' : 'bg-gray-100'}
+          iconColor={casosCriticos > 0 ? 'text-orange-600' : 'text-gray-400'}
           critical={casosCriticos > 0}
           changeLabel="Requieren atención"
         />
@@ -307,7 +322,7 @@ export default function Dashboard() {
           value={alertPending}
           label="Alertas pendientes"
           icon={Bell}
-          iconBg={alertPending > 0 ? 'bg-amber-100' : 'bg-gray-100'}
+          iconBg={alertPending > 0 ? 'icon-gradient-orange' : 'bg-gray-100'}
           iconColor={alertPending > 0 ? 'text-amber-600' : 'text-gray-400'}
           changeLabel="Por gestionar"
         />
@@ -315,8 +330,8 @@ export default function Dashboard() {
           value={`${diasPromedio}`}
           label="Score promedio"
           icon={Calendar}
-          iconBg="bg-violet-100"
-          iconColor="text-violet-600"
+          iconBg="icon-gradient-purple"
+          iconColor="text-purple-600"
           changeLabel="Riesgo promedio /100"
           sparklineData={weeklyData.map(w => ({ v: w.scorePromedio }))}
           sparklineColor="#7c3aed"

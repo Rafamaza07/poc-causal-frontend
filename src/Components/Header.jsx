@@ -131,7 +131,7 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
   }
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30 px-4 sm:px-6 flex items-center gap-3 sm:gap-4 flex-shrink-0">
+    <header className="h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30 px-4 sm:px-6 flex items-center gap-3 sm:gap-4 flex-shrink-0 shadow-sm">
 
       {/* ── Breadcrumb ── */}
       <nav className="hidden sm:flex items-center gap-1.5 text-sm flex-shrink-0">
@@ -149,9 +149,9 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
             onChange={e => { setQuery(e.target.value); setShowSearch(true) }}
             onFocus={() => setShowSearch(true)}
             placeholder="Buscar caso por ID..."
-            className="w-full h-9 pl-9 pr-4 text-sm bg-gray-50 border border-gray-200 rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400
-              transition-all placeholder:text-gray-400"
+            className="w-full h-9 pl-9 pr-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl
+              focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 focus:bg-white dark:focus:bg-gray-800
+              transition-all duration-200 placeholder:text-gray-400 dark:text-gray-100"
           />
         </div>
 
@@ -279,7 +279,10 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
             onClick={() => { setShowUser(!showUser); setShowBell(false) }}
             className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #3b76f6, #8b5cf6)' }}
+            >
               {avatarInitials}
             </div>
             <span className="text-sm font-medium text-gray-700 hidden md:block max-w-[120px] truncate">

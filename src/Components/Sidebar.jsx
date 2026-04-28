@@ -107,18 +107,23 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
                   end={n.end !== false}
                   {...(n.to === '/evaluar' ? { 'data-tour': 'nav-evaluar' } : {})}
                   className={({ isActive }) =>
-                    `flex items-center rounded-lg transition-colors duration-150 ${
+                    `flex items-center rounded-xl transition-all duration-150 ${
                       collapsed ? 'justify-center w-10 h-10 mx-auto' : 'gap-3 py-2.5'
                     } text-sm font-medium ${
                       isActive
                         ? collapsed
-                          ? 'bg-brand-600/90 text-white shadow-sm shadow-brand-600/25'
-                          : 'bg-brand-600/90 text-white shadow-sm shadow-brand-600/25 border-l-[3px] border-brand-300 pl-[11px] pr-3.5'
+                          ? 'text-white shadow-md'
+                          : 'text-white shadow-md pl-[11px] pr-3.5'
                         : collapsed
                           ? 'text-slate-400 hover:text-white hover:bg-white/[0.07]'
                           : 'text-slate-400 hover:text-white hover:bg-white/[0.07] pl-3.5 pr-3.5'
                     }`
                   }
+                  style={({ isActive }) => isActive ? {
+                    background: 'linear-gradient(135deg, rgba(59,118,246,0.85) 0%, rgba(99,102,241,0.85) 100%)',
+                    boxShadow: '0 2px 12px rgba(59,118,246,0.3)',
+                    borderLeft: collapsed ? undefined : '3px solid rgba(165,180,252,0.7)',
+                  } : {}}
                 >
                   <div className="relative flex-shrink-0">
                     <Icon className="w-[18px] h-[18px]" />
@@ -159,7 +164,10 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
           {!collapsed ? (
             <>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-md"
+                  style={{ background: 'linear-gradient(135deg, #3b76f6, #8b5cf6)' }}
+                >
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
