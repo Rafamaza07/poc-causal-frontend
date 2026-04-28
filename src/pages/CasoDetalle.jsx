@@ -243,6 +243,9 @@ export default function CasoDetalle() {
   const [tiposDoc,    setTiposDoc]    = useState([])
   const [tipoSel,     setTipoSel]     = useState('')
   const [genDoc,      setGenDoc]      = useState(false)
+  const [incluirRag,  setIncluirRag]  = useState(true)
+  const [ragSources,  setRagSources]  = useState([])
+  const [loadingRag,  setLoadingRag]  = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -313,6 +316,20 @@ export default function CasoDetalle() {
     } finally { setDescarga(false) }
   }
 
+  // Carga fuentes RAG cuando el modal está abierto, RAG activado y hay tipo seleccionado
+  useEffect(() => {
+    if (!modalDoc || !incluirRag || !tipoSel || !caso?.codigo_cie10) {
+      setRagSources([])
+      return
+    }
+    const q = `${caso.codigo_cie10} ${tipoSel.replace(/_/g, ' ')}`
+    setLoadingRag(true)
+    API.get('/api/v1/biblioteca/buscar', { params: { q, top_k: 5 } })
+      .then(r => setRagSources(r.data?.resultados ?? []))
+      .catch(() => setRagSources([]))
+      .finally(() => setLoadingRag(false))
+  }, [modalDoc, incluirRag, tipoSel, caso?.codigo_cie10])
+
   const abrirModalDoc = async () => {
     if (tiposDoc.length === 0) {
       try {
@@ -330,7 +347,7 @@ export default function CasoDetalle() {
     try {
       const res = await API.post(
         `/api/v1/casos/${id}/generar-documento`,
-        { tipo: tipoSel },
+        { tipo: tipoSel, incluir_rag: incluirRag },
         { responseType: 'blob' },
       )
       const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
@@ -1243,6 +1260,42 @@ export default function CasoDetalle() {
                   </label>
                 ))}
               </div>
+
+              {/* Checkbox RAG */}
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={incluirRag}
+                  onChange={e => setIncluirRag(e.target.checked)}
+                  className="accent-brand-600 w-4 h-4"
+                />
+                <span className="text-sm text-gray-700">Incluir referencias legales (RAG)</span>
+              </label>
+
+              {/* Preview fuentes RAG */}
+              {incluirRag && (
+                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                  {loadingRag ? (
+                    <p className="text-xs text-gray-400 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Buscando referencias…
+                    </p>
+                  ) : ragSources.length === 0 ? (
+                    <p className="text-xs text-gray-400">Sin referencias en corpus (el documento se generará igual).</p>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium text-gray-600 mb-1.5">{ragSources.length} referencias legales identificadas:</p>
+                      <ul className="space-y-1">
+                        {ragSources.map((s, i) => (
+                          <li key={i} className="text-xs text-gray-500 flex items-start gap-1">
+                            <span className="text-indigo-400 font-bold shrink-0">·</span>
+                            <span><span className="font-medium text-gray-700">{s.source}</span> — chunk #{s.chunk_id} <span className="text-gray-400">({(s.score*100).toFixed(0)}%)</span></span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
 
               <p className="text-xs text-gray-400 pt-1">
                 El documento se genera automáticamente con los datos del caso y se descarga como PDF listo para revisar antes de firmar.
