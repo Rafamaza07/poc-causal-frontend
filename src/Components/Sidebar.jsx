@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileSearch, Clock, Bell,
   MessageSquare, BarChart3, FileText, Settings, BookOpen,
   LogOut, ChevronLeft, ChevronRight, Menu, X,
-  ClipboardCheck, Cpu, Layers, Stethoscope, LayoutList,
+  ClipboardCheck, Cpu, Layers, Stethoscope, LayoutList, ShieldAlert,
 } from 'lucide-react'
 import AlertBadge from './AlertBadge'
 import BrandName from './BrandName'
@@ -27,8 +27,9 @@ const ALL_NAV = [
   { to: '/reportes',  label: 'Reportes',     icon: FileText,        permiso: null },
   { to: '/aprobaciones',       label: 'Aprobaciones', icon: ClipboardCheck, permiso: null, rolesAllowed: ['medico', 'admin', 'superadmin'], badge: 'aprobaciones' },
   { to: '/logs',               label: 'Logs',          icon: Settings,  permiso: 'ver_logs' },
-  { to: '/modelo/performance', label: 'Modelo IA',     icon: Cpu,        permiso: null, adminOnly: true },
-  { to: '/configuracion',      label: 'Configuración', icon: Settings,  permiso: null, adminOnly: true },
+  { to: '/admin/alertas-pendientes', label: 'Alertas usuarios', icon: ShieldAlert, permiso: null, adminOnly: true },
+  { to: '/modelo/performance',       label: 'Modelo IA',        icon: Cpu,         permiso: null, adminOnly: true },
+  { to: '/configuracion',            label: 'Configuración',    icon: Settings,    permiso: null, adminOnly: true },
 ]
 
 const MOBILE_PRIMARY = ['/dashboard', '/evaluar', '/alertas', '/chat']

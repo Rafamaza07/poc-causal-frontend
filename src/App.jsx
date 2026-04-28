@@ -22,6 +22,7 @@ import NotFound from './pages/NotFound'
 import PoliticaTratamiento from './pages/PoliticaTratamiento'
 import TraductorClinico from './pages/TraductorClinico'
 import ResumenCasos from './pages/ResumenCasos'
+import AdminAlertasPendientes from './pages/admin/AdminAlertasPendientes'
 import { ToastProvider } from './Components/Toast'
 
 const TITLE_MAP = {
@@ -40,7 +41,8 @@ const TITLE_MAP = {
   '/evaluar/lote':   'Evaluación en lote',
   '/logs':           'Logs',
   '/traductor':      'Traductor clínico',
-  '/resumen':        'Resumen de casos',
+  '/resumen':                   'Resumen de casos',
+  '/admin/alertas-pendientes':  'Alertas pendientes',
 }
 
 function TitleManager() {
@@ -91,8 +93,9 @@ function AppRoutes({ user, login, logout }) {
         <Route path="/aprobaciones"       element={['medico','admin','superadmin'].includes(user?.rol) ? <Aprobaciones /> : <NoPermiso />} />
         <Route path="/modelo/performance" element={['admin','superadmin'].includes(user?.rol) ? <ModeloPerformance /> : <NoPermiso />} />
         <Route path="/traductor"          element={<TraductorClinico />} />
-        <Route path="/resumen"            element={<ResumenCasos />} />
-        <Route path="*"                   element={<NotFound />} />
+        <Route path="/resumen"                   element={<ResumenCasos />} />
+        <Route path="/admin/alertas-pendientes" element={['admin','superadmin'].includes(user?.rol) ? <AdminAlertasPendientes /> : <NoPermiso />} />
+        <Route path="*"                         element={<NotFound />} />
       </Routes>
     </Layout>
   )
