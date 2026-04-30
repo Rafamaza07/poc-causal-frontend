@@ -122,8 +122,8 @@ Prioridad: **Frontend primero**. Bugs bloqueantes antes de mejoras visuales.
 |------|--------|
 | A1 — Refresh token | ✅ Implementado |
 | A2 — Nav documentos | ✅ Implementado |
-| A3 — Privacidad alertas | ⬜ Pendiente (backend) |
-| A4 — Query PostgreSQL | ⬜ Pendiente (backend) |
+| A3 — Privacidad alertas | ✅ Implementado |
+| A4 — Query PostgreSQL | ✅ Implementado |
 | B1–B5 | ⬜ Pendiente |
 | C1–C7 | ⬜ Pendiente |
 | D1–D2 | ⬜ Pendiente |
