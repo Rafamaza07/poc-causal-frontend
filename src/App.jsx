@@ -1,31 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
-import EvaluarLote from './pages/EvaluarLote'
-import Layout from "./Components/Layout"
-import Dashboard from './pages/Dashboard'
-import EvaluarPaciente from './pages/EvaluarPaciente'
-import Historial from './pages/Historial'
-import Comparar from './pages/Comparar'
-import Logs from './pages/Logs'
-import Configuracion from './pages/Configuracion'
-import Alertas from './pages/Alertas'
-import Chat from './pages/Chat'
-import CasoDetalle from './pages/CasoDetalle'
-import Reportes from './pages/Reportes'
-import Analytics from './pages/Analytics'
-import Normativa from './pages/Normativa'
-import Aprobaciones from './pages/Aprobaciones'
-import ModeloPerformance from './pages/ModeloPerformance'
-import NotFound from './pages/NotFound'
 import PoliticaTratamiento from './pages/PoliticaTratamiento'
-import TraductorClinico from './pages/TraductorClinico'
-import ResumenCasos from './pages/ResumenCasos'
-import AdminAlertasPendientes from './pages/admin/AdminAlertasPendientes'
-import Biblioteca from './pages/Biblioteca'
-import BibliotecaAdmin from './pages/admin/BibliotecaAdmin'
+import Layout from './Components/Layout'
 import { ToastProvider } from './Components/Toast'
+
+const EvaluarLote            = lazy(() => import('./pages/EvaluarLote'))
+const Dashboard              = lazy(() => import('./pages/Dashboard'))
+const EvaluarPaciente        = lazy(() => import('./pages/EvaluarPaciente'))
+const Historial              = lazy(() => import('./pages/Historial'))
+const Comparar               = lazy(() => import('./pages/Comparar'))
+const Logs                   = lazy(() => import('./pages/Logs'))
+const Configuracion          = lazy(() => import('./pages/Configuracion'))
+const Alertas                = lazy(() => import('./pages/Alertas'))
+const Chat                   = lazy(() => import('./pages/Chat'))
+const CasoDetalle            = lazy(() => import('./pages/CasoDetalle'))
+const Reportes               = lazy(() => import('./pages/Reportes'))
+const Analytics              = lazy(() => import('./pages/Analytics'))
+const Normativa              = lazy(() => import('./pages/Normativa'))
+const Aprobaciones           = lazy(() => import('./pages/Aprobaciones'))
+const ModeloPerformance      = lazy(() => import('./pages/ModeloPerformance'))
+const NotFound               = lazy(() => import('./pages/NotFound'))
+const TraductorClinico       = lazy(() => import('./pages/TraductorClinico'))
+const ResumenCasos           = lazy(() => import('./pages/ResumenCasos'))
+const AdminAlertasPendientes = lazy(() => import('./pages/admin/AdminAlertasPendientes'))
+const Biblioteca             = lazy(() => import('./pages/Biblioteca'))
+const BibliotecaAdmin        = lazy(() => import('./pages/admin/BibliotecaAdmin'))
 
 const TITLE_MAP = {
   '/dashboard':    'Dashboard',
@@ -61,6 +62,14 @@ function TitleManager() {
   return null
 }
 
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin" />
+    </div>
+  )
+}
+
 function AppRoutes({ user, login, logout }) {
   const puede = (permiso) => user?.permisos?.includes(permiso)
 
@@ -77,32 +86,34 @@ function AppRoutes({ user, login, logout }) {
 
   return (
     <Layout user={user} onLogout={logout}>
-      <Routes>
-        <Route path="/"          element={<Navigate to="/dashboard" />} />
-        <Route path="/login"     element={<Navigate to="/dashboard" />} />
-        <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/evaluar"      element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
-        <Route path="/evaluar/lote" element={puede('evaluar') ? <EvaluarLote /> : <NoPermiso />} />
-        <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
-        <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
-        <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
-        <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
-        <Route path="/configuracion" element={['admin','superadmin'].includes(user.rol) ? <Configuracion /> : <NoPermiso />} />
-        <Route path="/alertas"       element={<Alertas />} />
-        <Route path="/chat"          element={<Chat />} />
-        <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
-        <Route path="/analytics"     element={<Analytics />} />
-        <Route path="/normativa"          element={<Normativa />} />
-        <Route path="/aprobaciones"       element={['medico','admin','superadmin'].includes(user?.rol) ? <Aprobaciones /> : <NoPermiso />} />
-        <Route path="/modelo/performance" element={['admin','superadmin'].includes(user?.rol) ? <ModeloPerformance /> : <NoPermiso />} />
-        <Route path="/traductor"          element={<TraductorClinico />} />
-        <Route path="/resumen"                   element={<ResumenCasos />} />
-        <Route path="/admin/alertas-pendientes" element={['admin','superadmin'].includes(user?.rol) ? <AdminAlertasPendientes /> : <NoPermiso />} />
-        <Route path="/biblioteca"              element={<Biblioteca />} />
-        <Route path="/admin/biblioteca"        element={['admin','superadmin'].includes(user?.rol) ? <BibliotecaAdmin /> : <NoPermiso />} />
-        <Route path="*"                         element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/"          element={<Navigate to="/dashboard" />} />
+          <Route path="/login"     element={<Navigate to="/dashboard" />} />
+          <Route path="/politica-tratamiento" element={<PoliticaTratamiento />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/evaluar"      element={puede('evaluar') ? <EvaluarPaciente /> : <NoPermiso />} />
+          <Route path="/evaluar/lote" element={puede('evaluar') ? <EvaluarLote /> : <NoPermiso />} />
+          <Route path="/historial" element={puede('ver_historial') ? <Historial /> : <NoPermiso />} />
+          <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
+          <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
+          <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
+          <Route path="/configuracion" element={['admin','superadmin'].includes(user.rol) ? <Configuracion /> : <NoPermiso />} />
+          <Route path="/alertas"       element={<Alertas />} />
+          <Route path="/chat"          element={<Chat />} />
+          <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />
+          <Route path="/analytics"     element={<Analytics />} />
+          <Route path="/normativa"          element={<Normativa />} />
+          <Route path="/aprobaciones"       element={['medico','admin','superadmin'].includes(user?.rol) ? <Aprobaciones /> : <NoPermiso />} />
+          <Route path="/modelo/performance" element={['admin','superadmin'].includes(user?.rol) ? <ModeloPerformance /> : <NoPermiso />} />
+          <Route path="/traductor"          element={<TraductorClinico />} />
+          <Route path="/resumen"                   element={<ResumenCasos />} />
+          <Route path="/admin/alertas-pendientes" element={['admin','superadmin'].includes(user?.rol) ? <AdminAlertasPendientes /> : <NoPermiso />} />
+          <Route path="/biblioteca"              element={<Biblioteca />} />
+          <Route path="/admin/biblioteca"        element={['admin','superadmin'].includes(user?.rol) ? <BibliotecaAdmin /> : <NoPermiso />} />
+          <Route path="*"                         element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </Layout>
   )
 }
