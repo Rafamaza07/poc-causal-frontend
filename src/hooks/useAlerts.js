@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import API from '../api/client'
+import { normalizeAlerts, normalizeAlertSummary } from '../api/adapters'
 
 export function useAlerts({ autoRefresh = false, intervalMs = 30000 } = {}) {
   const [alerts, setAlerts]   = useState([])
@@ -14,10 +15,10 @@ export function useAlerts({ autoRefresh = false, intervalMs = 30000 } = {}) {
         API.get('/api/v1/alerts?limit=20&severity=CRITICAL'),
       ])
       if (summaryRes.status === 'fulfilled') {
-        setCount(summaryRes.value.data?.total_pending ?? 0)
+        setCount(normalizeAlertSummary(summaryRes.value.data).total_pending)
       }
       if (alertsRes.status === 'fulfilled') {
-        setAlerts(alertsRes.value.data?.alerts ?? alertsRes.value.data ?? [])
+        setAlerts(normalizeAlerts(alertsRes.value.data))
       }
     } finally {
       setLoading(false)
