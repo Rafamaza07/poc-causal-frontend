@@ -103,7 +103,10 @@ export default function PortalLayout({ user, onLogout, children }) {
 
       {/* ── Main content ───────────────────────────────────────────── */}
       <main className="flex-1 pt-14">
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div
+          key={location.pathname}
+          className="max-w-5xl mx-auto px-4 py-8 animate-page-in"
+        >
           {children}
         </div>
       </main>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import {
-  ArrowLeft, Loader2, AlertCircle, FileText, CheckCircle,
+  ArrowLeft, AlertCircle, FileText, CheckCircle,
   Send, Shield, ChevronRight,
 } from 'lucide-react'
 import API from '../../api/client'
+import LoadingButton from '../../Components/LoadingButton'
+import { Skeleton } from '../../Components/Skeleton'
 
 const TIPO_META = {
   derecho_peticion: {
@@ -25,12 +27,10 @@ export default function GenerarDocumento() {
   const tipo                     = searchParams.get('tipo') ?? 'derecho_peticion'
   const meta                     = TIPO_META[tipo] ?? TIPO_META.derecho_peticion
 
-  const [elegib,    setElegib]   = useState(null)
-  const [doc,       setDoc]      = useState(null)
-  const [loading,   setLoading]  = useState(true)
-  const [generating,setGenerating] = useState(false)
-  const [marking,   setMarking]  = useState(false)
-  const [error,     setError]    = useState(null)
+  const [elegib,  setElegib]  = useState(null)
+  const [doc,     setDoc]     = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(null)
 
   useEffect(() => {
     API.get(`/api/v1/cliente/elegibilidad/${id_caso}`)
@@ -42,34 +42,24 @@ export default function GenerarDocumento() {
   const elegible = elegib?.[tipo]?.elegible ?? false
 
   const generar = async () => {
-    setGenerating(true)
     setError(null)
     try {
       const r = await API.post(`/api/v1/cliente/documentos/${id_caso}`, { tipo })
       setDoc(r.data)
     } catch (e) {
       const msg = e.response?.data?.detail
-      if (e.response?.status === 429) {
-        setError('Límite de generación alcanzado. Intenta de nuevo en una hora.')
-      } else {
-        setError(msg ?? 'Error al generar el documento. Intenta de nuevo.')
-      }
-    } finally {
-      setGenerating(false)
+      setError(
+        e.response?.status === 429
+          ? 'Límite de generación alcanzado. Intenta de nuevo en una hora.'
+          : (msg ?? 'Error al generar el documento. Intenta de nuevo.')
+      )
+      throw e // LoadingButton necesita el throw para no mostrar "Listo"
     }
   }
 
   const marcarEnviado = async () => {
-    if (!doc) return
-    setMarking(true)
-    try {
-      await API.post(`/api/v1/cliente/documentos/${doc.id}/marcar-enviado`)
-      setDoc(prev => ({ ...prev, estado: 'enviado' }))
-    } catch {
-      // no-op
-    } finally {
-      setMarking(false)
-    }
+    await API.post(`/api/v1/cliente/documentos/${doc.id}/marcar-enviado`)
+    setDoc(prev => ({ ...prev, estado: 'enviado' }))
   }
 
   const colorMap = {
@@ -79,8 +69,13 @@ export default function GenerarDocumento() {
   const c = colorMap[meta.color] ?? colorMap.purple
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
+    <div className="space-y-6 animate-pulse">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-72" />
+      </div>
+      <Skeleton className="h-32 w-full rounded-2xl" />
     </div>
   )
 
@@ -138,16 +133,15 @@ export default function GenerarDocumento() {
               {error}
             </div>
           )}
-          <button
+          <LoadingButton
             onClick={generar}
-            disabled={generating}
-            className={`inline-flex items-center gap-2 text-sm font-bold text-white px-5 py-2.5 rounded-xl ${c.bg} ${c.hover} transition-colors disabled:opacity-60`}
+            loadingLabel="Generando…"
+            successLabel="Documento listo ✓"
+            iconLeft={<FileText className="w-4 h-4" />}
+            className={`text-sm font-bold text-white px-5 py-2.5 rounded-xl ${c.bg} ${c.hover}`}
           >
-            {generating
-              ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando…</>
-              : <><FileText className="w-4 h-4" /> Generar documento</>
-            }
-          </button>
+            Generar documento
+          </LoadingButton>
         </div>
       )}
 
@@ -171,16 +165,15 @@ export default function GenerarDocumento() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             {doc.estado !== 'enviado' && (
-              <button
+              <LoadingButton
                 onClick={marcarEnviado}
-                disabled={marking}
-                className="inline-flex items-center justify-center gap-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+                loadingLabel="Registrando…"
+                successLabel="Enviado ✓"
+                iconLeft={<Send className="w-4 h-4" />}
+                className="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-xl"
               >
-                {marking
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Registrando…</>
-                  : <><Send className="w-4 h-4" /> Marcar como enviado</>
-                }
-              </button>
+                Marcar como enviado
+              </LoadingButton>
             )}
             {doc.estado === 'enviado' && (
               <div className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-5 py-2.5 rounded-xl">

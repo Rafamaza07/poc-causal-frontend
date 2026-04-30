@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, ChevronRight, Loader2, FileSearch } from 'lucide-react'
+import { Clock, ChevronRight, FileSearch } from 'lucide-react'
 import API from '../../api/client'
+import { SkeletonCaseList } from '../../Components/Skeleton'
+import EmptyState, { ErrorState } from '../../Components/EmptyState'
 
 const NIVEL_CFG = {
   CRÍTICO:     { cls: 'bg-red-100 text-red-700',     bar: 'bg-red-500' },
@@ -23,11 +25,7 @@ export default function MiHistorial() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
-    </div>
-  )
+  if (loading) return <SkeletonCaseList />
 
   return (
     <div className="space-y-6">
@@ -38,15 +36,14 @@ export default function MiHistorial() {
         <p className="text-gray-500 text-sm">Historial completo de tus evaluaciones de incapacidad.</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
-      )}
+      {error && <ErrorState message={error} />}
 
       {!loading && casos.length === 0 && !error && (
-        <div className="text-center py-16">
-          <FileSearch className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">No tienes casos registrados todavía.</p>
-        </div>
+        <EmptyState
+          icon={FileSearch}
+          title="Sin casos registrados"
+          description="Tus evaluaciones de incapacidad aparecerán aquí cuando sean ingresadas al sistema."
+        />
       )}
 
       <div className="space-y-3">

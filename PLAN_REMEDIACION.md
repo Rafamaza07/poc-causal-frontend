@@ -124,7 +124,11 @@ Prioridad: **Frontend primero**. Bugs bloqueantes antes de mejoras visuales.
 | A2 — Nav documentos | ✅ Implementado |
 | A3 — Privacidad alertas | ✅ Implementado |
 | A4 — Query PostgreSQL | ✅ Implementado |
-| B1–B5 | ⬜ Pendiente |
+| B1 — Transiciones de ruta portal | ✅ Implementado |
+| B2 — Skeletons por pantalla portal | ✅ Implementado |
+| B3 — LoadingButton en acciones | ✅ Implementado |
+| B4 — Componentes compartidos Card/EmptyState | ✅ Implementado |
+| B5 — ErrorState editorial | ✅ Implementado |
 | C1–C7 | ⬜ Pendiente |
 | D1–D2 | ⬜ Pendiente |
 

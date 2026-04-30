@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, Loader2, FileSearch, CheckCircle, Clock, ChevronRight, Plus } from 'lucide-react'
+import { FileText, FileSearch, CheckCircle, Clock, ChevronRight, Plus } from 'lucide-react'
 import API from '../../api/client'
+import { SkeletonDocList } from '../../Components/Skeleton'
+import EmptyState, { ErrorState } from '../../Components/EmptyState'
 
 const TIPO_LABEL = {
   derecho_peticion: 'Derecho de Petición',
@@ -35,11 +37,7 @@ export default function MisDocumentos() {
     }).finally(() => setLoading(false))
   }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
-    </div>
-  )
+  if (loading) return <SkeletonDocList />
 
   return (
     <div className="space-y-6">
@@ -50,9 +48,7 @@ export default function MisDocumentos() {
         <p className="text-gray-500 text-sm">Derechos de petición y tutelas generados desde tus casos.</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
-      )}
+      {error && <ErrorState message={error} />}
 
       {/* Generar nuevo — solo si hay casos disponibles */}
       {casos.length > 0 && (
@@ -92,13 +88,14 @@ export default function MisDocumentos() {
 
       {/* Lista de documentos existentes */}
       {docs.length === 0 && !error ? (
-        <div className="text-center py-16">
-          <FileSearch className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">Aún no has generado documentos.</p>
-          {casos.length > 0 && (
-            <p className="text-gray-400 text-xs mt-1">Usa el panel de arriba para crear tu primer documento.</p>
-          )}
-        </div>
+        <EmptyState
+          icon={FileSearch}
+          title="Sin documentos generados"
+          description={casos.length > 0
+            ? 'Usa el panel de arriba para crear tu primer documento legal.'
+            : 'Aquí aparecerán tus derechos de petición y tutelas generadas.'
+          }
+        />
       ) : (
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">

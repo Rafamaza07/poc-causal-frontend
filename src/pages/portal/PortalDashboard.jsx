@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   LayoutDashboard, Clock, Bell, FileText, ChevronRight,
-  AlertCircle, CheckCircle, TrendingUp, Loader2,
+  AlertCircle, CheckCircle, TrendingUp,
 } from 'lucide-react'
 import API from '../../api/client'
 import { normalizeAlerts } from '../../api/adapters'
+import { SkeletonPortalDashboard } from '../../Components/Skeleton'
 
 function ScoreRing({ score }) {
   const pct    = Math.min(100, Math.max(0, score ?? 0))
@@ -61,13 +62,7 @@ export default function PortalDashboard() {
   const casoPrincipal = casos[0]
   const alertasUrgentes = alertas.filter(a => a.severidad === 'urgente' || a.severidad === 'importante')
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
-      </div>
-    )
-  }
+  if (loading) return <SkeletonPortalDashboard />
 
   return (
     <div className="space-y-8">

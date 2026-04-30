@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Bell, Loader2, CheckCircle, AlertCircle, Info, Clock } from 'lucide-react'
+import { Bell, CheckCircle, AlertCircle, Info, Clock } from 'lucide-react'
 import API from '../../api/client'
 import { normalizeAlerts } from '../../api/adapters'
+import { SkeletonAlertList } from '../../Components/Skeleton'
+import LoadingButton from '../../Components/LoadingButton'
+import EmptyState, { ErrorState } from '../../Components/EmptyState'
 
 const SEV_CFG = {
   urgente:    { cls: 'bg-red-50 border-red-200',    badge: 'bg-red-100 text-red-700',    icon: AlertCircle, iconCls: 'text-red-500' },
@@ -13,7 +16,6 @@ export default function MisAlertas() {
   const [alertas,  setAlertas]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(null)
-  const [marking,  setMarking]  = useState(null)
 
   useEffect(() => {
     API.get('/api/v1/cliente/mis-alertas')
@@ -23,22 +25,11 @@ export default function MisAlertas() {
   }, [])
 
   const marcarLeida = async (id) => {
-    setMarking(id)
-    try {
-      await API.post(`/api/v1/cliente/mis-alertas/${id}/leer`)
-      setAlertas(prev => prev.map(a => a.id === id ? { ...a, leida: true } : a))
-    } catch {
-      // silently fail — UI stays coherent
-    } finally {
-      setMarking(null)
-    }
+    await API.post(`/api/v1/cliente/mis-alertas/${id}/leer`)
+    setAlertas(prev => prev.map(a => a.id === id ? { ...a, leida: true } : a))
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
-    </div>
-  )
+  if (loading) return <SkeletonAlertList />
 
   const pendientes = alertas.filter(a => !a.leida)
   const leidas     = alertas.filter(a => a.leida)
@@ -52,15 +43,14 @@ export default function MisAlertas() {
         <p className="text-gray-500 text-sm">Acciones importantes y recordatorios sobre tu caso.</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
-      )}
+      {error && <ErrorState message={error} />}
 
       {!loading && alertas.length === 0 && !error && (
-        <div className="text-center py-16">
-          <CheckCircle className="w-10 h-10 text-emerald-200 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">No tienes alertas pendientes. ¡Todo al día!</p>
-        </div>
+        <EmptyState
+          icon={CheckCircle}
+          title="¡Todo al día!"
+          description="No tienes alertas pendientes por ahora. Te notificaremos cuando haya acciones importantes."
+        />
       )}
 
       {pendientes.length > 0 && (
@@ -89,13 +79,14 @@ export default function MisAlertas() {
                         {new Date(a.fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     )}
-                    <button
+                    <LoadingButton
                       onClick={() => marcarLeida(a.id)}
-                      disabled={marking === a.id}
-                      className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-50"
+                      loadingLabel="Marcando…"
+                      successLabel="Marcada ✓"
+                      className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors"
                     >
-                      {marking === a.id ? 'Marcando…' : 'Marcar como leída'}
-                    </button>
+                      Marcar como leída
+                    </LoadingButton>
                   </div>
                 </div>
               </div>

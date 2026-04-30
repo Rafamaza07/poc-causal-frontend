@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
-  ArrowLeft, Loader2, CheckCircle, AlertCircle, Info,
+  ArrowLeft, CheckCircle, AlertCircle, Info,
   FileText, Scale, ChevronRight, Shield,
 } from 'lucide-react'
 import API from '../../api/client'
+import { SkeletonCaseDetail } from '../../Components/Skeleton'
 
 const NIVEL_CFG = {
   CRÍTICO:     { cls: 'bg-red-100 text-red-700 border-red-200',     icon: AlertCircle,    iconCls: 'text-red-500' },
@@ -50,11 +51,7 @@ export default function MiCasoDetalle() {
     }).finally(() => setLoading(false))
   }, [id_caso])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
-    </div>
-  )
+  if (loading) return <SkeletonCaseDetail />
   if (error || !caso) return (
     <div className="text-center py-16">
       <AlertCircle className="w-8 h-8 text-red-300 mx-auto mb-3" />
