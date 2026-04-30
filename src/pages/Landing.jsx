@@ -4,7 +4,8 @@ import {
   Brain, Shield, Scale, FileText, Bell, BarChart3,
   Users, CheckCircle, ArrowRight, Activity, Zap, Lock,
   Sparkles, ArrowUpRight, Star, Building2, Briefcase,
-  TrendingUp, ChevronRight, Award,
+  TrendingUp, ChevronRight, Award, UserCheck, Smartphone,
+  ClipboardList, MessageSquare, Download, Gavel,
 } from 'lucide-react'
 
 /* ── Data ───────────────────────────────────────────────────────────────── */
@@ -42,13 +43,87 @@ const FEATURES = [
   },
 ]
 
+const PORTAL_BENEFITS = [
+  {
+    icon: ClipboardList, title: 'Estado de mi caso',
+    desc: 'Consulta en tiempo real el score de riesgo, la recomendación y el hito en que se encuentra tu incapacidad.',
+    color: 'text-blue-600', bg: 'bg-blue-50',
+  },
+  {
+    icon: TrendingUp, title: 'Historial completo',
+    desc: 'Cada evaluación queda registrada con fecha, médico y resultado. Trazabilidad total para ti como trabajador.',
+    color: 'text-emerald-600', bg: 'bg-emerald-50',
+  },
+  {
+    icon: Bell, title: 'Alertas personales',
+    desc: 'Recibe notificaciones antes de que venza un plazo crítico con tu EPS, ARL o AFP.',
+    color: 'text-orange-600', bg: 'bg-orange-50',
+  },
+  {
+    icon: Download, title: 'Resumen descargable',
+    desc: 'Descarga el resumen médico-legal de tu caso en PDF para presentarlo ante cualquier entidad.',
+    color: 'text-purple-600', bg: 'bg-purple-50',
+  },
+  {
+    icon: Gavel, title: 'Derechos de petición y tutelas',
+    desc: 'Genera automáticamente documentos legales personalizados listos para radicar ante EPS, ARL o empleador.',
+    color: 'text-rose-600', bg: 'bg-rose-50',
+  },
+]
+
+const PROFILES = [
+  {
+    tag: 'Para empresas y profesionales',
+    title: 'Plataforma B2B',
+    subtitle: 'Equipos de RRHH, SST, Jurídico y Médicos Laborales',
+    color: 'from-brand-600 to-accent-600',
+    border: 'border-brand-200',
+    bg: 'bg-brand-50/50',
+    badgeBg: 'bg-brand-100 text-brand-700',
+    icon: Building2,
+    features: [
+      'Evaluación individual y en lote (CSV)',
+      'Dashboard de analytics y tendencias',
+      'Pipeline de aprobaciones médicas',
+      'Alertas operativas multi-caso',
+      'Exportación PDF / Excel / API',
+      'Roles granulares por equipo',
+    ],
+    cta: 'Solicitar demo B2B',
+    ctaHref: 'mailto:rafamaza56@gmail.com?subject=Demo B2B KausalIA',
+    ctaStyle: 'bg-gray-900 text-white hover:bg-gray-700',
+  },
+  {
+    tag: 'Para trabajadores',
+    title: 'Portal Cliente Final',
+    subtitle: 'El trabajador gestiona su caso sin intermediarios',
+    color: 'from-emerald-500 to-teal-500',
+    border: 'border-emerald-200',
+    bg: 'bg-emerald-50/50',
+    badgeBg: 'bg-emerald-100 text-emerald-700',
+    icon: UserCheck,
+    features: [
+      'Consulta el estado de tu caso en tiempo real',
+      'Historial de evaluaciones con fechas y resultados',
+      'Alertas antes de que venzan tus plazos',
+      'Descarga tu resumen médico-legal en PDF',
+      'Genera derechos de petición y tutelas',
+      'Acceso seguro con tus credenciales',
+    ],
+    cta: 'Acceder al portal',
+    ctaHref: '/login',
+    ctaStyle: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700',
+    isInternal: true,
+  },
+]
+
 const PLANS = [
   {
     name: 'Básico',
     price: '$990.000',
     period: 'mes',
     desc: 'Para empleadores medianos con gestión interna de incapacidades.',
-    features: ['Hasta 100 casos/mes', '3 usuarios', 'PDF por caso', 'Alertas básicas', 'Soporte por email'],
+    features: ['Hasta 100 casos/mes', '3 usuarios', 'PDF por caso', 'Alertas básicas', 'Portal cliente 50 trabajadores', 'Soporte por email'],
     cta: 'Solicitar demo',
     highlight: false,
   },
@@ -57,7 +132,7 @@ const PLANS = [
     price: '$2.490.000',
     period: 'mes',
     desc: 'Para ARL y EPS con volumen alto y equipos médicos.',
-    features: ['Hasta 500 casos/mes', '15 usuarios', 'Evaluación en lote (CSV)', 'Alertas avanzadas + RAG legal', 'Analytics completo', 'Soporte prioritario'],
+    features: ['Hasta 500 casos/mes', '15 usuarios', 'Evaluación en lote (CSV)', 'Alertas avanzadas + RAG legal', 'Analytics completo', 'Portal cliente ilimitado', 'Soporte prioritario'],
     cta: 'Solicitar demo',
     highlight: true,
   },
@@ -101,91 +176,64 @@ const TARGETS = [
   {
     icon: Shield, name: 'EPS',
     full: 'Entidades Promotoras de Salud',
-    color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100',
-    dot: '#2563eb',
+    color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', dot: '#2563eb',
   },
   {
     icon: Activity, name: 'ARL',
     full: 'Administradoras de Riesgos Laborales',
-    color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100',
-    dot: '#ea580c',
+    color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', dot: '#ea580c',
   },
   {
     icon: TrendingUp, name: 'AFP',
     full: 'Fondos de Pensiones y Cesantías',
-    color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100',
-    dot: '#9333ea',
+    color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100', dot: '#9333ea',
   },
   {
     icon: Briefcase, name: 'Empleadores',
     full: 'Empresas y PYMES con nómina',
-    color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-100',
-    dot: '#0d9488',
+    color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-100', dot: '#0d9488',
   },
   {
     icon: Building2, name: 'IPS',
     full: 'Instituciones Prestadoras de Salud',
-    color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100',
-    dot: '#059669',
+    color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', dot: '#059669',
   },
   {
-    icon: Brain, name: 'Médicos laborales',
-    full: 'Especialistas en salud ocupacional',
-    color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-100',
-    dot: '#db2777',
+    icon: UserCheck, name: 'Trabajadores',
+    full: 'Vía el Portal Cliente Final',
+    color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', dot: '#e11d48',
   },
 ]
 
 const HOW_IT_WORKS = [
   {
-    n: '01',
-    title: 'Ingresa el caso',
+    n: '01', title: 'Ingresa el caso',
     desc: 'Carga diagnóstico CIE-10, contingencia y datos del trabajador en un formulario guiado.',
-    icon: FileText,
-    accent: '#2563eb',
-    bg: 'bg-blue-50',
-    text: 'text-blue-600',
-    border: 'border-blue-100',
+    icon: FileText, accent: '#2563eb', bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100',
   },
   {
-    n: '02',
-    title: 'Análisis causal IA',
+    n: '02', title: 'Análisis causal IA',
     desc: 'Motor PC + Bayesiano evalúa causalidad y calcula score de riesgo en < 2 segundos.',
-    icon: Brain,
-    accent: '#9333ea',
-    bg: 'bg-purple-50',
-    text: 'text-purple-600',
-    border: 'border-purple-100',
+    icon: Brain, accent: '#9333ea', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100',
   },
   {
-    n: '03',
-    title: 'Sustento legal RAG',
+    n: '03', title: 'Sustento legal RAG',
     desc: 'El corpus normativo (Ley 100, Decreto 1507) respalda cada recomendación con citas exactas.',
-    icon: Scale,
-    accent: '#059669',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-600',
-    border: 'border-emerald-100',
+    icon: Scale, accent: '#059669', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100',
   },
   {
-    n: '04',
-    title: 'Exporta y archiva',
+    n: '04', title: 'Exporta y archiva',
     desc: 'Genera PDF trazable o exporta al sistema de nómina. Historial inmutable para auditorías.',
-    icon: Award,
-    accent: '#ea580c',
-    bg: 'bg-orange-50',
-    text: 'text-orange-600',
-    border: 'border-orange-100',
+    icon: Award, accent: '#ea580c', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100',
   },
 ]
 
-/* ── Dot pattern helper ─────────────────────────────────────────────────── */
+/* ── Dot pattern helpers ────────────────────────────────────────────────── */
 const dotBg = {
   backgroundColor: '#ffffff',
   backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)',
   backgroundSize: '28px 28px',
 }
-
 const dotBgLight = {
   backgroundColor: '#f8faff',
   backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)',
@@ -205,8 +253,14 @@ export default function Landing() {
           <KausalIALogo size={28} />
           <div className="flex items-center gap-3">
             <a
+              href="#portal"
+              className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors hidden sm:flex items-center gap-1 font-medium"
+            >
+              <UserCheck className="w-3.5 h-3.5" /> Portal clientes
+            </a>
+            <a
               href="mailto:rafamaza56@gmail.com"
-              className="text-sm text-gray-500 hover:text-brand-600 transition-colors hidden sm:block font-medium"
+              className="text-sm text-gray-500 hover:text-brand-600 transition-colors hidden md:block font-medium"
             >
               Contactar
             </a>
@@ -267,7 +321,7 @@ export default function Landing() {
 
           <p className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
             KausalIA automatiza el análisis de incapacidades para EPS, ARL y empleadores en Colombia.
-            Reduce tiempos, estandariza criterios y mantiene trazabilidad legal completa.
+            Reduce tiempos, estandariza criterios y da a cada trabajador un portal propio para gestionar su caso.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
@@ -275,18 +329,18 @@ export default function Landing() {
               href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
               className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-50 font-semibold px-7 py-3.5 rounded-xl transition-all shadow-xl shadow-black/20"
             >
-              Solicitar demo gratuita <ArrowRight className="w-4 h-4" />
+              Solicitar demo B2B <ArrowRight className="w-4 h-4" />
             </a>
             <button
               onClick={() => navigate('/login')}
-              className="inline-flex items-center justify-center gap-2 bg-white/8 hover:bg-white/15 text-white border border-white/20 font-medium px-7 py-3.5 rounded-xl transition-all duration-200 backdrop-blur-sm"
+              className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-medium px-7 py-3.5 rounded-xl transition-all duration-200 backdrop-blur-sm"
             >
-              Ver la plataforma →
+              <UserCheck className="w-4 h-4" /> Acceder al portal cliente
             </button>
           </div>
 
           <div className="flex flex-wrap justify-center gap-5 text-white/40 text-xs font-medium">
-            {['Habeas Data Ley 1581/2012', 'Multi-tenant seguro', 'Deploy en Railway', 'API REST lista'].map(t => (
+            {['Habeas Data Ley 1581/2012', 'Multi-tenant seguro', 'Portal trabajador incluido', 'API REST lista'].map(t => (
               <span key={t} className="flex items-center gap-1.5">
                 <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" /> {t}
               </span>
@@ -351,23 +405,17 @@ export default function Landing() {
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Cómo funciona</h2>
             <p className="text-gray-500 max-w-xl mx-auto">De la carga del caso al resultado legal en cuatro pasos. Sin configuración compleja.</p>
           </div>
-
-          {/* Steps */}
           <div className="relative">
-            {/* Connecting line (desktop) */}
             <div className="hidden md:block absolute top-[28px] left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed border-gray-200 z-0" />
-
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
-              {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent, bg, text, border }) => (
-                <div key={n} className="flex flex-col items-center text-center md:items-center">
-                  {/* Circle */}
+              {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent }) => (
+                <div key={n} className="flex flex-col items-center text-center">
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-lg flex-shrink-0"
                     style={{ backgroundColor: accent, boxShadow: `0 8px 24px ${accent}40` }}
                   >
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  {/* Step number */}
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">{n}</span>
                   <h3 className="font-bold text-gray-900 mb-2 text-[15px]">{title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
@@ -383,14 +431,13 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-accent-600 bg-accent-50 px-3 py-1.5 rounded-full mb-4">
-              Plataforma
+              Plataforma B2B
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Diseñada para trabajo real</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Interfaz clara, flujos guiados y resultados accionables desde el primer día.</p>
           </div>
 
           <div className="relative">
-            {/* Floating metric left */}
             <div
               className="absolute -left-4 lg:-left-8 top-1/3 bg-white rounded-2xl p-4 border border-gray-100 hidden lg:flex flex-col gap-0.5 z-20"
               style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
@@ -403,7 +450,6 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Floating metric right */}
             <div
               className="absolute -right-4 lg:-right-8 top-1/4 bg-white rounded-2xl p-4 border border-gray-100 hidden lg:block z-20"
               style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
@@ -415,12 +461,10 @@ export default function Landing() {
               <div className="text-[10px] text-gray-400 mt-0.5">Habeas Data Ley 1581</div>
             </div>
 
-            {/* Browser frame */}
             <div
               className="rounded-2xl overflow-hidden border border-gray-200"
               style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.05)' }}
             >
-              {/* Chrome bar */}
               <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -435,9 +479,7 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* App shell */}
               <div className="flex" style={{ minHeight: '400px', backgroundColor: '#f8fafc' }}>
-                {/* Sidebar */}
                 <div className="w-48 bg-gray-900 flex-shrink-0 p-4 hidden sm:flex flex-col">
                   <div className="flex items-center gap-2 mb-7 px-1">
                     <KausalIALogo size={16} />
@@ -460,7 +502,6 @@ export default function Landing() {
                       <span className="text-[11px] font-medium leading-tight">{label}</span>
                     </div>
                   ))}
-
                   <div className="mt-auto pt-4 border-t border-gray-800">
                     <div className="flex items-center gap-2 px-2">
                       <div className="w-6 h-6 rounded-full bg-brand-600 flex items-center justify-center flex-shrink-0">
@@ -474,9 +515,7 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Main content */}
                 <div className="flex-1 p-5 overflow-hidden">
-                  {/* Header bar */}
                   <div className="flex items-center justify-between mb-5">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
@@ -491,22 +530,20 @@ export default function Landing() {
                     </div>
                   </div>
 
-                  {/* Form grid */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     {[
-                      { label: 'Diagnóstico CIE-10', value: 'M54.5 — Lumbago no especificado', filled: true },
-                      { label: 'Tipo de contingencia', value: 'Enfermedad laboral', filled: true },
-                      { label: 'Días de incapacidad', value: '15 días continuos', filled: true },
-                      { label: 'EPS del paciente', value: 'Nueva EPS S.A.S.', filled: true },
-                    ].map(({ label, value, filled }) => (
+                      { label: 'Diagnóstico CIE-10', value: 'M54.5 — Lumbago no especificado' },
+                      { label: 'Tipo de contingencia', value: 'Enfermedad laboral' },
+                      { label: 'Días de incapacidad', value: '15 días continuos' },
+                      { label: 'EPS del paciente', value: 'Nueva EPS S.A.S.' },
+                    ].map(({ label, value }) => (
                       <div key={label} className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
                         <div className="text-[10px] text-gray-400 font-medium mb-1 uppercase tracking-wide">{label}</div>
-                        <div className={`text-xs font-semibold ${filled ? 'text-gray-800' : 'text-gray-300'}`}>{value}</div>
+                        <div className="text-xs font-semibold text-gray-800">{value}</div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Result panel */}
                   <div className="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 bg-emerald-50 border-b border-emerald-100">
                       <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
@@ -515,14 +552,11 @@ export default function Landing() {
                       <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">✓ Completado en 1.4s</span>
                     </div>
                     <div className="p-4 flex items-start gap-5">
-                      {/* Score ring */}
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                           <circle cx="18" cy="18" r="15.9" fill="none" stroke="#d1fae5" strokeWidth="3.5" />
-                          <circle
-                            cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" strokeWidth="3.5"
-                            strokeDasharray="79 100" strokeLinecap="round"
-                          />
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" strokeWidth="3.5"
+                            strokeDasharray="79 100" strokeLinecap="round" />
                         </svg>
                         <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-emerald-600">79</span>
                       </div>
@@ -543,6 +577,228 @@ export default function Landing() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Portal Cliente Final ─────────────────────────────────────── */}
+      <section
+        id="portal"
+        className="py-24 px-4 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 40%, #f0f9ff 100%)' }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left — copy */}
+            <div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-100 px-3 py-1.5 rounded-full mb-6">
+                <UserCheck className="w-3.5 h-3.5" /> Nuevo · Portal Cliente Final
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-5 leading-tight">
+                El trabajador gestiona<br />
+                <span className="text-emerald-600">su caso sin intermediarios</span>
+              </h2>
+              <p className="text-gray-600 mb-8 leading-relaxed text-[15px]">
+                Cada trabajador accede a un portal personal donde puede consultar su evaluación, recibir alertas antes de que venzan sus plazos legales y generar automáticamente documentos como derechos de petición o tutelas.
+              </p>
+
+              <ul className="space-y-4">
+                {PORTAL_BENEFITS.map(({ icon: Icon, title, desc, color, bg }) => (
+                  <li key={title} className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-9 h-9 ${bg} rounded-xl flex items-center justify-center mt-0.5`}>
+                      <Icon className={`w-4.5 h-4.5 ${color}`} style={{ width: '18px', height: '18px' }} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-sm mb-0.5">{title}</div>
+                      <div className="text-xs text-gray-500 leading-relaxed">{desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/25"
+                >
+                  <UserCheck className="w-4 h-4" /> Acceder al portal
+                </button>
+                <a
+                  href="mailto:rafamaza56@gmail.com?subject=Portal cliente KausalIA"
+                  className="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-medium px-6 py-3 rounded-xl transition-all"
+                >
+                  Solicitar demo <ChevronRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Right — portal mockup */}
+            <div className="relative">
+              {/* Floating badge */}
+              <div
+                className="absolute -top-4 -right-4 z-20 bg-white rounded-2xl px-4 py-3 border border-emerald-100 hidden lg:block"
+                style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
+              >
+                <div className="flex items-center gap-2">
+                  <Gavel className="w-4 h-4 text-emerald-600" />
+                  <div>
+                    <div className="text-xs font-bold text-gray-900">Derecho de petición</div>
+                    <div className="text-[10px] text-emerald-600 font-semibold">Generado en 3 segundos</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="rounded-2xl overflow-hidden border border-emerald-200/60"
+                style={{ boxShadow: '0 24px 80px rgba(5,150,105,0.12), 0 0 0 1px rgba(5,150,105,0.06)' }}
+              >
+                {/* Chrome bar */}
+                <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-400" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                    <div className="w-3 h-3 rounded-full bg-green-400" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="bg-white rounded-lg px-4 py-1.5 text-xs text-gray-400 flex items-center gap-2 border border-gray-200 max-w-xs w-full justify-center">
+                      <Lock className="w-3 h-3 text-emerald-500" />
+                      portal.kausal-ia.co / mi-caso
+                    </div>
+                  </div>
+                </div>
+
+                {/* Portal UI */}
+                <div className="bg-white" style={{ minHeight: '460px' }}>
+                  {/* Portal header */}
+                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-white font-bold text-sm">Hola, Carlos Rodríguez</div>
+                        <div className="text-emerald-200 text-[11px]">Trabajador · Nueva EPS S.A.S.</div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <span className="text-white text-[11px] font-bold">CR</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Alert banner */}
+                  <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+                    <Bell className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-xs font-bold text-amber-800">Alerta: 12 días para vencimiento</div>
+                      <div className="text-[10px] text-amber-600 mt-0.5">Tu prórroga ante la EPS vence el 12 de mayo. Actúa antes.</div>
+                    </div>
+                  </div>
+
+                  {/* Case card */}
+                  <div className="mx-4 mt-3 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-700">Mi caso activo · #2847</span>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">En seguimiento</span>
+                    </div>
+                    <div className="p-4 flex items-center gap-4">
+                      <div className="relative w-14 h-14 flex-shrink-0">
+                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#d1fae5" strokeWidth="3.5" />
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" strokeWidth="3.5"
+                            strokeDasharray="62 100" strokeLinecap="round" />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-xs font-extrabold text-emerald-600">62</span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-gray-900">Riesgo Moderado</div>
+                        <div className="text-[11px] text-gray-500 mt-0.5">M54.5 · 15 días incapacidad</div>
+                        <div className="text-[10px] text-blue-600 mt-1.5 font-medium">Ver detalle completo →</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mx-4 mt-3 grid grid-cols-3 gap-2 mb-4">
+                    {[
+                      { icon: Download, label: 'Descargar PDF', color: 'text-blue-600 bg-blue-50 border-blue-100' },
+                      { icon: Gavel, label: 'Generar tutela', color: 'text-rose-600 bg-rose-50 border-rose-100' },
+                      { icon: MessageSquare, label: 'Asistente IA', color: 'text-purple-600 bg-purple-50 border-purple-100' },
+                    ].map(({ icon: Icon, label, color }) => (
+                      <button key={label} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center ${color} cursor-default select-none`}>
+                        <Icon style={{ width: '16px', height: '16px' }} />
+                        <span className="text-[10px] font-semibold leading-tight">{label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Timeline mini */}
+                  <div className="mx-4 mb-4 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Historial reciente</div>
+                    {[
+                      { date: '30 abr', event: 'Evaluación IA completada', dot: 'bg-emerald-400' },
+                      { date: '18 abr', event: 'Certificado médico recibido', dot: 'bg-blue-400' },
+                      { date: '02 abr', event: 'Inicio incapacidad reportado', dot: 'bg-gray-300' },
+                    ].map(({ date, event, dot }) => (
+                      <div key={date} className="flex items-center gap-2.5 py-1">
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
+                        <span className="text-[10px] text-gray-400 w-10 flex-shrink-0">{date}</span>
+                        <span className="text-[10px] text-gray-700">{event}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── Dos perfiles, una plataforma ────────────────────────────── */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full mb-4">
+              Perfiles
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Dos perfiles, una plataforma</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">KausalIA sirve tanto al equipo operativo de la empresa como al trabajador afectado.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {PROFILES.map(({ tag, title, subtitle, border, bg, badgeBg, icon: Icon, features, cta, ctaHref, ctaStyle, isInternal }) => (
+              <div
+                key={title}
+                className={`relative flex flex-col rounded-2xl border ${border} ${bg} p-7 hover:shadow-elevated transition-all duration-300`}
+              >
+                <span className={`self-start text-xs font-bold px-3 py-1 rounded-full mb-5 ${badgeBg}`}>{tag}</span>
+                <div className="flex items-center gap-3 mb-3">
+                  <Icon className="w-6 h-6 text-gray-700" />
+                  <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">{subtitle}</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                {isInternal ? (
+                  <button
+                    onClick={() => navigate(ctaHref)}
+                    className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm ${ctaStyle}`}
+                  >
+                    {cta} <span className="ml-1">→</span>
+                  </button>
+                ) : (
+                  <a
+                    href={ctaHref}
+                    className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm ${ctaStyle}`}
+                  >
+                    {cta} <span className="ml-1">→</span>
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -648,7 +904,7 @@ export default function Landing() {
               Precios
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Planes y precios</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Precios en COP + IVA. Sin permanencia mínima.</p>
+            <p className="text-gray-500 max-w-xl mx-auto">Precios en COP + IVA. Sin permanencia mínima. Portal cliente incluido en todos los planes.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             {PLANS.map((plan) => (
@@ -723,14 +979,22 @@ export default function Landing() {
             ¿Listo para automatizar tu gestión<br className="hidden sm:block" /> de incapacidades?
           </h2>
           <p className="text-white/50 mb-10 max-w-xl mx-auto">
-            Agenda una demo y te mostramos el sistema con datos reales de tu sector.
+            Agenda una demo para tu equipo o accede directamente al portal si eres trabajador.
           </p>
-          <a
-            href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
-            className="btn-glow inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl transition-all shadow-2xl shadow-black/40 text-base"
-          >
-            Solicitar demo gratuita <ArrowUpRight className="w-5 h-5" />
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
+              className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl transition-all shadow-2xl shadow-black/40 text-base"
+            >
+              Solicitar demo gratuita <ArrowUpRight className="w-5 h-5" />
+            </a>
+            <button
+              onClick={() => navigate('/login')}
+              className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold px-8 py-4 rounded-xl transition-all text-base"
+            >
+              <UserCheck className="w-5 h-5" /> Acceder al portal cliente
+            </button>
+          </div>
         </div>
       </section>
 
@@ -743,6 +1007,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-6">
             <a href="/politica-tratamiento" className="hover:text-brand-600 transition-colors">Política de datos</a>
+            <a href="#portal" className="hover:text-emerald-600 transition-colors">Portal clientes</a>
             <a href="mailto:rafamaza56@gmail.com" className="hover:text-brand-600 transition-colors">Contacto</a>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
