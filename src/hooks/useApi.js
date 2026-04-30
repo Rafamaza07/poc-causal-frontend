@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import api from '../services/api'
+import API from '../api/client'
 
 export function useApi() {
   const [loading, setLoading] = useState(false)
@@ -9,7 +9,7 @@ export function useApi() {
     setLoading(true)
     setError(null)
     try {
-      const res = await api[method](url, data, config)
+      const res = await API[method](url, data, config)
       return res.data
     } catch (err) {
       const msg = err.response?.data?.detail || err.message || 'Error inesperado'

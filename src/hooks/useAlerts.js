@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import api from '../services/api'
+import API from '../api/client'
 
 export function useAlerts({ autoRefresh = false, intervalMs = 30000 } = {}) {
   const [alerts, setAlerts]   = useState([])
@@ -10,8 +10,8 @@ export function useAlerts({ autoRefresh = false, intervalMs = 30000 } = {}) {
     setLoading(true)
     try {
       const [summaryRes, alertsRes] = await Promise.allSettled([
-        api.get('/api/v1/alerts/summary'),
-        api.get('/api/v1/alerts?limit=20&severity=CRITICAL'),
+        API.get('/api/v1/alerts/summary'),
+        API.get('/api/v1/alerts?limit=20&severity=CRITICAL'),
       ])
       if (summaryRes.status === 'fulfilled') {
         setCount(summaryRes.value.data?.total_pending ?? 0)
@@ -32,7 +32,7 @@ export function useAlerts({ autoRefresh = false, intervalMs = 30000 } = {}) {
   }, [fetchAlerts, autoRefresh, intervalMs])
 
   const acknowledge = useCallback(async (alertId) => {
-    await api.post(`/api/v1/alerts/${alertId}/acknowledge`)
+    await API.post(`/api/v1/alerts/${alertId}/acknowledge`)
     setAlerts(prev => prev.filter(a => a.id !== alertId))
     setCount(prev => Math.max(0, prev - 1))
   }, [])
