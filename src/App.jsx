@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Landing from './pages/Landing'
 import PoliticaTratamiento from './pages/PoliticaTratamiento'
 import Layout from './Components/Layout'
+import PortalLayout from './Components/PortalLayout'
 import { ToastProvider } from './Components/Toast'
 
 const EvaluarLote            = lazy(() => import('./pages/EvaluarLote'))
@@ -27,6 +28,12 @@ const ResumenCasos           = lazy(() => import('./pages/ResumenCasos'))
 const AdminAlertasPendientes = lazy(() => import('./pages/admin/AdminAlertasPendientes'))
 const Biblioteca             = lazy(() => import('./pages/Biblioteca'))
 const BibliotecaAdmin        = lazy(() => import('./pages/admin/BibliotecaAdmin'))
+
+const PortalDashboard  = lazy(() => import('./pages/portal/PortalDashboard'))
+const MiHistorial      = lazy(() => import('./pages/portal/MiHistorial'))
+const MiCasoDetalle    = lazy(() => import('./pages/portal/MiCasoDetalle'))
+const MisAlertas       = lazy(() => import('./pages/portal/MisAlertas'))
+const GenerarDocumento = lazy(() => import('./pages/portal/GenerarDocumento'))
 
 const TITLE_MAP = {
   '/dashboard':    'Dashboard',
@@ -70,6 +77,25 @@ function PageLoader() {
   )
 }
 
+function PortalRoutes({ user, logout }) {
+  return (
+    <PortalLayout user={user} onLogout={logout}>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/"                              element={<Navigate to="/portal" />} />
+          <Route path="/login"                         element={<Navigate to="/portal" />} />
+          <Route path="/portal"                        element={<PortalDashboard />} />
+          <Route path="/portal/historial"              element={<MiHistorial />} />
+          <Route path="/portal/historial/:id_caso"     element={<MiCasoDetalle />} />
+          <Route path="/portal/alertas"                element={<MisAlertas />} />
+          <Route path="/portal/documentos/:id_caso"    element={<GenerarDocumento />} />
+          <Route path="*"                              element={<Navigate to="/portal" />} />
+        </Routes>
+      </Suspense>
+    </PortalLayout>
+  )
+}
+
 function AppRoutes({ user, login, logout }) {
   const puede = (permiso) => user?.permisos?.includes(permiso)
 
@@ -82,6 +108,10 @@ function AppRoutes({ user, login, logout }) {
         <Route path="*"                     element={<Navigate to="/" />} />
       </Routes>
     )
+  }
+
+  if (user.rol === 'cliente_final') {
+    return <PortalRoutes user={user} logout={logout} />
   }
 
   return (
