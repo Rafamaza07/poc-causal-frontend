@@ -30,11 +30,13 @@ export default function Login({ onLogin }) {
       const { data } = await API.post('/api/login', form)
       if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
       onLogin({
-        usuario:  data.usuario,
-        nombre:   data.nombre,
-        rol:      data.rol,
-        permisos: data.permisos,
-        tenant:   data.tenant,
+        usuario:    data.usuario,
+        nombre:     data.nombre,
+        rol:        data.rol,
+        permisos:   data.permisos,
+        tenant:     data.tenant,
+        superadmin: data.superadmin ?? false,
+        sub_id:     data.sub_id ?? null,
       }, data.access_token)
     } catch (err) {
       setError(err.response?.data?.detail || 'Credenciales inválidas')

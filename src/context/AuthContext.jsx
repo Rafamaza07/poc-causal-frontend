@@ -8,10 +8,13 @@ export function AuthProvider({ children }) {
   })
 
   const login = (u, token) => {
+    // Asegurar que refresh_token ya fue guardado por el caller (Login.jsx)
     localStorage.setItem('user', JSON.stringify(u))
     localStorage.setItem('token', token)
     setUser(u)
   }
+
+  const esSuperadmin = () => user?.superadmin === true || user?.rol === 'superadmin'
 
   const logout = () => {
     localStorage.removeItem('user')
@@ -23,7 +26,7 @@ export function AuthProvider({ children }) {
   const puede = (permiso) => user?.permisos?.includes(permiso) ?? false
 
   return (
-    <AuthCtx.Provider value={{ user, login, logout, puede }}>
+    <AuthCtx.Provider value={{ user, login, logout, puede, esSuperadmin }}>
       {children}
     </AuthCtx.Provider>
   )
