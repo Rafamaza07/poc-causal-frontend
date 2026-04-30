@@ -129,7 +129,13 @@ Prioridad: **Frontend primero**. Bugs bloqueantes antes de mejoras visuales.
 | B3 — LoadingButton en acciones | ✅ Implementado |
 | B4 — Componentes compartidos Card/EmptyState | ✅ Implementado |
 | B5 — ErrorState editorial | ✅ Implementado |
-| C1–C7 | ⬜ Pendiente |
+| C1 — Componentes landing (Hero/Proof/Tour) | ✅ Implementado |
+| C2 — Hero 2 columnas con mock animado | ✅ Implementado |
+| C3 — Proof stack métricas + testimonios | ✅ Implementado |
+| C4 — Product tour interactivo 4 tabs | ✅ Implementado |
+| C5 — useScrollReveal + scroll motion | ✅ Implementado |
+| C6 — Plus Jakarta Sans display font | ✅ Implementado |
+| C7 — Landing.jsx compositor | ✅ Implementado |
 | D1–D2 | ⬜ Pendiente |
 
 ---
