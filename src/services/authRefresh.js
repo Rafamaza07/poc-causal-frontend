@@ -54,6 +54,7 @@ export async function handleUnauthorized(originalRequest, axiosInstance) {
     const data  = await resp.json()
     const token = data.access_token
     localStorage.setItem('token', token)
+    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
     processQueue(null, token)
     originalRequest.headers.Authorization = `Bearer ${token}`
     return axiosInstance(originalRequest)
