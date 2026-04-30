@@ -88,7 +88,7 @@ function AppRoutes({ user, login, logout }) {
         <Route path="/historial/:id" element={puede('ver_historial') ? <CasoDetalle /> : <NoPermiso />} />
         <Route path="/comparar"  element={puede('comparar') ? <Comparar /> : <NoPermiso />} />
         <Route path="/logs"           element={puede('ver_logs') ? <Logs /> : <NoPermiso />} />
-        <Route path="/configuracion" element={user.rol === 'admin' ? <Configuracion /> : <NoPermiso />} />
+        <Route path="/configuracion" element={['admin','superadmin'].includes(user.rol) ? <Configuracion /> : <NoPermiso />} />
         <Route path="/alertas"       element={<Alertas />} />
         <Route path="/chat"          element={<Chat />} />
         <Route path="/reportes"      element={puede('exportar') ? <Reportes /> : <NoPermiso />} />

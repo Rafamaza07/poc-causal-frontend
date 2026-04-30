@@ -166,7 +166,7 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
               <p className="px-4 py-3 text-sm text-gray-400 text-center">Sin resultados</p>
             )}
             {!searchBusy && results.map(caso => {
-              const range = getScoreRange(caso.score_causal ?? 0)
+              const range = getScoreRange(caso.score_riesgo ?? 0)
               return (
                 <button
                   key={caso.id_caso}
@@ -176,7 +176,7 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
                 >
                   <span className="text-sm font-medium text-gray-800 flex-1 truncate">{caso.id_caso}</span>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${range.bg} ${range.text}`}>
-                    {Math.round(caso.score_causal ?? 0)}
+                    {Math.round(caso.score_riesgo ?? 0)}
                   </span>
                   <span className="text-xs text-gray-400 flex-shrink-0">
                     {caso.fecha ? formatDate(caso.fecha) : '—'}
@@ -250,7 +250,7 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
                               {timeAgo(a.created_at || a.timestamp)}
                             </p>
                           </div>
-                          {!a.is_read && (
+                          {!a.read_at && (
                             <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
                           )}
                         </div>
