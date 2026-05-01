@@ -297,15 +297,7 @@ export default function LandingHero() {
         </div>
       </div>
 
-      {/* Imperceptible gradient fade to next section */}
-      <div
-        className="absolute bottom-0 inset-x-0 h-52 pointer-events-none"
-        style={{
-          background: dark
-            ? 'linear-gradient(to bottom, rgba(17,24,39,0) 0%, rgba(17,24,39,0.15) 35%, rgba(17,24,39,0.65) 65%, rgba(17,24,39,1) 100%)'
-            : 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.65) 65%, rgba(255,255,255,1) 100%)',
-        }}
-      />
+      {/* No gradient needed — LandingProof floats above this section via negative margin */}
     </section>
   )
 }
