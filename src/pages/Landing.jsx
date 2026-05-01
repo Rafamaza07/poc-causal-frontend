@@ -197,14 +197,6 @@ export default function Landing() {
 
           <div className="flex items-center gap-3">
             <a
-              href="#portal"
-              className={`text-sm font-medium transition-colors hidden sm:flex items-center gap-1 ${
-                dark ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5" /> Portal clientes
-            </a>
-            <a
               href="mailto:rafamaza56@gmail.com"
               className={`text-sm font-medium transition-colors hidden md:block ${
                 dark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-brand-600'
@@ -820,6 +812,49 @@ export default function Landing() {
                 </a>
               </div>
             ))}
+          </div>
+
+          {/* ── Plan Trabajador ─────────────────────────────────────────── */}
+          <div
+            className="mt-6 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-2 transition-all duration-200"
+            style={{
+              backgroundColor: dark ? '#0a1f12' : '#f0fdf4',
+              borderColor: dark ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.3)',
+              boxShadow: dark ? '0 4px 24px rgba(16,185,129,0.1)' : '0 4px 24px rgba(16,185,129,0.07)',
+            }}
+          >
+            <div className="flex-1 min-w-0">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 uppercase tracking-[0.12em] mb-2 block" style={{ color: dark ? '#34d399' : '#059669' }}>
+                <UserCheck className="w-3.5 h-3.5 inline -mt-0.5" /> Para trabajadores
+              </span>
+              <h3 className={`text-xl font-bold mb-1 ${dark ? 'text-white' : 'text-gray-900'}`}>Plan Por Caso</h3>
+              <div className="flex items-end gap-1 mb-4">
+                <span className={`text-3xl font-extrabold tabular-nums ${dark ? 'text-white' : 'text-gray-900'}`}>$49.900</span>
+                <span className={`text-sm mb-1 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>&nbsp;COP / caso gestionado</span>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {[
+                  'Evaluación IA + score de riesgo',
+                  'Sustento legal normativo',
+                  'Derecho de petición o tutela lista para radicar',
+                  'Acceso al portal por 30 días',
+                ].map(f => (
+                  <span key={f} className={`flex items-center gap-1.5 text-sm ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/login?type=trabajador')}
+              className="flex-shrink-0 inline-flex items-center gap-2 font-semibold px-7 py-3.5 rounded-xl transition-all text-sm whitespace-nowrap text-white"
+              style={{
+                background: 'linear-gradient(135deg, #059669, #0d9488)',
+                boxShadow: '0 4px 16px rgba(5,150,105,0.3)',
+              }}
+            >
+              Acceder al portal <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </section>
