@@ -54,6 +54,7 @@
 
 /* Fondos con opacidad (Tailwind /XX modifier) */
 .dark .bg-white\/60  { background-color: rgb(17 24 39 / 0.6) !important; }
+.dark .bg-white\/80  { background-color: rgb(17 24 39 / 0.8) !important; }
 .dark .bg-white\/20  { background-color: rgb(17 24 39 / 0.2) !important; }
 .dark .bg-gray-50\/50 { background-color: rgb(17 24 39 / 0.5) !important; }
 .dark .bg-gray-50\/80 { background-color: rgb(17 24 39 / 0.8) !important; }
@@ -103,6 +104,7 @@
 /* ── Bordes ───────────────────────────────────────────────────────────────── */
 .dark .border-gray-50    { border-color: #1f2937 !important; }
 .dark .border-gray-100   { border-color: #1f2937 !important; }
+.dark .border-gray-100\/80 { border-color: rgb(31 41 55 / 0.8) !important; }
 .dark .border-gray-200   { border-color: #374151 !important; }
 .dark .border-gray-300   { border-color: #4b5563 !important; }
 .dark .border-slate-100  { border-color: #1f2937 !important; }

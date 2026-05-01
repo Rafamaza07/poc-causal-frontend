@@ -7,11 +7,13 @@ import {
   Sparkles, ArrowUpRight, Star, Building2, Briefcase,
   TrendingUp, ChevronRight, Award, UserCheck,
   ClipboardList, MessageSquare, Download, Gavel,
+  Sun, Moon,
 } from 'lucide-react'
 import LandingHero   from './landing/LandingHero'
 import LandingProof  from './landing/LandingProof'
 import LandingTour   from './landing/LandingTour'
 import useScrollReveal from '../hooks/useScrollReveal'
+import { useTheme } from '../hooks/useTheme'
 
 /* ── Data ───────────────────────────────────────────────────────────────── */
 
@@ -75,8 +77,11 @@ const HOW_IT_WORKS = [
   { n: '04', title: 'Exporta y archiva',   desc: 'Genera PDF trazable o exporta al sistema de nómina. Historial inmutable para auditorías.', icon: Award, accent: '#ea580c' },
 ]
 
-const dotBg      = { backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
-const dotBgLight = { backgroundColor: '#f8faff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
+const makeDotBg = (dark, base) => ({
+  backgroundColor: dark ? (base === 'light' ? '#0f172a' : '#111827') : (base === 'light' ? '#f8faff' : '#ffffff'),
+  backgroundImage: `radial-gradient(circle, ${dark ? '#1e293b' : '#dde3f0'} 1.2px, transparent 1.2px)`,
+  backgroundSize: '28px 28px',
+})
 
 const FAQ_ITEMS = [
   {
@@ -116,18 +121,25 @@ const FAQ_ITEMS = [
 /* ── Component ──────────────────────────────────────────────────────────── */
 export default function Landing() {
   const navigate = useNavigate()
+  const { dark, setMode } = useTheme()
   const [showSticky, setShowSticky] = useState(false)
   const [openFaq, setOpenFaq] = useState(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
 
   useEffect(() => {
     const handler = () => {
       const scrollY = window.scrollY
-      const nearBottom = scrollY > document.body.scrollHeight - window.innerHeight - 500
+      const scrollHeight = document.body.scrollHeight - window.innerHeight
+      setScrollProgress(scrollHeight > 0 ? (scrollY / scrollHeight) * 100 : 0)
+      const nearBottom = scrollY > scrollHeight - 500
       setShowSticky(scrollY > 700 && !nearBottom)
     }
     window.addEventListener('scroll', handler, { passive: true })
     return () => window.removeEventListener('scroll', handler)
   }, [])
+
+  const dotBg      = makeDotBg(dark, 'normal')
+  const dotBgLight = makeDotBg(dark, 'light')
 
   const targetsRef  = useScrollReveal({ threshold: 0.1, delay: 0 })
   const howRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
@@ -141,6 +153,17 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white font-sans">
 
+      {/* ── Scroll progress bar ─────────────────────────────────────── */}
+      <div className="fixed top-0 inset-x-0 z-[60] h-[2px] pointer-events-none">
+        <div
+          className="h-full transition-[width] duration-75"
+          style={{
+            width: `${scrollProgress}%`,
+            background: 'linear-gradient(90deg, #3b76f6, #8b5cf6, #f472b6)',
+          }}
+        />
+      </div>
+
       {/* ── Navbar ──────────────────────────────────────────────────── */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80 shadow-sm">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -152,6 +175,13 @@ export default function Landing() {
             <a href="mailto:rafamaza56@gmail.com" className="text-sm text-gray-500 hover:text-brand-600 transition-colors hidden md:block font-medium">
               Contactar
             </a>
+            <button
+              onClick={() => setMode(dark ? 'light' : 'dark')}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:text-brand-600 hover:border-brand-200 transition-all duration-200"
+              aria-label="Cambiar tema"
+            >
+              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <button
               onClick={() => navigate('/login')}
               className="text-sm bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all duration-200 font-medium shadow-sm hover:shadow-md"
@@ -228,7 +258,7 @@ export default function Landing() {
 
       {/* ── Portal Cliente Final ─────────────────────────────────────── */}
       <section id="portal" className="py-24 px-4 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 40%, #f0f9ff 100%)' }}>
+        style={{ background: dark ? 'linear-gradient(135deg, #052e16 0%, #022c22 40%, #0e1f3d 100%)' : 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 40%, #f0f9ff 100%)' }}>
         <div className="max-w-6xl mx-auto">
           <div ref={portalRef} className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
@@ -407,7 +437,7 @@ export default function Landing() {
 
       {/* ── Problema / Solución ─────────────────────────────────────── */}
       <section className="py-24 px-4"
-        style={{ background: 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)' }}>
+        style={{ background: dark ? 'linear-gradient(135deg, #0f172a 0%, #1a0a3d 50%, #0f2a1a 100%)' : 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">El problema</span>
@@ -485,7 +515,7 @@ export default function Landing() {
       </section>
 
       {/* ── Planes ──────────────────────────────────────────────────── */}
-      <section className="py-24 px-4" style={{ background: 'linear-gradient(180deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <section className="py-24 px-4" style={{ background: dark ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)' : 'linear-gradient(180deg, #f8faff 0%, #f0f4ff 100%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">Precios</span>
