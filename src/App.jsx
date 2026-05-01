@@ -91,6 +91,7 @@ function PortalRoutes({ user, logout }) {
           <Route path="/portal/alertas"                element={<MisAlertas />} />
           <Route path="/portal/documentos"             element={<MisDocumentos />} />
           <Route path="/portal/documentos/:id_caso"    element={<GenerarDocumento />} />
+          <Route path="/portal/evaluar"                element={<EvaluarPaciente />} />
           <Route path="*"                              element={<Navigate to="/portal" />} />
         </Routes>
       </Suspense>

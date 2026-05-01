@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   LayoutDashboard, Clock, Bell, FileText, ChevronRight,
-  AlertCircle, CheckCircle, TrendingUp,
+  AlertCircle, CheckCircle, TrendingUp, Brain,
 } from 'lucide-react'
 import API from '../../api/client'
 import { normalizeAlerts } from '../../api/adapters'
@@ -106,12 +106,27 @@ export default function PortalDashboard() {
         </div>
       )}
 
+      {/* ── Evaluar mi caso — acción principal de pago ─────────── */}
+      <Link
+        to="/portal/evaluar"
+        className="flex items-center gap-4 p-5 rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 to-blue-50 hover:from-violet-100 hover:to-blue-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
+          <Brain className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-gray-900 text-sm">Evaluar mi caso con IA</div>
+          <div className="text-xs text-gray-500 mt-0.5">Obtén tu score de riesgo, sustento legal y recomendación en segundos</div>
+        </div>
+        <ChevronRight className="w-5 h-5 text-violet-400 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+      </Link>
+
       {/* ── Acciones rápidas ───────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { to: '/portal/historial', icon: Clock,    label: 'Mis casos',      color: 'text-blue-600 bg-blue-50' },
-          { to: '/portal/alertas',   icon: Bell,     label: 'Mis alertas',    color: 'text-amber-600 bg-amber-50', badge: alertasUrgentes.length || null },
-          { to: '/portal/documentos',icon: FileText, label: 'Mis documentos', color: 'text-purple-600 bg-purple-50', badge: docs.length || null },
+          { to: '/portal/historial',  icon: Clock,    label: 'Mis casos',      color: 'text-blue-600 bg-blue-50' },
+          { to: '/portal/alertas',    icon: Bell,     label: 'Mis alertas',    color: 'text-amber-600 bg-amber-50', badge: alertasUrgentes.length || null },
+          { to: '/portal/documentos', icon: FileText, label: 'Mis documentos', color: 'text-purple-600 bg-purple-50', badge: docs.length || null },
           casoPrincipal
             ? { to: `/portal/historial/${casoPrincipal.id_caso}`, icon: LayoutDashboard, label: 'Ver mi caso', color: 'text-emerald-600 bg-emerald-50' }
             : { to: '/portal', icon: LayoutDashboard, label: 'Inicio', color: 'text-gray-400 bg-gray-50' },
