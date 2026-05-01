@@ -84,7 +84,7 @@ export default function LandingProof() {
   const testRef = useScrollReveal({ threshold: 0.1,  delay: 160 })
 
   return (
-    <section className="py-24 px-4 bg-white border-b border-gray-100">
+    <section className="py-24 px-4 bg-white">
       <div className="max-w-5xl mx-auto">
 
         <div ref={headRef} className="text-center mb-14">

@@ -297,20 +297,15 @@ export default function LandingHero() {
         </div>
       </div>
 
-      {/* Wave separator — blends hero into next section */}
-      <div className="absolute bottom-0 inset-x-0 pointer-events-none" style={{ lineHeight: 0 }}>
-        <svg
-          viewBox="0 0 1440 80"
-          preserveAspectRatio="none"
-          className="w-full block"
-          style={{ height: '80px' }}
-        >
-          <path
-            d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,30 1440,40 L1440,80 L0,80 Z"
-            fill={dark ? '#111827' : '#ffffff'}
-          />
-        </svg>
-      </div>
+      {/* Imperceptible gradient fade to next section */}
+      <div
+        className="absolute bottom-0 inset-x-0 h-52 pointer-events-none"
+        style={{
+          background: dark
+            ? 'linear-gradient(to bottom, rgba(17,24,39,0) 0%, rgba(17,24,39,0.15) 35%, rgba(17,24,39,0.65) 65%, rgba(17,24,39,1) 100%)'
+            : 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0.65) 65%, rgba(255,255,255,1) 100%)',
+        }}
+      />
     </section>
   )
 }
