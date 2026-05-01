@@ -215,7 +215,7 @@ export default function LandingTour() {
       <div className="max-w-5xl mx-auto">
 
         <div ref={headRef} className="text-center mb-14">
-          <p className="text-xs font-bold tracking-widest uppercase text-brand-400 mb-3">
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/30 mb-3">
             Product tour
           </p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display tracking-tight mb-3">

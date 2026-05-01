@@ -18,12 +18,12 @@ import { useTheme } from '../hooks/useTheme'
 /* ── Data ───────────────────────────────────────────────────────────────── */
 
 const FEATURES = [
-  { icon: Brain,    title: 'Motor causal IA',       desc: 'Algoritmo PC con inferencia bayesiana — no correlaciones, causalidad real.',           gradient: 'icon-gradient-blue',   iconColor: 'text-blue-600' },
-  { icon: Bell,     title: 'Alertas proactivas',     desc: 'Hitos legales EPS/ARL/AFP monitoreados automáticamente (90/120/180/540 días).',          gradient: 'icon-gradient-orange', iconColor: 'text-orange-500' },
-  { icon: Scale,    title: 'RAG Legal normativo',    desc: 'Ley 100, Decreto 1507, Ley 776 y más — sustento jurídico en cada evaluación.',           gradient: 'icon-gradient-purple', iconColor: 'text-purple-600' },
-  { icon: Users,    title: 'Multi-tenant',           desc: 'Cada EPS o empleador tiene su espacio aislado con control de roles granular.',            gradient: 'icon-gradient-teal',   iconColor: 'text-teal-600' },
-  { icon: Shield,   title: 'Trazabilidad inmutable', desc: 'Cada evaluación es un INSERT; historial completo para auditorías legales.',               gradient: 'icon-gradient-green',  iconColor: 'text-green-600' },
-  { icon: FileText, title: 'Export PDF / Excel',     desc: 'Reportes individuales y portafolios consolidados con un clic.',                           gradient: 'icon-gradient-pink',   iconColor: 'text-pink-600' },
+  { icon: Brain,    title: 'Motor causal IA',       desc: 'Algoritmo PC con inferencia bayesiana — no correlaciones, causalidad real.',           iconColor: 'text-blue-600' },
+  { icon: Bell,     title: 'Alertas proactivas',     desc: 'Hitos legales EPS/ARL/AFP monitoreados automáticamente (90/120/180/540 días).',          iconColor: 'text-orange-500' },
+  { icon: Scale,    title: 'RAG Legal normativo',    desc: 'Ley 100, Decreto 1507, Ley 776 y más — sustento jurídico en cada evaluación.',           iconColor: 'text-violet-600' },
+  { icon: Users,    title: 'Multi-tenant',           desc: 'Cada EPS o empleador tiene su espacio aislado con control de roles granular.',            iconColor: 'text-teal-600' },
+  { icon: Shield,   title: 'Trazabilidad inmutable', desc: 'Cada evaluación es un INSERT; historial completo para auditorías legales.',               iconColor: 'text-emerald-600' },
+  { icon: FileText, title: 'Export PDF / Excel',     desc: 'Reportes individuales y portafolios consolidados con un clic.',                           iconColor: 'text-gray-500' },
 ]
 
 const PORTAL_BENEFITS = [
@@ -62,12 +62,12 @@ const PROBLEMS = [
 ]
 
 const TARGETS = [
-  { icon: Shield,    name: 'EPS',        full: 'Entidades Promotoras de Salud',            color: 'text-blue-600',   bg: 'bg-blue-50',   border: 'border-blue-100',   dot: '#2563eb' },
-  { icon: Activity,  name: 'ARL',        full: 'Administradoras de Riesgos Laborales',     color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', dot: '#ea580c' },
-  { icon: TrendingUp,name: 'AFP',        full: 'Fondos de Pensiones y Cesantías',          color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100', dot: '#9333ea' },
-  { icon: Briefcase, name: 'Empleadores',full: 'Empresas y PYMES con nómina',              color: 'text-teal-600',   bg: 'bg-teal-50',   border: 'border-teal-100',   dot: '#0d9488' },
-  { icon: Building2, name: 'IPS',        full: 'Instituciones Prestadoras de Salud',       color: 'text-emerald-600',bg: 'bg-emerald-50',border: 'border-emerald-100',dot: '#059669' },
-  { icon: UserCheck, name: 'Trabajadores',full: 'Vía el Portal Cliente Final',             color: 'text-rose-600',   bg: 'bg-rose-50',   border: 'border-rose-100',   dot: '#e11d48' },
+  { icon: Shield,    name: 'EPS',         full: 'Entidades Promotoras de Salud',        color: 'text-blue-600' },
+  { icon: Activity,  name: 'ARL',         full: 'Administradoras de Riesgos Laborales', color: 'text-orange-500' },
+  { icon: TrendingUp,name: 'AFP',         full: 'Fondos de Pensiones y Cesantías',      color: 'text-violet-600' },
+  { icon: Briefcase, name: 'Empleadores', full: 'Empresas y PYMES con nómina',          color: 'text-teal-600' },
+  { icon: Building2, name: 'IPS',         full: 'Instituciones Prestadoras de Salud',   color: 'text-emerald-600' },
+  { icon: UserCheck, name: 'Trabajadores',full: 'Vía el Portal Cliente Final',          color: 'text-rose-600' },
 ]
 
 const HOW_IT_WORKS = [
@@ -202,23 +202,20 @@ export default function Landing() {
       <section className="py-20 px-4 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-              Diseñado para el sistema de seguridad social colombiano
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">
+              Sistema de seguridad social colombiano
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 font-display">¿Para quién es KausalIA?</h2>
           </div>
-          <div ref={targetsRef} className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {TARGETS.map(({ icon: Icon, name, full, color, bg, border, dot }) => (
-              <div key={name} className={`group flex items-start gap-4 p-5 rounded-2xl border ${border} ${bg} hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-default`}>
-                <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-white">
-                  <Icon className={`w-5 h-5 ${color}`} />
+          <div ref={targetsRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {TARGETS.map(({ icon: Icon, name, full, color }) => (
+              <div key={name} className="group flex items-start gap-3.5 p-5 rounded-2xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-soft transition-all duration-200 cursor-default">
+                <div className="flex-shrink-0 w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center">
+                  <Icon className={`w-4 h-4 ${color}`} />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-bold text-gray-900 text-sm">{name}</span>
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: dot }} />
-                  </div>
-                  <p className="text-xs text-gray-500 leading-snug">{full}</p>
+                  <span className="font-semibold text-gray-900 text-sm leading-tight">{name}</span>
+                  <p className="text-xs text-gray-400 leading-snug mt-0.5">{full}</p>
                 </div>
               </div>
             ))}
@@ -230,7 +227,7 @@ export default function Landing() {
       <section className="py-24 px-4 overflow-hidden" style={dotBgLight}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">Proceso</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">Proceso</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Cómo funciona</h2>
             <p className="text-gray-500 max-w-xl mx-auto">De la carga del caso al resultado legal en cuatro pasos. Sin configuración compleja.</p>
           </div>
@@ -239,11 +236,11 @@ export default function Landing() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
               {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent }) => (
                 <div key={n} className="flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-lg flex-shrink-0"
-                    style={{ backgroundColor: accent, boxShadow: `0 8px 24px ${accent}40` }}>
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 shadow-soft flex-shrink-0"
+                    style={{ backgroundColor: accent }}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">{n}</span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-300 mb-2">{n}</span>
                   <h3 className="font-bold text-gray-900 mb-2 text-[15px]">{title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
                 </div>
@@ -400,7 +397,7 @@ export default function Landing() {
       <section className="py-24 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full mb-4">Perfiles</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">Perfiles</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Dos perfiles, una plataforma</h2>
             <p className="text-gray-500 max-w-xl mx-auto">KausalIA sirve tanto al equipo operativo de la empresa como al trabajador afectado.</p>
           </div>
@@ -440,13 +437,13 @@ export default function Landing() {
         style={{ background: dark ? 'linear-gradient(135deg, #0f172a 0%, #1a0a3d 50%, #0f2a1a 100%)' : 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">El problema</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">El problema</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Del proceso manual al criterio automatizado</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Tres problemas críticos que KausalIA resuelve desde el día uno.</p>
           </div>
           <div ref={problemsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {PROBLEMS.map(({ icon: Icon, before, after }) => (
-              <div key={before} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lifted hover:-translate-y-1 transition-all duration-300 group">
+              <div key={before} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-200 group">
                 <div className="w-11 h-11 icon-gradient-blue rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                   <Icon className="w-5 h-5 text-blue-600" />
                 </div>
@@ -470,21 +467,19 @@ export default function Landing() {
       <section className="py-24 px-4" style={dotBg}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-accent-600 bg-accent-50 px-3 py-1.5 rounded-full mb-4">Funcionalidades</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">Funcionalidades</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Todo lo que necesitas, integrado</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Desde la evaluación causal hasta la exportación DIAN, en una sola plataforma.</p>
           </div>
-          <div ref={featuresRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon: Icon, title, desc, gradient, iconColor }, idx) => (
-              <div key={title} className="group relative p-6 rounded-2xl border border-gray-100 bg-white hover:border-transparent hover:shadow-elevated transition-all duration-300 cursor-default overflow-hidden">
-                <span className="absolute top-4 right-5 text-[11px] font-bold text-gray-200 tabular-nums select-none">{String(idx + 1).padStart(2, '0')}</span>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
-                  style={{ background: 'radial-gradient(ellipse at top left, rgba(59,118,246,0.04) 0%, transparent 70%)' }} />
-                <div className={`relative w-11 h-11 ${gradient} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className={`w-5 h-5 ${iconColor}`} />
+          <div ref={featuresRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURES.map(({ icon: Icon, title, desc, iconColor }, idx) => (
+              <div key={title} className="group relative p-6 rounded-2xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-lifted transition-all duration-200 cursor-default">
+                <span className="absolute top-4 right-5 text-[11px] font-medium text-gray-200 tabular-nums select-none">{String(idx + 1).padStart(2, '0')}</span>
+                <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-gray-100 transition-colors duration-200">
+                  <Icon className={`w-4.5 h-4.5 ${iconColor}`} style={{ width: '18px', height: '18px' }} />
                 </div>
-                <h3 className="relative font-bold text-gray-900 mb-2 text-[15px]">{title}</h3>
-                <p className="relative text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="font-semibold text-gray-900 mb-2 text-[15px]">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -518,21 +513,21 @@ export default function Landing() {
       <section className="py-24 px-4" style={{ background: dark ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)' : 'linear-gradient(180deg, #f8faff 0%, #f0f4ff 100%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">Precios</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">Precios</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Planes y precios</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Precios en COP + IVA. Sin permanencia mínima. Portal cliente incluido en todos los planes.</p>
           </div>
-          <div ref={pricingRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div ref={pricingRef} className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
             {PLANS.map((plan) => (
-              <div key={plan.name} className={`relative flex flex-col rounded-2xl transition-all duration-300 ${
-                plan.highlight ? 'card-gradient-border shadow-2xl shadow-brand-500/20 scale-105 py-8 px-7' : 'bg-white border border-gray-200 p-7 hover:shadow-lifted hover:-translate-y-1'
+              <div key={plan.name} className={`relative flex flex-col rounded-2xl p-7 transition-all duration-200 ${
+                plan.highlight
+                  ? 'bg-white border-2 border-brand-400/50 shadow-lifted'
+                  : 'bg-white border border-gray-200 hover:border-gray-300 hover:shadow-soft hover:-translate-y-0.5'
               }`}>
                 {plan.highlight && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-gradient-to-r from-brand-500 to-accent-500 text-white px-4 py-1.5 rounded-full shadow-lg shadow-brand-500/30">
-                      <Star className="w-3 h-3 fill-current" /> MÁS POPULAR
-                    </span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand-600 uppercase tracking-[0.12em] mb-4">
+                    <Star className="w-3 h-3 fill-current" /> Más popular
+                  </span>
                 )}
                 <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
                 <div className="flex items-end gap-1 mb-2">
@@ -549,7 +544,7 @@ export default function Landing() {
                 </ul>
                 <a href="mailto:rafamaza56@gmail.com?subject=Plan KausalIA"
                   className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                    plan.highlight ? 'bg-gradient-to-r from-brand-600 to-accent-600 text-white hover:from-brand-700 hover:to-accent-700 shadow-lg shadow-brand-500/25 btn-glow' : 'bg-gray-900 text-white hover:bg-gray-700'
+                    plan.highlight ? 'bg-brand-600 text-white hover:bg-brand-700 shadow-soft' : 'bg-gray-900 text-white hover:bg-gray-700'
                   }`}>
                   {plan.cta} <span className="ml-1">→</span>
                 </a>
@@ -563,7 +558,7 @@ export default function Landing() {
       <section className="py-24 px-4 bg-white border-b border-gray-100">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">Preguntas frecuentes</span>
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-4">Preguntas frecuentes</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Lo que más nos preguntan</h2>
             <p className="text-gray-500 max-w-xl mx-auto">Si no encuentras tu respuesta, escríbenos y te contestamos en menos de un día hábil.</p>
           </div>

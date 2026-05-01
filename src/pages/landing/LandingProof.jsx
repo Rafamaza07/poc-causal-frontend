@@ -88,7 +88,7 @@ export default function LandingProof() {
       <div className="max-w-5xl mx-auto">
 
         <div ref={headRef} className="text-center mb-14">
-          <p className="text-xs font-bold tracking-widest uppercase text-brand-500 mb-3">
+          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 mb-3">
             Resultados reales
           </p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display tracking-tight mb-3">
