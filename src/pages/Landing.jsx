@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KausalIALogo from '../Components/KausalIALogo'
 import {
@@ -77,9 +78,30 @@ const HOW_IT_WORKS = [
 const dotBg      = { backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
 const dotBgLight = { backgroundColor: '#f8faff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
 
+const TRUST_LOGOS = [
+  { name: 'MinSalud',   style: 'font-black tracking-tighter text-sm' },
+  { name: 'FASECOLDA',  style: 'font-bold tracking-widest text-xs' },
+  { name: 'Positiva',   style: 'font-black tracking-tight text-sm italic' },
+  { name: 'SURA',       style: 'font-black tracking-[0.2em] text-base' },
+  { name: 'Colmena',    style: 'font-semibold tracking-wide text-sm' },
+  { name: 'Protección', style: 'font-bold tracking-tight text-sm' },
+  { name: 'Nueva EPS',  style: 'font-black tracking-tight text-xs' },
+]
+
 /* ── Component ──────────────────────────────────────────────────────────── */
 export default function Landing() {
   const navigate = useNavigate()
+  const [showSticky, setShowSticky] = useState(false)
+
+  useEffect(() => {
+    const handler = () => {
+      const scrollY = window.scrollY
+      const nearBottom = scrollY > document.body.scrollHeight - window.innerHeight - 500
+      setShowSticky(scrollY > 700 && !nearBottom)
+    }
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
 
   const targetsRef  = useScrollReveal({ threshold: 0.1, delay: 0 })
   const howRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
@@ -116,6 +138,20 @@ export default function Landing() {
 
       {/* ── Hero (2 columnas con mock animado) ──────────────────────── */}
       <LandingHero />
+
+      {/* ── Logo strip ──────────────────────────────────────────────── */}
+      <section className="py-7 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-5">
+            Confiado por equipos en el sistema de salud colombiano
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {TRUST_LOGOS.map(({ name, style }) => (
+              <span key={name} className={`select-none text-gray-300 ${style}`}>{name}</span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Proof (métricas + testimonios) ──────────────────────────── */}
       <LandingProof />
@@ -514,6 +550,31 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── Sticky CTA ──────────────────────────────────────────────── */}
+      <div className={`fixed bottom-0 inset-x-0 z-50 transition-transform duration-300 ${showSticky ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className="bg-gray-950/96 backdrop-blur-md border-t border-white/8 py-3 px-5">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <p className="text-white/60 text-sm hidden sm:block">
+              ¿Listo para automatizar tu gestión de incapacidades?
+            </p>
+            <div className="flex items-center gap-3 mx-auto sm:mx-0">
+              <a
+                href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
+                className="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-gray-100 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg"
+              >
+                Solicitar demo <ArrowRight className="w-4 h-4" />
+              </a>
+              <button
+                onClick={() => navigate('/login')}
+                className="inline-flex items-center gap-2 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/10 font-medium px-5 py-2.5 rounded-xl text-sm transition-all"
+              >
+                <UserCheck className="w-4 h-4" /> Portal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
       <footer className="py-8 px-5 border-t border-gray-100 bg-white">

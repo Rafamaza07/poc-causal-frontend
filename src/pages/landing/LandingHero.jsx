@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KausalIALogo from '../../Components/KausalIALogo'
 import {
@@ -6,8 +7,46 @@ import {
   Bell, TrendingUp, Users,
 } from 'lucide-react'
 
+const PHRASES = [
+  'Evalúa incapacidades',
+  'Reduce sanciones',
+  'Sustenta con RAG legal',
+  'Automatiza la gestión',
+]
+
+const STAR_PATH = 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z'
+
 export default function LandingHero() {
   const navigate = useNavigate()
+  const [phraseIdx, setPhraseIdx] = useState(0)
+  const [displayed, setDisplayed] = useState(PHRASES[0])
+  const [typing, setTyping] = useState(false)
+
+  useEffect(() => {
+    const full = PHRASES[phraseIdx]
+    if (typing) {
+      if (displayed.length < full.length) {
+        const t = setTimeout(() => setDisplayed(full.slice(0, displayed.length + 1)), 55)
+        return () => clearTimeout(t)
+      }
+      const t = setTimeout(() => setTyping(false), 2200)
+      return () => clearTimeout(t)
+    } else {
+      if (displayed.length > 0) {
+        const t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 28)
+        return () => clearTimeout(t)
+      }
+      const next = (phraseIdx + 1) % PHRASES.length
+      setPhraseIdx(next)
+      setTyping(true)
+    }
+  }, [displayed, typing, phraseIdx])
+
+  // Kick off the cycle after initial display time
+  useEffect(() => {
+    const t = setTimeout(() => setTyping(false), 2200)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <section
@@ -45,7 +84,12 @@ export default function LandingHero() {
               className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-white leading-[1.08] tracking-tight mb-5 animate-slide-up font-display"
               style={{ animationDelay: '80ms' }}
             >
-              Evalúa incapacidades<br />
+              {/* Typewriter line */}
+              <span className="inline-block min-h-[1.1em]">
+                {displayed}
+                <span className="inline-block w-[2px] h-[0.85em] bg-blue-400 ml-[2px] align-middle animate-pulse" />
+              </span>
+              <br />
               <span style={{
                 background: 'linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6)',
                 WebkitBackgroundClip: 'text',
@@ -83,8 +127,9 @@ export default function LandingHero() {
               </button>
             </div>
 
+            {/* Trust indicators */}
             <div
-              className="flex flex-wrap gap-4 text-white/40 text-xs font-medium animate-slide-up"
+              className="flex flex-wrap gap-4 text-white/40 text-xs font-medium animate-slide-up mb-5"
               style={{ animationDelay: '320ms' }}
             >
               {['Habeas Data Ley 1581', 'Multi-tenant seguro', 'Portal trabajador incluido', 'API REST lista'].map(t => (
@@ -92,6 +137,21 @@ export default function LandingHero() {
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" /> {t}
                 </span>
               ))}
+            </div>
+
+            {/* Rating badge */}
+            <div className="flex items-center gap-3 animate-slide-up" style={{ animationDelay: '380ms' }}>
+              <div className="flex items-center gap-1.5 bg-white/6 border border-white/10 rounded-xl px-3 py-2">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 20 20">
+                      <path d={STAR_PATH} />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-white/80 text-xs font-bold ml-1">4.9</span>
+                <span className="text-white/35 text-xs">· Piloto activo con EPS en Colombia</span>
+              </div>
             </div>
           </div>
 
