@@ -78,20 +78,46 @@ const HOW_IT_WORKS = [
 const dotBg      = { backgroundColor: '#ffffff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
 const dotBgLight = { backgroundColor: '#f8faff', backgroundImage: 'radial-gradient(circle, #dde3f0 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }
 
-const TRUST_LOGOS = [
-  { name: 'MinSalud',   style: 'font-black tracking-tighter text-sm' },
-  { name: 'FASECOLDA',  style: 'font-bold tracking-widest text-xs' },
-  { name: 'Positiva',   style: 'font-black tracking-tight text-sm italic' },
-  { name: 'SURA',       style: 'font-black tracking-[0.2em] text-base' },
-  { name: 'Colmena',    style: 'font-semibold tracking-wide text-sm' },
-  { name: 'Protección', style: 'font-bold tracking-tight text-sm' },
-  { name: 'Nueva EPS',  style: 'font-black tracking-tight text-xs' },
+const FAQ_ITEMS = [
+  {
+    q: '¿Requiere instalación o configuración técnica compleja?',
+    a: 'No. KausalIA es 100% SaaS — accedes desde el navegador sin instalar nada. La configuración inicial de tu tenant (usuarios, roles, datos de empresa) se hace en menos de un día.',
+  },
+  {
+    q: '¿Cómo se integra con nuestros sistemas actuales?',
+    a: 'Ofrecemos API REST documentada para integrar con sistemas de nómina, HCE y plataformas de EPS. También soportamos carga masiva por CSV para equipos que no tienen integración técnica.',
+  },
+  {
+    q: '¿Cumple con la Ley 1581 de Habeas Data y normativa de datos en salud?',
+    a: 'Sí. Cada tenant tiene datos aislados, los datos sensibles de salud nunca salen de servidores colombianos, y la plataforma incluye gestión de consentimientos y trazabilidad de accesos.',
+  },
+  {
+    q: '¿Qué pasa si la normativa laboral cambia?',
+    a: 'El corpus RAG Legal se actualiza cuando el marco normativo cambia. Las evaluaciones ya emitidas quedan archivadas con la versión de normativa vigente en el momento de emitirlas.',
+  },
+  {
+    q: '¿El portal del trabajador tiene costo adicional?',
+    a: 'No. El portal de autogestión para trabajadores está incluido en todos los planes sin costo adicional. El número de trabajadores activos varía según el plan.',
+  },
+  {
+    q: '¿Cuánto tiempo toma estar operativos?',
+    a: 'Entre 1 y 3 días hábiles para cuentas estándar: creación de tenant, carga de usuarios y capacitación básica. Integraciones API toman más tiempo según la complejidad del sistema destino.',
+  },
+  {
+    q: '¿Qué significa "causalidad real" y por qué importa?',
+    a: 'La mayoría de sistemas usan correlaciones estadísticas: si X ocurre, probablemente Y. KausalIA usa redes causales (algoritmo PC + bayesiano) que modelan por qué X causa Y, lo que da recomendaciones más precisas y defendibles ante una auditoría.',
+  },
+  {
+    q: '¿Puedo exportar los casos para auditorías externas?',
+    a: 'Sí. Cada evaluación se puede exportar en PDF con trazabilidad completa (fecha, usuario, normativa aplicada, score). Los planes Profesional y Enterprise también permiten exportación masiva en Excel y por API.',
+  },
 ]
 
 /* ── Component ──────────────────────────────────────────────────────────── */
 export default function Landing() {
   const navigate = useNavigate()
   const [showSticky, setShowSticky] = useState(false)
+  const [openFaq, setOpenFaq] = useState(null)
 
   useEffect(() => {
     const handler = () => {
@@ -138,20 +164,6 @@ export default function Landing() {
 
       {/* ── Hero (2 columnas con mock animado) ──────────────────────── */}
       <LandingHero />
-
-      {/* ── Logo strip ──────────────────────────────────────────────── */}
-      <section className="py-7 px-4 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-center text-[10px] font-bold uppercase tracking-widest text-gray-300 mb-5">
-            Confiado por equipos en el sistema de salud colombiano
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {TRUST_LOGOS.map(({ name, style }) => (
-              <span key={name} className={`select-none text-gray-300 ${style}`}>{name}</span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Proof (métricas + testimonios) ──────────────────────────── */}
       <LandingProof />
@@ -511,6 +523,39 @@ export default function Landing() {
                   }`}>
                   {plan.cta} <span className="ml-1">→</span>
                 </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      <section className="py-24 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full mb-4">Preguntas frecuentes</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-display mb-3">Lo que más nos preguntan</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Si no encuentras tu respuesta, escríbenos y te contestamos en menos de un día hábil.</p>
+          </div>
+          <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
+            {FAQ_ITEMS.map(({ q, a }, i) => (
+              <div key={i}>
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-gray-50 transition-colors duration-150 group"
+                >
+                  <span className="font-semibold text-gray-900 text-[15px] leading-snug">{q}</span>
+                  <span className={`flex-shrink-0 w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center transition-transform duration-200 group-hover:border-brand-300 ${openFaq === i ? 'rotate-45 bg-brand-50 border-brand-200' : ''}`}>
+                    <svg className={`w-3 h-3 ${openFaq === i ? 'text-brand-600' : 'text-gray-400'}`} viewBox="0 0 12 12" fill="none">
+                      <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-5">
+                    <p className="text-gray-500 text-sm leading-relaxed">{a}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

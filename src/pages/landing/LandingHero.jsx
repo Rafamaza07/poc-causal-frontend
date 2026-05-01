@@ -150,7 +150,7 @@ export default function LandingHero() {
                   ))}
                 </div>
                 <span className="text-white/80 text-xs font-bold ml-1">4.9</span>
-                <span className="text-white/35 text-xs">· Piloto activo con EPS en Colombia</span>
+                <span className="text-white/35 text-xs">· Usuarios satisfechos</span>
               </div>
             </div>
           </div>

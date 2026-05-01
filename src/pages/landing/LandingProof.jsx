@@ -106,7 +106,7 @@ export default function LandingProof() {
 
         {/* Testimonials */}
         <div ref={testRef} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {TESTIMONIALS.map(({ quote, name, role, company, initials, avatarBg, logoBg, logoBorder, logoColor }) => (
+          {TESTIMONIALS.map(({ quote, name, role, initials, avatarBg }) => (
             <div
               key={name}
               className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col gap-4"
@@ -120,20 +120,14 @@ export default function LandingProof() {
                 ))}
               </div>
               <p className="text-gray-700 text-[15px] leading-relaxed flex-1">"{quote}"</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarBg}`}>
-                    {initials}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">{name}</div>
-                    <div className="text-xs text-gray-400">{role}</div>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarBg}`}>
+                  {initials}
                 </div>
-                {/* Company badge */}
-                <span className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border ${logoBg} ${logoBorder} ${logoColor} whitespace-nowrap`}>
-                  {company}
-                </span>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{name}</div>
+                  <div className="text-xs text-gray-400">{role}</div>
+                </div>
               </div>
             </div>
           ))}
