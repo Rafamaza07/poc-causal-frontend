@@ -1,16 +1,26 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { User, Lock, Eye, EyeOff, Shield, Brain, Scale } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { User, Lock, Eye, EyeOff, Shield, Brain, Scale, ClipboardList, Bell, Download } from 'lucide-react'
 import API from '../api/client'
 import KausalIALogo from '../Components/KausalIALogo'
 
-const FEATURES = [
-  { icon: Shield, text: 'Aislamiento de datos por organización' },
-  { icon: Brain,  text: 'Motor causal con IA integrada' },
-  { icon: Scale,  text: 'Fundamentación legal automática' },
+const B2B_FEATURES = [
+  { icon: Shield,         text: 'Aislamiento de datos por organización' },
+  { icon: Brain,          text: 'Motor causal con IA integrada' },
+  { icon: Scale,          text: 'Fundamentación legal automática' },
+]
+
+const WORKER_FEATURES = [
+  { icon: ClipboardList,  text: 'Estado de tu caso en tiempo real' },
+  { icon: Bell,           text: 'Alertas antes de que venzan tus plazos' },
+  { icon: Download,       text: 'Descarga tu resumen médico-legal en PDF' },
 ]
 
 export default function Login({ onLogin }) {
+  const [searchParams] = useSearchParams()
+  const loginType = searchParams.get('type') || 'empresa'
+  const isWorker  = loginType === 'trabajador'
+
   const [form, setForm]       = useState({ usuario: '', password: '' })
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
@@ -46,6 +56,16 @@ export default function Login({ onLogin }) {
     }
   }
 
+  const features   = isWorker ? WORKER_FEATURES : B2B_FEATURES
+  const accentFrom = isWorker ? '#059669' : '#3b76f6'
+  const accentTo   = isWorker ? '#0d9488' : '#6d28d9'
+  const leftBg     = isWorker
+    ? 'linear-gradient(135deg, #022c22 0%, #052e16 40%, #0e1f3d 100%)'
+    : 'linear-gradient(135deg, #0a0f1e 0%, #0d1b3e 40%, #1a0a3d 70%, #0f172a 100%)'
+  const headingGradient = isWorker
+    ? 'linear-gradient(90deg, #ffffff, #6ee7b7)'
+    : 'linear-gradient(90deg, #ffffff, #a5b4fc)'
+
   return (
     <div className="min-h-screen flex">
       <style>{`
@@ -59,10 +79,10 @@ export default function Login({ onLogin }) {
         .shake { animation: shake 0.5s ease-in-out; }
       `}</style>
 
-      {/* ── Left column (desktop only) ──────────────────── */}
+      {/* ── Left column ─────────────────────────────────────── */}
       <div
         className="hidden md:flex md:w-1/2 min-h-screen flex-col items-center justify-center px-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0a0f1e 0%, #0d1b3e 40%, #1a0a3d 70%, #0f172a 100%)' }}
+        style={{ background: leftBg }}
       >
         {/* Grid */}
         <div
@@ -73,36 +93,59 @@ export default function Login({ onLogin }) {
           }}
         />
         {/* Orbs */}
-        <div className="absolute top-10 right-10 w-64 h-64 rounded-full opacity-20 animate-float-slow pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #3b76f6 0%, transparent 70%)' }} />
-        <div className="absolute bottom-20 left-10 w-48 h-48 rounded-full opacity-15 animate-float pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)' }} />
+        <div
+          className="absolute top-10 right-10 w-64 h-64 rounded-full opacity-20 animate-float-slow pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${accentFrom} 0%, transparent 70%)` }}
+        />
+        <div
+          className="absolute bottom-20 left-10 w-48 h-48 rounded-full opacity-15 animate-float pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${accentTo} 0%, transparent 70%)` }}
+        />
 
         <div className="relative z-10 max-w-sm w-full">
           <div className="mb-8">
             <KausalIALogo size={42} dark />
           </div>
 
+          {/* Type badge */}
+          <span
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-5 border"
+            style={{
+              color: isWorker ? '#6ee7b7' : '#a5b4fc',
+              borderColor: isWorker ? 'rgba(110,231,183,0.25)' : 'rgba(165,180,252,0.25)',
+              background: isWorker ? 'rgba(110,231,183,0.08)' : 'rgba(165,180,252,0.08)',
+            }}
+          >
+            {isWorker ? 'Portal Trabajador' : 'Acceso Empresarial'}
+          </span>
+
           <h2
             className="text-3xl font-extrabold mb-3 leading-tight"
             style={{
-              background: 'linear-gradient(90deg, #ffffff, #a5b4fc)',
+              background: headingGradient,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}
           >
-            Decisiones clínicas con causalidad real
+            {isWorker
+              ? 'Tu incapacidad, bajo control'
+              : 'Decisiones clínicas con causalidad real'}
           </h2>
           <p className="text-white/50 text-sm leading-relaxed mb-10">
-            Evaluación inteligente de incapacidades laborales para EPS, ARL y empleadores en Colombia.
+            {isWorker
+              ? 'Consulta tu caso, recibe alertas de plazos y genera documentos legales sin intermediarios.'
+              : 'Evaluación inteligente de incapacidades laborales para EPS, ARL y empleadores en Colombia.'}
           </p>
 
           <div className="space-y-3">
-            {FEATURES.map(({ icon: Icon, text }) => (
+            {features.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-blue-300" />
+                  <Icon
+                    className="w-4 h-4"
+                    style={{ color: isWorker ? '#6ee7b7' : '#93c5fd' }}
+                  />
                 </div>
                 <span className="text-white/70 text-sm">{text}</span>
               </div>
@@ -111,7 +154,7 @@ export default function Login({ onLogin }) {
         </div>
       </div>
 
-      {/* ── Right column ─────────────────────────────────── */}
+      {/* ── Right column ─────────────────────────────────────── */}
       <div className="flex-1 bg-white flex items-center justify-center px-8 sm:px-12 min-h-screen">
         <div className="w-full max-w-sm">
           {/* Mobile-only logo */}
@@ -119,13 +162,29 @@ export default function Login({ onLogin }) {
             <KausalIALogo size={26} />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
-          <p className="text-sm text-gray-500 mt-1 mb-8">Accede a tu cuenta</p>
+          {/* Type indicator (mobile) */}
+          <div className="md:hidden mb-4">
+            <span
+              className="inline-flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full"
+              style={{
+                color: isWorker ? '#059669' : '#4f46e5',
+                background: isWorker ? '#d1fae5' : '#ede9fe',
+              }}
+            >
+              {isWorker ? 'Portal Trabajador' : 'Acceso Empresarial'}
+            </span>
+          </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className={shake ? 'shake' : ''}
-          >
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isWorker ? 'Acceder a mi portal' : 'Iniciar sesión'}
+          </h1>
+          <p className="text-sm text-gray-500 mt-1 mb-8">
+            {isWorker
+              ? 'Ingresa con las credenciales que te dio tu empresa'
+              : 'Accede a tu cuenta organizacional'}
+          </p>
+
+          <form onSubmit={handleSubmit} className={shake ? 'shake' : ''}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in">
                 {error}
@@ -133,7 +192,6 @@ export default function Login({ onLogin }) {
             )}
 
             <div className="space-y-4">
-              {/* Usuario */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
                 <div className="relative">
@@ -150,7 +208,6 @@ export default function Login({ onLogin }) {
                 </div>
               </div>
 
-              {/* Contraseña */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
                 <div className="relative">
@@ -174,12 +231,11 @@ export default function Login({ onLogin }) {
                 </div>
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full h-12 flex items-center justify-center gap-2 text-sm mt-2 rounded-xl text-white font-bold transition-all duration-200 btn-glow disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ background: 'linear-gradient(135deg, #3b76f6, #6d28d9)' }}
+                style={{ background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})` }}
               >
                 {loading ? (
                   <>
@@ -189,13 +245,15 @@ export default function Login({ onLogin }) {
                     </svg>
                     Ingresando...
                   </>
-                ) : 'Iniciar sesión'}
+                ) : isWorker ? 'Entrar a mi portal →' : 'Iniciar sesión →'}
               </button>
             </div>
           </form>
 
           <p className="text-xs text-gray-400 text-center mt-12">
-            Sistema exclusivo para entidades autorizadas
+            {isWorker
+              ? 'Acceso exclusivo para trabajadores con credenciales activas'
+              : 'Sistema exclusivo para entidades autorizadas'}
           </p>
           <p className="text-xs text-gray-400 text-center mt-2">
             <Link to="/politica-tratamiento" className="text-brand-600 hover:underline">

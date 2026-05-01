@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KausalIALogo from '../../Components/KausalIALogo'
+import { useTheme } from '../../hooks/useTheme'
 import {
   Sparkles, ArrowRight, UserCheck, CheckCircle,
-  FileText, Scale, Shield, Lock, Brain, BarChart3,
+  FileText, Scale, Lock, Brain, BarChart3,
   Bell, TrendingUp, Users,
 } from 'lucide-react'
 
@@ -14,39 +15,27 @@ const PHRASES = [
   'Automatiza la gestión',
 ]
 
-const STAR_PATH = 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z'
-
 export default function LandingHero() {
   const navigate = useNavigate()
+  const { dark } = useTheme()
   const [phraseIdx, setPhraseIdx] = useState(0)
-  const [displayed, setDisplayed] = useState(PHRASES[0])
-  const [typing, setTyping] = useState(false)
+  const [visible, setVisible] = useState(true)
 
+  // Hold 3s → fade out
   useEffect(() => {
-    const full = PHRASES[phraseIdx]
-    if (typing) {
-      if (displayed.length < full.length) {
-        const t = setTimeout(() => setDisplayed(full.slice(0, displayed.length + 1)), 55)
-        return () => clearTimeout(t)
-      }
-      const t = setTimeout(() => setTyping(false), 2200)
-      return () => clearTimeout(t)
-    } else {
-      if (displayed.length > 0) {
-        const t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 28)
-        return () => clearTimeout(t)
-      }
-      const next = (phraseIdx + 1) % PHRASES.length
-      setPhraseIdx(next)
-      setTyping(true)
-    }
-  }, [displayed, typing, phraseIdx])
+    const hold = setTimeout(() => setVisible(false), 3000)
+    return () => clearTimeout(hold)
+  }, [phraseIdx])
 
-  // Kick off the cycle after initial display time
+  // After fade out (380ms) → swap phrase → fade in
   useEffect(() => {
-    const t = setTimeout(() => setTyping(false), 2200)
-    return () => clearTimeout(t)
-  }, [])
+    if (visible) return
+    const swap = setTimeout(() => {
+      setPhraseIdx(i => (i + 1) % PHRASES.length)
+      setVisible(true)
+    }, 380)
+    return () => clearTimeout(swap)
+  }, [visible])
 
   return (
     <section
@@ -55,47 +44,82 @@ export default function LandingHero() {
     >
       {/* Grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.12] pointer-events-none"
+        className="absolute inset-0 opacity-[0.10] pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)',
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />
-      {/* Orbs */}
-      <div className="absolute top-20 left-[5%] w-72 h-72 rounded-full opacity-20 animate-float-slow pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #3b76f6 0%, transparent 70%)' }} />
-      <div className="absolute top-32 right-[5%] w-56 h-56 rounded-full opacity-15 animate-float pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)' }} />
+
+      {/* Ambient orbs */}
+      <div
+        className="absolute top-20 left-[5%] w-80 h-80 rounded-full opacity-[0.18] animate-float-slow pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #3b76f6 0%, transparent 70%)', filter: 'blur(1px)' }}
+      />
+      <div
+        className="absolute top-36 right-[5%] w-60 h-60 rounded-full opacity-[0.14] animate-float pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)', filter: 'blur(1px)' }}
+      />
+      <div
+        className="absolute bottom-24 left-1/2 w-96 h-48 rounded-full opacity-[0.08] pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, #06b6d4 0%, transparent 70%)', transform: 'translateX(-50%)' }}
+      />
 
       <div className="relative max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center pb-20 pt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center pb-28 pt-4">
 
-          {/* ── Left: copy ──────────────────────────────────────────────── */}
+          {/* ── Left: copy ─────────────────────────────────────────── */}
           <div>
+            {/* Badge */}
             <div className="inline-flex items-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: '0ms' }}>
-              <span className="inline-flex items-center gap-1.5 bg-white/8 text-white/80 text-xs font-semibold px-4 py-1.5 rounded-full border border-white/15 backdrop-blur-sm">
+              <span
+                className="inline-flex items-center gap-1.5 text-white/80 text-xs font-semibold px-4 py-1.5 rounded-full border border-white/15 backdrop-blur-sm"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(59,118,246,0.15) 0%, rgba(139,92,246,0.12) 100%)',
+                  boxShadow: '0 0 20px rgba(59,118,246,0.12), inset 0 1px 0 rgba(255,255,255,0.08)',
+                }}
+              >
                 <Sparkles className="w-3 h-3 text-yellow-400" />
                 Motor de decisión clínica con causalidad real
-                <span className="ml-1 bg-brand-500/30 text-brand-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">NUEVO</span>
+                <span className="ml-1 bg-brand-500/30 text-brand-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  NUEVO
+                </span>
               </span>
             </div>
 
+            {/* Heading */}
             <h1
               className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-white leading-[1.08] tracking-tight mb-5 animate-slide-up font-display"
               style={{ animationDelay: '80ms' }}
             >
-              {/* Typewriter line */}
-              <span className="inline-block min-h-[1.1em]">
-                {displayed}
-                <span className="inline-block w-[2px] h-[0.85em] bg-blue-400 ml-[2px] align-middle animate-pulse" />
+              {/* Crossfade phrase — fixed height prevents layout jump */}
+              <span style={{ display: 'block', height: '1.15em', position: 'relative' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    opacity: visible ? 1 : 0,
+                    transform: visible ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.98)',
+                    transition: 'opacity 0.38s cubic-bezier(0.4,0,0.2,1), transform 0.38s cubic-bezier(0.4,0,0.2,1)',
+                    willChange: 'opacity, transform',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {PHRASES[phraseIdx]}
+                </span>
               </span>
-              <br />
-              <span style={{
-                background: 'linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>
+
+              {/* Gradient subtitle — always visible */}
+              <span
+                style={{
+                  background: 'linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 con inteligencia causal
               </span>
             </h1>
@@ -115,12 +139,12 @@ export default function LandingHero() {
             >
               <a
                 href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
-                className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-50 font-semibold px-7 py-3.5 rounded-xl transition-all shadow-xl shadow-black/20"
+                className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-50 font-semibold px-7 py-3.5 rounded-xl transition-all shadow-xl shadow-black/25"
               >
                 Solicitar demo B2B <ArrowRight className="w-4 h-4" />
               </a>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login?type=trabajador')}
                 className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-medium px-7 py-3.5 rounded-xl transition-all duration-200 backdrop-blur-sm"
               >
                 <UserCheck className="w-4 h-4" /> Portal cliente →
@@ -129,7 +153,7 @@ export default function LandingHero() {
 
             {/* Trust indicators */}
             <div
-              className="flex flex-wrap gap-4 text-white/40 text-xs font-medium animate-slide-up mb-5"
+              className="flex flex-wrap gap-4 text-white/40 text-xs font-medium animate-slide-up"
               style={{ animationDelay: '320ms' }}
             >
               {['Habeas Data Ley 1581', 'Multi-tenant seguro', 'Portal trabajador incluido', 'API REST lista'].map(t => (
@@ -138,30 +162,15 @@ export default function LandingHero() {
                 </span>
               ))}
             </div>
-
-            {/* Rating badge */}
-            <div className="flex items-center gap-3 animate-slide-up" style={{ animationDelay: '380ms' }}>
-              <div className="flex items-center gap-1.5 bg-white/6 border border-white/10 rounded-xl px-3 py-2">
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 20 20">
-                      <path d={STAR_PATH} />
-                    </svg>
-                  ))}
-                </div>
-                <span className="text-white/80 text-xs font-bold ml-1">4.9</span>
-                <span className="text-white/35 text-xs">· Usuarios satisfechos</span>
-              </div>
-            </div>
           </div>
 
-          {/* ── Right: product mockup (visible lg+) ─────────────────────── */}
+          {/* ── Right: product mockup (lg+) ───────────────────────────── */}
           <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '200ms' }}>
 
             {/* Floating metric card */}
             <div
               className="absolute -top-8 -left-6 z-20 bg-white rounded-2xl px-4 py-3 border border-gray-100 animate-float-slow"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+              style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10)' }}
             >
               <div className="text-2xl font-extrabold text-emerald-600 tabular-nums">1.4s</div>
               <div className="text-xs text-gray-400 font-medium">Por evaluación</div>
@@ -174,7 +183,7 @@ export default function LandingHero() {
             {/* Floating legal card */}
             <div
               className="absolute -bottom-4 -right-4 z-20 bg-white rounded-2xl px-4 py-3 border border-blue-100 animate-float"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)', animationDelay: '1s' }}
+              style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)', animationDelay: '1s' }}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Scale className="w-3.5 h-3.5 text-blue-600" />
@@ -210,12 +219,12 @@ export default function LandingHero() {
                     <KausalIALogo size={14} />
                   </div>
                   {[
-                    { label: 'Dashboard', icon: BarChart3, active: false },
-                    { label: 'Evaluar caso', icon: FileText, active: true },
-                    { label: 'Mis casos', icon: Users, active: false },
-                    { label: 'Alertas', icon: Bell, active: false },
-                    { label: 'Normativa', icon: Scale, active: false },
-                    { label: 'Analytics', icon: TrendingUp, active: false },
+                    { label: 'Dashboard',  icon: BarChart3, active: false },
+                    { label: 'Evaluar caso', icon: FileText,  active: true },
+                    { label: 'Mis casos',  icon: Users,    active: false },
+                    { label: 'Alertas',    icon: Bell,     active: false },
+                    { label: 'Normativa',  icon: Scale,    active: false },
+                    { label: 'Analytics',  icon: TrendingUp, active: false },
                   ].map(({ label, icon: Icon, active }) => (
                     <div
                       key={label}
@@ -241,10 +250,10 @@ export default function LandingHero() {
 
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     {[
-                      { label: 'CIE-10', value: 'M54.5 — Lumbago' },
+                      { label: 'CIE-10',      value: 'M54.5 — Lumbago' },
                       { label: 'Contingencia', value: 'Enfermedad laboral' },
-                      { label: 'Días', value: '15 días continuos' },
-                      { label: 'EPS', value: 'Nueva EPS S.A.S.' },
+                      { label: 'Días',         value: '15 días continuos' },
+                      { label: 'EPS',          value: 'Nueva EPS S.A.S.' },
                     ].map(({ label, value }) => (
                       <div key={label} className="bg-white/5 rounded-lg p-2 border border-white/10">
                         <div className="text-[9px] text-gray-500 mb-0.5">{label}</div>
@@ -283,14 +292,25 @@ export default function LandingHero() {
                 </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
 
-      {/* Fade to white */}
-      <div className="absolute bottom-0 inset-x-0 h-28 pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, transparent, #ffffff)' }} />
+      {/* Wave separator — blends hero into next section */}
+      <div className="absolute bottom-0 inset-x-0 pointer-events-none" style={{ lineHeight: 0 }}>
+        <svg
+          viewBox="0 0 1440 80"
+          preserveAspectRatio="none"
+          className="w-full block"
+          style={{ height: '80px' }}
+        >
+          <path
+            d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,30 1440,40 L1440,80 L0,80 Z"
+            fill={dark ? '#111827' : '#ffffff'}
+          />
+        </svg>
+      </div>
     </section>
   )
 }
