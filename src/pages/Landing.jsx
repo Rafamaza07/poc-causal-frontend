@@ -28,7 +28,7 @@ const FEATURES = [
 
 const PORTAL_BENEFITS = [
   { icon: ClipboardList, title: 'Estado de mi caso',              desc: 'Consulta en tiempo real el score de riesgo, la recomendación y el hito en que se encuentra tu incapacidad.', color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-900/30' },
-  { icon: TrendingUp,    title: 'Historial completo',             desc: 'Cada evaluación queda registrada con fecha, médico y resultado. Trazabilidad total para ti como trabajador.', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
+  { icon: TrendingUp,    title: 'Historial completo',             desc: 'Cada evaluación queda registrada con fecha, médico y resultado. Trazabilidad total de cada caso evaluado.', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
   { icon: Bell,          title: 'Alertas personales',             desc: 'Recibe notificaciones antes de que venza un plazo crítico con tu EPS, ARL o AFP.',                           color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/30' },
   { icon: Download,      title: 'Resumen descargable',            desc: 'Descarga el resumen médico-legal de tu caso en PDF para presentarlo ante cualquier entidad.',                color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/30' },
   { icon: Gavel,         title: 'Derechos de petición y tutelas', desc: 'Genera automáticamente documentos legales personalizados listos para radicar ante EPS, ARL o empleador.',   color: 'text-rose-600',   bg: 'bg-rose-50 dark:bg-rose-900/30' },
@@ -42,7 +42,7 @@ const PROFILES = [
     cta: 'Solicitar demo B2B', ctaHref: 'mailto:rafamaza56@gmail.com?subject=Demo B2B KausalIA', ctaStyle: 'bg-gray-900 text-white hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
   },
   {
-    tag: 'Para trabajadores', title: 'Portal Cliente Final', subtitle: 'El trabajador gestiona su caso sin intermediarios',
+    tag: 'Para cualquier persona', title: 'Portal Individual', subtitle: 'Médico, abogado, trabajador o cualquier persona',
     border: 'border-emerald-200 dark:border-emerald-800', bg: 'bg-emerald-50/50 dark:bg-emerald-900/20', badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300', icon: UserCheck,
     features: ['Consulta el estado de tu caso en tiempo real', 'Historial de evaluaciones con fechas y resultados', 'Alertas antes de que venzan tus plazos', 'Descarga tu resumen médico-legal en PDF', 'Genera derechos de petición y tutelas', 'Acceso seguro con tus credenciales'],
     cta: 'Acceder al portal', ctaHref: '/login?type=trabajador', ctaStyle: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700', isInternal: true,
@@ -50,8 +50,8 @@ const PROFILES = [
 ]
 
 const PLANS = [
-  { name: 'Básico', price: '$990.000', period: 'mes', desc: 'Para empleadores medianos con gestión interna de incapacidades.', features: ['Hasta 100 casos/mes', '3 usuarios', 'PDF por caso', 'Alertas básicas', 'Portal cliente 50 trabajadores', 'Soporte por email'], cta: 'Solicitar demo', highlight: false },
-  { name: 'Profesional', price: '$2.490.000', period: 'mes', desc: 'Para ARL y EPS con volumen alto y equipos médicos.', features: ['Hasta 500 casos/mes', '15 usuarios', 'Evaluación en lote (CSV)', 'Alertas avanzadas + RAG legal', 'Analytics completo', 'Portal cliente ilimitado', 'Soporte prioritario'], cta: 'Solicitar demo', highlight: true },
+  { name: 'Básico', price: '$990.000', period: 'mes', desc: 'Para empleadores medianos con gestión interna de incapacidades.', features: ['Hasta 100 casos/mes', '3 usuarios', 'PDF por caso', 'Alertas básicas', 'Portal individual — 50 accesos', 'Soporte por email'], cta: 'Solicitar demo', highlight: false },
+  { name: 'Profesional', price: '$2.490.000', period: 'mes', desc: 'Para ARL y EPS con volumen alto y equipos médicos.', features: ['Hasta 500 casos/mes', '15 usuarios', 'Evaluación en lote (CSV)', 'Alertas avanzadas + RAG legal', 'Analytics completo', 'Portal individual ilimitado', 'Soporte prioritario'], cta: 'Solicitar demo', highlight: true },
   { name: 'Enterprise', price: 'A convenir', period: '', desc: 'Para grandes aseguradoras o ministerios con integración HR.', features: ['Casos ilimitados', 'Usuarios ilimitados', 'API + webhooks salientes', 'SLA 99.9%', 'Gerente de cuenta dedicado', 'Factura electrónica DIAN'], cta: 'Hablar con ventas', highlight: false },
 ]
 
@@ -67,11 +67,11 @@ const TARGETS = [
   { icon: TrendingUp,name: 'AFP',         full: 'Fondos de Pensiones y Cesantías',      color: 'text-violet-600' },
   { icon: Briefcase, name: 'Empleadores', full: 'Empresas y PYMES con nómina',          color: 'text-teal-600' },
   { icon: Building2, name: 'IPS',         full: 'Instituciones Prestadoras de Salud',   color: 'text-emerald-600' },
-  { icon: UserCheck, name: 'Trabajadores',full: 'Vía el Portal Cliente Final',          color: 'text-rose-600' },
+  { icon: UserCheck, name: 'Individuos',   full: 'Portal individual por caso',           color: 'text-rose-600' },
 ]
 
 const HOW_IT_WORKS = [
-  { n: '01', title: 'Ingresa el caso',     desc: 'Carga diagnóstico CIE-10, contingencia y datos del trabajador en un formulario guiado.', icon: FileText, accent: '#2563eb' },
+  { n: '01', title: 'Ingresa el caso',     desc: 'Carga diagnóstico CIE-10, contingencia y datos del paciente en un formulario guiado.', icon: FileText, accent: '#2563eb' },
   { n: '02', title: 'Análisis causal IA',  desc: 'Motor PC + Bayesiano evalúa causalidad y calcula score de riesgo en < 2 segundos.',      icon: Brain,    accent: '#9333ea' },
   { n: '03', title: 'Sustento legal RAG',  desc: 'El corpus normativo (Ley 100, Decreto 1507) respalda cada recomendación con citas exactas.', icon: Scale, accent: '#059669' },
   { n: '04', title: 'Exporta y archiva',   desc: 'Genera PDF trazable o exporta al sistema de nómina. Historial inmutable para auditorías.', icon: Award, accent: '#ea580c' },
@@ -101,8 +101,8 @@ const FAQ_ITEMS = [
     a: 'El corpus RAG Legal se actualiza cuando el marco normativo cambia. Las evaluaciones ya emitidas quedan archivadas con la versión de normativa vigente en el momento de emitirlas.',
   },
   {
-    q: '¿El portal del trabajador tiene costo adicional?',
-    a: 'No. El portal de autogestión para trabajadores está incluido en todos los planes sin costo adicional. El número de trabajadores activos varía según el plan.',
+    q: '¿El portal individual tiene costo para quienes acceden directamente?',
+    a: 'Cuando una empresa contrata un plan B2B, el acceso al portal individual está incluido sin costo adicional para el número de usuarios del plan. Quien accede directamente, sin pasar por una empresa, puede gestionar su caso por $49.900 COP por caso — sin suscripción mensual.',
   },
   {
     q: '¿Cuánto tiempo toma estar operativos?',
@@ -280,10 +280,10 @@ export default function Landing() {
                     </div>
                     <div>
                       <div className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>
-                        Soy trabajador
+                        Acceso personal
                       </div>
                       <div className={`text-xs mt-0.5 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-                        Portal personal de caso
+                        Médico, abogado, trabajador o cualquier persona
                       </div>
                     </div>
                   </button>
@@ -404,11 +404,11 @@ export default function Landing() {
                 <UserCheck className="w-3.5 h-3.5" /> Nuevo · Portal Cliente Final
               </span>
               <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-5 leading-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
-                El trabajador gestiona<br />
-                <span className="text-emerald-600 dark:text-emerald-400">su caso sin intermediarios</span>
+                Gestiona tu caso<br />
+                <span className="text-emerald-600 dark:text-emerald-400">sin intermediarios</span>
               </h2>
               <p className={`mb-8 leading-relaxed text-[15px] ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
-                Cada trabajador accede a un portal personal donde puede consultar su evaluación, recibir alertas antes de que venzan sus plazos legales y generar automáticamente documentos como derechos de petición o tutelas.
+                Cualquier persona — médico, abogado, trabajador o familiar — accede a un portal individual donde consulta la evaluación, recibe alertas de plazos legales y genera documentos como derechos de petición o tutelas.
               </p>
               <ul className="space-y-4">
                 {PORTAL_BENEFITS.map(({ icon: Icon, title, desc, color, bg }) => (
@@ -478,7 +478,7 @@ export default function Landing() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-white font-bold text-sm">Hola, Carlos Rodríguez</div>
-                        <div className="text-emerald-200 text-[11px]">Trabajador · Nueva EPS S.A.S.</div>
+                        <div className="text-emerald-200 text-[11px]">Portal individual · Nueva EPS S.A.S.</div>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                         <span className="text-white text-[11px] font-bold">CR</span>
@@ -542,7 +542,7 @@ export default function Landing() {
               Dos perfiles, una plataforma
             </h2>
             <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              KausalIA sirve tanto al equipo operativo de la empresa como al trabajador afectado.
+              KausalIA sirve tanto al equipo operativo de la empresa como a cualquier persona afectada.
             </p>
           </div>
           <div ref={profilesRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -814,7 +814,7 @@ export default function Landing() {
             ))}
           </div>
 
-          {/* ── Plan Trabajador ─────────────────────────────────────────── */}
+          {/* ── Plan Individual ─────────────────────────────────────────── */}
           <div
             className="mt-6 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-2 transition-all duration-200"
             style={{
@@ -825,7 +825,7 @@ export default function Landing() {
           >
             <div className="flex-1 min-w-0">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 uppercase tracking-[0.12em] mb-2 block" style={{ color: dark ? '#34d399' : '#059669' }}>
-                <UserCheck className="w-3.5 h-3.5 inline -mt-0.5" /> Para trabajadores
+                <UserCheck className="w-3.5 h-3.5 inline -mt-0.5" /> Para cualquier persona
               </span>
               <h3 className={`text-xl font-bold mb-1 ${dark ? 'text-white' : 'text-gray-900'}`}>Plan Por Caso</h3>
               <div className="flex items-end gap-1 mb-4">
@@ -947,7 +947,7 @@ export default function Landing() {
             ¿Listo para automatizar tu gestión<br className="hidden sm:block" /> de incapacidades?
           </h2>
           <p className="text-white/50 mb-10 max-w-xl mx-auto">
-            Agenda una demo para tu equipo o accede directamente al portal si eres trabajador.
+            Agenda una demo para tu equipo o accede directamente al portal individual.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
@@ -960,7 +960,7 @@ export default function Landing() {
               onClick={() => navigate('/login?type=trabajador')}
               className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold px-8 py-4 rounded-xl transition-all text-base"
             >
-              <UserCheck className="w-5 h-5" /> Acceder al portal cliente
+              <UserCheck className="w-5 h-5" /> Acceder al portal individual
             </button>
           </div>
         </div>

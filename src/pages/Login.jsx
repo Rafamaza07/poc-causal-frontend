@@ -116,7 +116,7 @@ export default function Login({ onLogin }) {
               background: isWorker ? 'rgba(110,231,183,0.08)' : 'rgba(165,180,252,0.08)',
             }}
           >
-            {isWorker ? 'Portal Trabajador' : 'Acceso Empresarial'}
+            {isWorker ? 'Acceso Individual' : 'Acceso Empresarial'}
           </span>
 
           <h2
@@ -171,7 +171,7 @@ export default function Login({ onLogin }) {
                 background: isWorker ? '#d1fae5' : '#ede9fe',
               }}
             >
-              {isWorker ? 'Portal Trabajador' : 'Acceso Empresarial'}
+              {isWorker ? 'Acceso Individual' : 'Acceso Empresarial'}
             </span>
           </div>
 
@@ -180,7 +180,7 @@ export default function Login({ onLogin }) {
           </h1>
           <p className="text-sm text-gray-500 mt-1 mb-8">
             {isWorker
-              ? 'Ingresa con las credenciales que te dio tu empresa'
+              ? 'Ingresa con tus credenciales de acceso al portal'
               : 'Accede a tu cuenta organizacional'}
           </p>
 
@@ -252,7 +252,7 @@ export default function Login({ onLogin }) {
 
           <p className="text-xs text-gray-400 text-center mt-12">
             {isWorker
-              ? 'Acceso exclusivo para trabajadores con credenciales activas'
+              ? 'Acceso personal al portal individual'
               : 'Sistema exclusivo para entidades autorizadas'}
           </p>
           <p className="text-xs text-gray-400 text-center mt-2">
