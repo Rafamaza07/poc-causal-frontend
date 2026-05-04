@@ -312,6 +312,14 @@ export default function CasoDetalle() {
     } finally { setReeval(false) }
   }
 
+  const handleVacioClick = (checklistKey) => {
+    setActiveTab('documentacion')
+    setTimeout(() => {
+      document.getElementById(`chk-${checklistKey}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
+  }
+
   const descargarPDF = async () => {
     setDescarga(true)
     try {
@@ -670,7 +678,7 @@ export default function CasoDetalle() {
           ) : grafoCausal ? (
             <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-sm font-semibold text-gray-800 mb-4">Grafo causal del caso</h2>
-              <CasoCausalGraph data={grafoCausal} />
+              <CasoCausalGraph data={grafoCausal} onVacioClick={handleVacioClick} />
             </section>
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 animate-pulse">
@@ -922,6 +930,7 @@ export default function CasoDetalle() {
                       return (
                         <label
                           key={item.key}
+                          id={`chk-${item.key}`}
                           className={[
                             'flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer',
                             'transition-colors hover:bg-gray-50 select-none',
