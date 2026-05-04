@@ -25,3 +25,6 @@ API.interceptors.response.use(
 )
 
 export default API
+
+export const getGrafoCausalCaso = (idCaso) =>
+  API.get(`/api/casos/${idCaso}/grafo-causal`).then((r) => r.data)
