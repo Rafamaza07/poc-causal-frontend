@@ -28,7 +28,6 @@ const ResumenCasos           = lazy(() => import('./pages/ResumenCasos'))
 const AdminAlertasPendientes = lazy(() => import('./pages/admin/AdminAlertasPendientes'))
 const Biblioteca             = lazy(() => import('./pages/Biblioteca'))
 const BibliotecaAdmin        = lazy(() => import('./pages/admin/BibliotecaAdmin'))
-const ScratchGrafo           = lazy(() => import('./pages/_ScratchGrafo'))
 
 const PortalDashboard  = lazy(() => import('./pages/portal/PortalDashboard'))
 const MiHistorial      = lazy(() => import('./pages/portal/MiHistorial'))
@@ -145,8 +144,6 @@ function AppRoutes({ user, login, logout }) {
           <Route path="/admin/alertas-pendientes" element={['admin','superadmin'].includes(user?.rol) ? <AdminAlertasPendientes /> : <NoPermiso />} />
           <Route path="/biblioteca"              element={<Biblioteca />} />
           <Route path="/admin/biblioteca"        element={['admin','superadmin'].includes(user?.rol) ? <BibliotecaAdmin /> : <NoPermiso />} />
-          {/* SCRATCH temporal — borrar en Fase 3 */}
-          <Route path="/scratch-grafo"           element={<ScratchGrafo />} />
           <Route path="*"                         element={<NotFound />} />
         </Routes>
       </Suspense>

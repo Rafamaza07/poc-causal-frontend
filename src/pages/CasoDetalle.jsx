@@ -9,7 +9,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, ReferenceArea,
 } from 'recharts'
-import API from '../api/client'
+import API, { getGrafoCausalCaso } from '../api/client'
+import CasoCausalGraph from '../Components/charts/CasoCausalGraph'
 import Tabs from '../Components/ui/Tabs'
 import RutaTerminalCard from '../Components/data/RutaTerminalCard'
 import ScoreBloques from '../Components/data/ScoreBloques'
@@ -247,6 +248,9 @@ export default function CasoDetalle() {
   const [ragSources,  setRagSources]  = useState([])
   const [loadingRag,  setLoadingRag]  = useState(false)
 
+  const [grafoCausal,    setGrafoCausal]    = useState(null)
+  const [grafoCausalErr, setGrafoCausalErr] = useState(false)
+
   useEffect(() => {
     setLoading(true)
     API.get(`/api/historial/${id}`)
@@ -280,6 +284,16 @@ export default function CasoDetalle() {
     API.get(`/api/v1/casos/${id}/bitacora`)
       .then(r => setBitacora(r.data?.entradas ?? []))
       .catch(() => {})
+  }, [id])
+
+  useEffect(() => {
+    setGrafoCausal(null)
+    setGrafoCausalErr(false)
+    getGrafoCausalCaso(id)
+      .then(setGrafoCausal)
+      .catch((err) => {
+        if (err?.response?.status !== 404) setGrafoCausalErr(true)
+      })
   }, [id])
 
   const reevaluar = async () => {
@@ -647,6 +661,21 @@ export default function CasoDetalle() {
                 Posición en hitos normativos
               </h3>
               <MilestoneBar diasActuales={caso.dias_incapacidad_acumulados} />
+            </div>
+          )}
+
+          {/* Grafo causal del caso */}
+          {grafoCausalErr ? (
+            <p className="text-sm text-gray-400 text-center py-2">No se pudo cargar el grafo causal.</p>
+          ) : grafoCausal ? (
+            <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h2 className="text-sm font-semibold text-gray-800 mb-4">Grafo causal del caso</h2>
+              <CasoCausalGraph data={grafoCausal} />
+            </section>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 animate-pulse">
+              <div className="h-4 w-40 bg-gray-200 rounded mb-4" />
+              <div className="h-[420px] bg-gray-100 rounded-lg" />
             </div>
           )}
 

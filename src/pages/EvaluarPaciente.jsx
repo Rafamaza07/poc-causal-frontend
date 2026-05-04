@@ -8,7 +8,8 @@ import {
   Scale, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert,
   XCircle, Clipboard,
 } from 'lucide-react'
-import API from '../api/client'
+import API, { getGrafoCausalCaso } from '../api/client'
+import CasoCausalGraph from '../Components/charts/CasoCausalGraph'
 import { useToast } from '../Components/Toast'
 import Stepper from '../Components/ui/Stepper'
 import ScoreGauge from '../Components/charts/ScoreGauge'
@@ -309,6 +310,8 @@ export default function EvaluarPaciente() {
   const [fileLoading, setFileLoading]     = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(false)
   const [consentChecked, setConsentChecked] = useState(false)
+  const [grafoCausal,    setGrafoCausal]    = useState(null)
+  const [grafoCausalErr, setGrafoCausalErr] = useState(false)
   const [titular, setTitular] = useState({ nombre: '', cedula: '', email: '' })
   const setTit = (k, v) => setTitular(t => ({ ...t, [k]: v }))
 
@@ -333,6 +336,17 @@ export default function EvaluarPaciente() {
       .catch(() => setPreviewId(''))
       .finally(() => setPreviewLoading(false))
   }, [form.empresa_id])
+
+  useEffect(() => {
+    if (!result?.id_caso) return
+    setGrafoCausal(null)
+    setGrafoCausalErr(false)
+    getGrafoCausalCaso(result.id_caso)
+      .then(setGrafoCausal)
+      .catch((err) => {
+        if (err?.response?.status !== 404) setGrafoCausalErr(true)
+      })
+  }, [result?.id_caso])
 
   const set  = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const dias = parseInt(form.dias_incapacidad_acumulados) || 0
@@ -649,6 +663,21 @@ export default function EvaluarPaciente() {
             </div>
           </div>
         </div>
+
+        {/* Grafo causal del caso */}
+        {grafoCausalErr ? (
+          <p className="text-sm text-gray-400 text-center py-2">No se pudo cargar el grafo causal.</p>
+        ) : grafoCausal ? (
+          <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-800 mb-4">Grafo causal del caso</h2>
+            <CasoCausalGraph data={grafoCausal} />
+          </section>
+        ) : result?.id_caso ? (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 animate-pulse">
+            <div className="h-4 w-40 bg-gray-200 rounded mb-4" />
+            <div className="h-[420px] bg-gray-100 rounded-lg" />
+          </div>
+        ) : null}
 
         {/* Ruta de decisión — marco clínico-jurídico */}
         {result.ruta_terminal && (
