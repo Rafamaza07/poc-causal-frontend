@@ -58,10 +58,6 @@ const VACIO_TO_CHECKLIST = {
   concepto_rehab:      'concepto_rehabilitacion',
 }
 
-// ─── Conversión SVG coords → % del contenedor para posicionar tooltip ──────
-function tipPct(svgX, svgY) {
-  return { left: `${(svgX / 600) * 100}%`, top: `${(svgY / 420) * 100}%` }
-}
 
 // ─── Nodo SVG ──────────────────────────────────────────────────────────────
 function NodoSVG({ id, label, detalle, estado, onEnter, onLeave, onToggle }) {

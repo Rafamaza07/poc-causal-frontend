@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Activity,
@@ -90,7 +90,7 @@ export default function Sidebar({ user, onLogout, alertCount = 0, aprobCount = 0
 
         {/* Navigation */}
         <nav className={`flex-1 overflow-y-auto space-y-0.5 ${collapsed ? 'px-2 py-1' : 'px-3 py-1'}`}>
-          {[...nav, ...(adminNav.length ? [{ _separator: true }] : []), ...adminNav].map((n, idx) => {
+          {[...nav, ...(adminNav.length ? [{ _separator: true }] : []), ...adminNav].map((n, _idx) => {
             if (n._separator) return (
               <div key="sep-admin" className={`${collapsed ? 'py-1' : 'py-1.5'}`}>
                 {!collapsed && (

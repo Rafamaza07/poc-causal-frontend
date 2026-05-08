@@ -163,7 +163,6 @@ export default function Landing() {
   const ctaRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
 
   const sectionBg = dark ? '#111827' : '#ffffff'
-  const sectionBgAlt = dark ? '#0f172a' : '#f8faff'
 
   return (
     <div className={`min-h-screen font-sans ${dark ? 'bg-gray-900' : 'bg-white'}`}>

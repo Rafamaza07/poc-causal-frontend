@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KausalIALogo from '../../Components/KausalIALogo'
-import { useTheme } from '../../hooks/useTheme'
 import {
   Sparkles, ArrowRight, UserCheck, CheckCircle,
   FileText, Scale, Lock, Brain, BarChart3,
@@ -17,7 +16,6 @@ const PHRASES = [
 
 export default function LandingHero() {
   const navigate = useNavigate()
-  const { dark } = useTheme()
   const [phraseIdx, setPhraseIdx] = useState(0)
   const [visible, setVisible] = useState(true)
 

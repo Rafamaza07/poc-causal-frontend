@@ -173,8 +173,7 @@ export default function Alertas() {
           : a
       ))
       setToAck(null)
-    } catch {
-    } finally {
+    } catch { /* no-op */ } finally {
       setAcking(false)
     }
   }

@@ -109,7 +109,7 @@ function AlertRow({ alert }) {
   )
 }
 
-function CustomDonutLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) {
+function CustomDonutLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }) {
   if (percent < 0.05) return null
   const RADIAN = Math.PI / 180
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5

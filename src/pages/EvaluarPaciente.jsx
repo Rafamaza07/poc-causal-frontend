@@ -591,7 +591,7 @@ export default function EvaluarPaciente() {
       })
       setMapaAjustes(data)
     } catch (err) {
-      showToast(err.response?.data?.detail || 'Error al generar el mapa de ajustes.', 'error')
+      toast(err.response?.data?.detail || 'Error al generar el mapa de ajustes.', 'error')
     } finally {
       setMapaLoading(false)
     }

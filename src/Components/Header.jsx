@@ -45,7 +45,7 @@ const NEXT_MODE = { light: 'system', system: 'dark', dark: 'light' }
 const THEME_ICON = { light: Sun, system: Monitor, dark: Moon }
 const THEME_TITLE = { light: 'Cambiar a sistema', system: 'Cambiar a oscuro', dark: 'Cambiar a claro' }
 
-export default function Header({ user, onLogout, dark = false, mode = 'light', onSetMode }) {
+export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -83,7 +83,7 @@ export default function Header({ user, onLogout, dark = false, mode = 'light', o
         setUnread(sumRes.value.data?.unread ?? 0)
       if (listRes.status === 'fulfilled')
         setRecentAlerts(listRes.value.data?.alerts ?? listRes.value.data?.alertas ?? [])
-    } catch {}
+    } catch { /* no-op */ }
   }, [])
 
   useEffect(() => { fetchSummary() }, [fetchSummary])
