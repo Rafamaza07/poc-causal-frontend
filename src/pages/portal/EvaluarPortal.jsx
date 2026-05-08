@@ -164,7 +164,7 @@ export default function EvaluarPortal() {
         tipo_contrato:       form.tipo_contrato,
         consentimiento_datos: true,
       }
-      const { data } = await API.post('/api/evaluar', payload)
+      const { data } = await API.post('/api/v1/cliente/evaluar', payload)
       setResult(data)
       setStep(3)
     } catch (err) {
