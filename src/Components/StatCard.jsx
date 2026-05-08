@@ -31,7 +31,7 @@ export default function StatCard({
   icon: Icon,
   iconBg = 'icon-gradient-blue',
   iconColor = 'text-blue-600',
-  valueColor = 'text-gray-900',
+  valueColor = 'text-gray-900 dark:text-white',
   change,
   changeLabel,
   critical = false,

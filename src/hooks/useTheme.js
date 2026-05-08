@@ -4,7 +4,7 @@ const systemIsDark = () => window.matchMedia('(prefers-color-scheme: dark)').mat
 
 export function useTheme() {
   const [mode, setModeState] = useState(
-    () => localStorage.getItem('theme') ?? 'system'
+    () => localStorage.getItem('theme') ?? 'dark'
   )
 
   useEffect(() => {

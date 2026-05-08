@@ -135,9 +135,9 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
 
       {/* ── Breadcrumb ── */}
       <nav className="hidden sm:flex items-center gap-1.5 text-sm flex-shrink-0">
-        <span className="text-gray-400">Inicio</span>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
-        <span className="font-medium text-gray-800">{pageLabel}</span>
+        <span className="text-gray-400 dark:text-gray-500">Inicio</span>
+        <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" />
+        <span className="font-medium text-gray-800 dark:text-gray-100">{pageLabel}</span>
       </nav>
 
       {/* ── Search ── */}
@@ -156,10 +156,10 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
         </div>
 
         {showSearch && query.length >= 2 && (
-          <div className="absolute top-10 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
+          <div className="absolute top-10 left-0 right-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
             {searchBusy && (
               <div className="p-3 space-y-2">
-                {[1, 2, 3].map(i => <div key={i} className="h-8 bg-gray-100 rounded-lg animate-pulse" />)}
+                {[1, 2, 3].map(i => <div key={i} className="h-8 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />)}
               </div>
             )}
             {!searchBusy && results.length === 0 && (
@@ -171,10 +171,10 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
                 <button
                   key={caso.id_caso}
                   onClick={() => handleSelect(caso)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors
-                    text-left border-b last:border-0 border-gray-50"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
+                    text-left border-b last:border-0 border-gray-100 dark:border-gray-700/50"
                 >
-                  <span className="text-sm font-medium text-gray-800 flex-1 truncate">{caso.id_caso}</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-100 flex-1 truncate">{caso.id_caso}</span>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${range.bg} ${range.text}`}>
                     {Math.round(caso.score_riesgo ?? 0)}
                   </span>
@@ -210,8 +210,8 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
         <div ref={bellRef} className="relative" data-tour="bell">
           <button
             onClick={() => { setShowBell(!showBell); setShowUser(false) }}
-            className="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-500
-              hover:text-gray-800 hover:bg-gray-100 transition-colors"
+            className="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400
+              hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <Bell className="w-[18px] h-[18px]" />
             {unread > 0 && (
@@ -223,27 +223,27 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
           </button>
 
           {showBell && (
-            <div className="absolute top-11 right-0 w-80 bg-white border border-gray-200 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-900">Alertas</span>
+            <div className="absolute top-11 right-0 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">Alertas</span>
                 {unread > 0 && (
-                  <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">
                     {unread} sin leer
                   </span>
                 )}
               </div>
 
-              <div className="max-h-64 overflow-y-auto divide-y divide-gray-50">
+              <div className="max-h-64 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/40">
                 {recentAlerts.length === 0
                   ? <p className="px-4 py-5 text-sm text-gray-400 text-center">Sin alertas recientes</p>
                   : recentAlerts.map(a => {
                       const sev = (a.severity || a.nivel_alerta || 'INFO').toUpperCase()
                       const { Icon, color } = SEV_META[sev] ?? SEV_META.INFO
                       return (
-                        <div key={a.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/60 transition-colors">
+                        <div key={a.id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors">
                           <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${color}`} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-800 truncate">
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
                               {a.title || a.mensaje || a.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-0.5">
@@ -261,8 +261,8 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
 
               <button
                 onClick={() => { navigate('/alertas'); setShowBell(false) }}
-                className="w-full px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-50
-                  transition-colors border-t border-gray-100"
+                className="w-full px-4 py-2.5 text-sm font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20
+                  transition-colors border-t border-gray-100 dark:border-gray-700/60"
               >
                 Ver todas →
               </button>
@@ -271,13 +271,13 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
         </div>
 
         {/* Divider */}
-        <div className="h-6 w-px bg-gray-200 mx-3" />
+        <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-3" />
 
         {/* User menu */}
         <div ref={userRef} className="relative">
           <button
             onClick={() => { setShowUser(!showUser); setShowBell(false) }}
-            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white shadow-sm"
@@ -285,31 +285,31 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
             >
               {avatarInitials}
             </div>
-            <span className="text-sm font-medium text-gray-700 hidden md:block max-w-[120px] truncate">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block max-w-[120px] truncate">
               {user?.nombre || user?.usuario}
             </span>
           </button>
 
           {showUser && (
-            <div className="absolute top-11 right-0 w-52 bg-white border border-gray-200 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
-              <div className="px-3 py-2.5 border-b border-gray-100">
-                <p className="text-xs font-semibold text-gray-800 truncate">{user?.nombre}</p>
+            <div className="absolute top-11 right-0 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lifted z-50 animate-slide-down overflow-hidden">
+              <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700/60">
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{user?.nombre}</p>
                 <p className="text-[11px] text-gray-400 capitalize mt-0.5">{user?.rol}</p>
               </div>
               <div className="py-1">
                 {user?.rol === 'admin' && (
                   <button
                     onClick={() => { navigate('/configuracion'); setShowUser(false) }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <Settings className="w-3.5 h-3.5 text-gray-400" />
                     Configuración
                   </button>
                 )}
-                <div className="h-px bg-gray-100 my-1" />
+                <div className="h-px bg-gray-100 dark:bg-gray-700/60 my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Cerrar sesión

@@ -155,7 +155,7 @@ export default function Login({ onLogin }) {
       </div>
 
       {/* ── Right column ─────────────────────────────────────── */}
-      <div className="flex-1 bg-white flex items-center justify-center px-8 sm:px-12 min-h-screen">
+      <div className="flex-1 bg-white dark:bg-gray-950 flex items-center justify-center px-8 sm:px-12 min-h-screen">
         <div className="w-full max-w-sm">
           {/* Mobile-only logo */}
           <div className="flex md:hidden mb-8">
@@ -164,21 +164,19 @@ export default function Login({ onLogin }) {
 
           {/* Type indicator (mobile) */}
           <div className="md:hidden mb-4">
-            <span
-              className="inline-flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full"
-              style={{
-                color: isWorker ? '#059669' : '#4f46e5',
-                background: isWorker ? '#d1fae5' : '#ede9fe',
-              }}
-            >
+            <span className={`inline-flex items-center text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
+              isWorker
+                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/30'
+                : 'text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/30'
+            }`}>
               {isWorker ? 'Acceso Individual' : 'Acceso Empresarial'}
             </span>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {isWorker ? 'Acceder a mi portal' : 'Iniciar sesión'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1 mb-8">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-8">
             {isWorker
               ? 'Ingresa con tus credenciales de acceso al portal'
               : 'Accede a tu cuenta organizacional'}
@@ -186,14 +184,14 @@ export default function Login({ onLogin }) {
 
           <form onSubmit={handleSubmit} className={shake ? 'shake' : ''}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in">
                 {error}
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Usuario</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -209,7 +207,7 @@ export default function Login({ onLogin }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
