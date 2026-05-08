@@ -35,6 +35,7 @@ const MiCasoDetalle    = lazy(() => import('./pages/portal/MiCasoDetalle'))
 const MisAlertas       = lazy(() => import('./pages/portal/MisAlertas'))
 const GenerarDocumento = lazy(() => import('./pages/portal/GenerarDocumento'))
 const MisDocumentos    = lazy(() => import('./pages/portal/MisDocumentos'))
+const EvaluarPortal    = lazy(() => import('./pages/portal/EvaluarPortal'))
 
 const TITLE_MAP = {
   '/dashboard':    'Dashboard',
@@ -91,7 +92,7 @@ function PortalRoutes({ user, logout }) {
           <Route path="/portal/alertas"                element={<MisAlertas />} />
           <Route path="/portal/documentos"             element={<MisDocumentos />} />
           <Route path="/portal/documentos/:id_caso"    element={<GenerarDocumento />} />
-          <Route path="/portal/evaluar"                element={<EvaluarPaciente />} />
+          <Route path="/portal/evaluar"                element={<EvaluarPortal />} />
           <Route path="*"                              element={<Navigate to="/portal" />} />
         </Routes>
       </Suspense>

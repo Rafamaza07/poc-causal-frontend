@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
-  LayoutDashboard, Clock, Bell, FileText, LogOut, Menu, X, UserCheck,
+  LayoutDashboard, Clock, Bell, FileText, LogOut, Menu, X, UserCheck, Brain,
 } from 'lucide-react'
 import KausalIALogo from './KausalIALogo'
 
 const NAV = [
   { to: '/portal',           icon: LayoutDashboard, label: 'Mi resumen' },
   { to: '/portal/historial', icon: Clock,            label: 'Mis casos' },
+  { to: '/portal/evaluar',   icon: Brain,            label: 'Evaluar', highlight: true },
   { to: '/portal/alertas',   icon: Bell,             label: 'Mis alertas' },
   { to: '/portal/documentos',icon: FileText,         label: 'Mis documentos' },
 ]
@@ -36,8 +37,22 @@ export default function PortalLayout({ user, onLogout, children }) {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {NAV.map(({ to, icon: Icon, label }) => {
+            {NAV.map(({ to, icon: Icon, label, highlight }) => {
               const active = location.pathname === to || (to !== '/portal' && location.pathname.startsWith(to))
+              if (highlight) return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${
+                    active
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-200'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              )
               return (
                 <Link
                   key={to}
@@ -82,7 +97,7 @@ export default function PortalLayout({ user, onLogout, children }) {
         {/* Mobile dropdown */}
         {open && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 pb-3 pt-2 space-y-1">
-            {NAV.map(({ to, icon: Icon, label }) => {
+            {NAV.map(({ to, icon: Icon, label, highlight }) => {
               const active = location.pathname === to || (to !== '/portal' && location.pathname.startsWith(to))
               return (
                 <Link
@@ -90,7 +105,9 @@ export default function PortalLayout({ user, onLogout, children }) {
                   to={to}
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                    active ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-50'
+                    active
+                      ? highlight ? 'bg-violet-600 text-white' : 'bg-emerald-50 text-emerald-700'
+                      : highlight ? 'text-violet-700 bg-violet-50 font-bold' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" /> {label}
