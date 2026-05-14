@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Info,
   Brain, FileText, Scale, Shield, ChevronRight, Loader2,
+  BookOpen, Mic, MicOff, Lock, Sparkles,
 } from 'lucide-react'
 import API from '../../api/client'
 import { useToast } from '../../Components/Toast'
@@ -68,12 +69,20 @@ const TIEMPO_EMPRESA_OPTS = [
   { value: '72',  label: 'Más de 5 años' },
 ]
 
+const RELATO_MIN = 50
+const RELATO_MAX = 10000
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function StepIndicator({ step }) {
+  const labels = {
+    1: 'Tu historia',
+    2: 'Tu diagnóstico',
+    3: 'Tu situación laboral',
+  }
   return (
     <div className="flex items-center gap-2 mb-6">
-      {[1, 2].map(n => (
+      {[1, 2, 3].map(n => (
         <div key={n} className="flex items-center gap-2">
           <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
             step > n  ? 'bg-emerald-500 text-white'
@@ -83,9 +92,9 @@ function StepIndicator({ step }) {
             {step > n ? <CheckCircle className="w-3.5 h-3.5" /> : n}
           </div>
           <span className={`text-xs font-medium hidden sm:inline ${step === n ? 'text-gray-700' : 'text-gray-400'}`}>
-            {n === 1 ? 'Tu diagnóstico' : 'Tu situación laboral'}
+            {labels[n]}
           </span>
-          {n < 2 && <div className={`w-8 h-px mx-1 ${step > n ? 'bg-emerald-300' : 'bg-gray-200'}`} />}
+          {n < 3 && <div className={`w-8 h-px mx-1 ${step > n ? 'bg-emerald-300' : 'bg-gray-200'}`} />}
         </div>
       ))}
     </div>
@@ -130,6 +139,14 @@ export default function EvaluarPortal() {
   const [error,    setError]    = useState(null)
   const [cie10Mode, setCie10Mode] = useState('select') // 'select' | 'manual'
 
+  // Estado del relato (Paso 1)
+  const [relato, setRelato] = useState('')
+  const [grabando, setGrabando] = useState(false)
+  const [verRelatoCompleto, setVerRelatoCompleto] = useState(false)
+  const recognitionRef = useRef(null)
+  const speechSupported = typeof window !== 'undefined' &&
+    (window.SpeechRecognition || window.webkitSpeechRecognition)
+
   const [form, setForm] = useState({
     codigo_cie10:          '',
     tipo_contingencia:     'Enfermedad General',
@@ -144,8 +161,55 @@ export default function EvaluarPortal() {
 
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-  const canGoStep2 = form.codigo_cie10.trim() && form.dias_incapacidad && Number(form.dias_incapacidad) > 0
-  const canSubmit  = canGoStep2 && form.eps.trim() && form.edad && Number(form.edad) >= 18 && form.consentimiento
+  const canGoStep3 = form.codigo_cie10.trim() && form.dias_incapacidad && Number(form.dias_incapacidad) > 0
+  const canSubmit  = canGoStep3 && form.eps.trim() && form.edad && Number(form.edad) >= 18 && form.consentimiento
+
+  // ── Dictado por voz (Web Speech API) ─────────────────────────────────────
+  const iniciarDictado = () => {
+    if (grabando) {
+      try { recognitionRef.current?.stop() } catch { /* noop */ }
+      setGrabando(false)
+      return
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      toast('Tu navegador no soporta dictado por voz. Prueba con Chrome o Edge.', 'error')
+      return
+    }
+    const rec = new SpeechRecognition()
+    rec.lang = 'es-CO'
+    rec.continuous = true
+    rec.interimResults = false
+    rec.onresult = (e) => {
+      const texto = Array.from(e.results)
+        .filter(r => r.isFinal)
+        .map(r => r[0].transcript)
+        .join(' ')
+        .trim()
+      if (texto) {
+        setRelato(prev => (prev ? prev + ' ' : '') + texto)
+      }
+    }
+    rec.onerror = (e) => {
+      console.warn('Dictado error:', e.error)
+      setGrabando(false)
+    }
+    rec.onend = () => setGrabando(false)
+    try {
+      rec.start()
+      recognitionRef.current = rec
+      setGrabando(true)
+    } catch {
+      toast('No se pudo iniciar el dictado. Verifica los permisos del micrófono.', 'error')
+    }
+  }
+
+  // Detener dictado al desmontar
+  useEffect(() => {
+    return () => {
+      try { recognitionRef.current?.stop() } catch { /* noop */ }
+    }
+  }, [])
 
   const handleSubmit = async () => {
     if (!canSubmit) return
@@ -163,10 +227,11 @@ export default function EvaluarPortal() {
         tiempo_empresa_meses: Number(form.tiempo_empresa_meses),
         tipo_contrato:       form.tipo_contrato,
         consentimiento_datos: true,
+        relato_paciente:     relato.trim() || null,
       }
       const { data } = await API.post('/api/v1/cliente/evaluar', payload)
       setResult(data)
-      setStep(3)
+      setStep(4)
     } catch (err) {
       const msg = err.response?.data?.detail || 'No se pudo completar la evaluación. Intenta de nuevo.'
       setError(msg)
@@ -176,9 +241,9 @@ export default function EvaluarPortal() {
     }
   }
 
-  // ── Step 3: Result ───────────────────────────────────────────────────────
+  // ── Step 4: Result ───────────────────────────────────────────────────────
 
-  if (step === 3 && result) {
+  if (step === 4 && result) {
     const score = result.score_riesgo ?? 0
     const info  = SCORE_TEXTO(score)
     const recTexto = REC_TEXTO[result.recomendacion] ?? result.resumen ?? 'Consulta los detalles con tu EPS o ARL.'
@@ -212,6 +277,25 @@ export default function EvaluarPortal() {
           </div>
           <p className="text-sm text-gray-700 leading-relaxed">{recTexto}</p>
         </div>
+
+        {/* Relato del paciente (colapsable, si existe) */}
+        {relato.trim() && (
+          <details
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group"
+            open={verRelatoCompleto}
+            onToggle={(e) => setVerRelatoCompleto(e.target.open)}
+          >
+            <summary className="cursor-pointer flex items-center justify-between list-none">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-violet-500" /> Tu historia (como la contaste)
+              </h3>
+              <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${verRelatoCompleto ? 'rotate-90' : ''}`} />
+            </summary>
+            <p className="mt-3 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap italic">
+              "{relato.trim()}"
+            </p>
+          </details>
+        )}
 
         {/* Next steps */}
         {result.proximos_pasos?.length > 0 && (
@@ -284,7 +368,7 @@ export default function EvaluarPortal() {
     )
   }
 
-  // ── Steps 1 & 2 ──────────────────────────────────────────────────────────
+  // ── Steps 1, 2 & 3 ──────────────────────────────────────────────────────────
 
   return (
     <div className="max-w-xl mx-auto animate-page-in">
@@ -302,8 +386,125 @@ export default function EvaluarPortal() {
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
 
-        {/* ── STEP 1: Diagnóstico ─────────────────────────────── */}
+        {/* ── STEP 1: Relato del paciente ─────────────────────── */}
         {step === 1 && (
+          <>
+            {/* Header con icono y mensaje empático */}
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-100">
+              <div className="shrink-0 w-11 h-11 rounded-full bg-violet-600 flex items-center justify-center shadow-sm">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Cuéntanos tu historia</h2>
+                <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                  Antes de los datos técnicos, queremos escucharte. Describe lo que ha pasado con tu caso en tus propias palabras: cómo empezó, qué entidades han intervenido, qué ha pasado con tu trabajo. Cualquier detalle puede ser importante para mejorar tu evaluación.
+                </p>
+              </div>
+            </div>
+
+            {/* Sugerencias colapsables */}
+            <details className="rounded-xl border border-gray-200 bg-white">
+              <summary className="cursor-pointer list-none flex items-center justify-between p-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-violet-500" />
+                  ¿Qué puedes incluir? (sugerencias)
+                </span>
+                <ChevronRight className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-90" />
+              </summary>
+              <ul className="px-4 pb-4 pt-1 space-y-1.5 text-sm text-gray-600 list-disc pl-9">
+                <li>Cuándo empezaron los síntomas o el accidente</li>
+                <li>Qué hacías en tu trabajo cuando ocurrió</li>
+                <li>Tratamientos que has recibido y si te han funcionado</li>
+                <li>Cómo te ha respondido la EPS, ARL o tu empresa</li>
+                <li>Si te han reubicado, despedido o cambiado funciones</li>
+                <li>Cualquier conflicto o demora con las entidades</li>
+                <li>Cómo ha afectado esto tu vida diaria y tu familia</li>
+              </ul>
+            </details>
+
+            {/* Textarea grande */}
+            <div className="relative">
+              <textarea
+                value={relato}
+                onChange={(e) => setRelato(e.target.value.slice(0, RELATO_MAX))}
+                rows={12}
+                maxLength={RELATO_MAX}
+                placeholder="Por ejemplo: 'Trabajo en una bodega desde hace 6 años. En marzo de 2024 empecé a sentir un dolor fuerte en la espalda baja después de levantar unas cajas pesadas. Fui a la EPS y me dieron 15 días de incapacidad...'"
+                className="w-full p-4 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 resize-y min-h-[260px] text-sm leading-relaxed"
+              />
+              <div className="absolute bottom-3 right-4 text-[11px] text-gray-400 bg-white/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                {relato.length.toLocaleString()} / {RELATO_MAX.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Dictado por voz */}
+            {speechSupported && (
+              <button
+                type="button"
+                onClick={iniciarDictado}
+                className={`inline-flex items-center gap-2 text-sm font-medium px-3.5 py-2 rounded-xl border transition-colors ${
+                  grabando
+                    ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+                    : 'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100'
+                }`}
+              >
+                {grabando
+                  ? <><MicOff className="w-4 h-4" /> Detener dictado</>
+                  : <><Mic className="w-4 h-4" /> Prefiero dictarlo por voz</>
+                }
+                {grabando && (
+                  <span className="ml-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
+              </button>
+            )}
+
+            {/* Mensaje tranquilizador sobre privacidad */}
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-gray-50 text-xs text-gray-600">
+              <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-gray-400" />
+              <p>
+                Tu relato se guarda cifrado y solo se usa para mejorar la evaluación de tu caso. No se comparte con terceros sin tu consentimiento.
+              </p>
+            </div>
+
+            {/* Navegación */}
+            <div className="flex justify-between items-center pt-2">
+              <button
+                type="button"
+                onClick={() => setRelato('')}
+                className="text-xs text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!relato}
+              >
+                Limpiar
+              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Saltar este paso
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  disabled={relato.length > 0 && relato.length < RELATO_MIN}
+                  title={relato.length > 0 && relato.length < RELATO_MIN
+                    ? `Escribe al menos ${RELATO_MIN} caracteres o salta este paso`
+                    : ''}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-bold hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Continuar <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── STEP 2: Diagnóstico ─────────────────────────────── */}
+        {step === 2 && (
           <>
             <div>
               <h2 className="text-base font-bold text-gray-800 mb-1">Tu diagnóstico médico</h2>
@@ -393,18 +594,26 @@ export default function EvaluarPortal() {
               <p className="text-xs text-gray-400 mt-1">Suma todos los períodos, incluyendo renovaciones.</p>
             </div>
 
-            <button
-              onClick={() => setStep(2)}
-              disabled={!canGoStep2}
-              className="w-full h-11 flex items-center justify-center gap-2 text-sm font-bold text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors"
-            >
-              Continuar <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setStep(1)}
+                className="h-11 px-5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 inline mr-1" /> Atrás
+              </button>
+              <button
+                onClick={() => setStep(3)}
+                disabled={!canGoStep3}
+                className="flex-1 h-11 flex items-center justify-center gap-2 text-sm font-bold text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors"
+              >
+                Continuar <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </>
         )}
 
-        {/* ── STEP 2: Situación laboral ───────────────────────── */}
-        {step === 2 && (
+        {/* ── STEP 3: Situación laboral ───────────────────────── */}
+        {step === 3 && (
           <>
             <div>
               <h2 className="text-base font-bold text-gray-800 mb-1">Tu situación laboral</h2>
@@ -504,7 +713,7 @@ export default function EvaluarPortal() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => setStep(1)}
+                onClick={() => setStep(2)}
                 className="h-11 px-5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 inline mr-1" /> Atrás
