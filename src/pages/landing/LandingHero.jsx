@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import KausalIALogo from '../../Components/KausalIALogo'
 import {
-  Sparkles, ArrowRight, UserCheck, CheckCircle,
-  FileText, Scale, Lock, Brain, BarChart3,
-  Bell, TrendingUp, Users,
+  Sparkles, ArrowRight, CheckCircle,
+  FileText, Scale, Lock, BarChart3,
+  Bell, TrendingUp, Users, Play,
 } from 'lucide-react'
+import { trackEvent } from '../../utils/analytics'
 
 const PHRASES = [
-  'Evalúa incapacidades',
-  'Reduce sanciones',
-  'Sustenta con RAG legal',
-  'Automatiza la gestión',
+  'más rápidas y defendibles',
+  'con trazabilidad legal total',
+  'estandarizadas con IA causal',
+  'listas en menos de 2 segundos',
 ]
 
 export default function LandingHero() {
-  const navigate = useNavigate()
   const [phraseIdx, setPhraseIdx] = useState(0)
   const [visible, setVisible] = useState(true)
 
@@ -88,11 +87,12 @@ export default function LandingHero() {
 
             {/* Heading */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-white leading-[1.08] tracking-tight mb-5 animate-slide-up font-display"
+              className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold text-white leading-[1.08] tracking-tight mb-5 animate-slide-up font-display"
               style={{ animationDelay: '80ms' }}
             >
-              {/* Crossfade phrase — fixed height prevents layout jump */}
-              <span style={{ display: 'block', height: '1.15em', position: 'relative' }}>
+              Decisiones médico-legales
+              {/* Crossfade phrase */}
+              <span style={{ display: 'block', height: '1.2em', position: 'relative', marginTop: '0.05em' }}>
                 <span
                   style={{
                     position: 'absolute',
@@ -102,23 +102,14 @@ export default function LandingHero() {
                     transform: visible ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.98)',
                     transition: 'opacity 0.38s cubic-bezier(0.4,0,0.2,1), transform 0.38s cubic-bezier(0.4,0,0.2,1)',
                     willChange: 'opacity, transform',
-                    whiteSpace: 'nowrap',
+                    background: 'linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                   }}
                 >
                   {PHRASES[phraseIdx]}
                 </span>
-              </span>
-
-              {/* Gradient subtitle — always visible */}
-              <span
-                style={{
-                  background: 'linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                con inteligencia causal
               </span>
             </h1>
 
@@ -126,35 +117,43 @@ export default function LandingHero() {
               className="text-base sm:text-[17px] text-white/60 mb-8 leading-relaxed animate-slide-up"
               style={{ animationDelay: '160ms' }}
             >
-              KausalIA automatiza el análisis de incapacidades para EPS, ARL y empleadores
-              en Colombia. Reduce tiempos, estandariza criterios y da a cada trabajador un
-              portal propio para gestionar su caso.
+              Estandariza evaluaciones de incapacidad con motor causal IA y sustento normativo
+              automatizado para EPS, ARL, AFP y empleadores en Colombia.
             </p>
 
             <div
-              className="flex flex-col sm:flex-row gap-3 mb-8 animate-slide-up"
+              className="flex flex-col sm:flex-row gap-3 mb-6 animate-slide-up"
               style={{ animationDelay: '240ms' }}
             >
               <a
                 href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
+                onClick={() => trackEvent('landing_hero_cta_click', { cta: 'demo' })}
                 className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-50 font-semibold px-7 py-3.5 rounded-xl transition-all shadow-xl shadow-black/25"
               >
-                Solicitar demo B2B <ArrowRight className="w-4 h-4" />
+                Solicitar demo <ArrowRight className="w-4 h-4" />
               </a>
               <button
-                onClick={() => navigate('/login?type=trabajador')}
-                className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-medium px-7 py-3.5 rounded-xl transition-all duration-200 backdrop-blur-sm"
+                onClick={() => { trackEvent('landing_watch_tour_click'); document.getElementById('tour-section')?.scrollIntoView({ behavior: 'smooth' }) }}
+                className="inline-flex items-center justify-center gap-2 bg-white/8 hover:bg-white/14 text-white/80 border border-white/15 font-medium px-7 py-3.5 rounded-xl transition-all duration-200 backdrop-blur-sm"
               >
-                <UserCheck className="w-4 h-4" /> Portal cliente →
+                <Play className="w-4 h-4 text-white/60" /> Ver recorrido del producto
               </button>
             </div>
+
+            {/* Micro-proof */}
+            <p
+              className="text-white/30 text-xs mb-6 animate-slide-up"
+              style={{ animationDelay: '280ms' }}
+            >
+              Implementación inicial en 1–3 días hábiles · Sin permanencia mínima
+            </p>
 
             {/* Trust indicators */}
             <div
               className="flex flex-wrap gap-4 text-white/40 text-xs font-medium animate-slide-up"
               style={{ animationDelay: '320ms' }}
             >
-              {['Habeas Data Ley 1581', 'Multi-tenant seguro', 'Portal trabajador incluido', 'API REST lista'].map(t => (
+              {['Habeas Data Ley 1581', 'Trazabilidad inmutable', 'Control de acceso por rol', 'RAG normativo vigente'].map(t => (
                 <span key={t} className="flex items-center gap-1.5">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" /> {t}
                 </span>
