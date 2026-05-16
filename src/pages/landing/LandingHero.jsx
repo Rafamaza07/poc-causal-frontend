@@ -92,7 +92,11 @@ export default function LandingHero() {
             >
               Decisiones médico-legales
               {/* Crossfade phrase */}
-              <span style={{ display: 'block', height: '1.2em', position: 'relative', marginTop: '0.05em' }}>
+              <span style={{ display: 'block', position: 'relative', marginTop: '0.05em' }}>
+                {/* Spacer invisible: reserva la altura de la frase más larga para evitar solapamiento */}
+                <span aria-hidden="true" style={{ visibility: 'hidden', display: 'block' }}>
+                  estandarizadas con IA causal
+                </span>
                 <span
                   style={{
                     position: 'absolute',
