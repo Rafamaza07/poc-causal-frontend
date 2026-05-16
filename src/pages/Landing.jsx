@@ -9,11 +9,17 @@ import {
   ClipboardList, MessageSquare, Download, Gavel,
   Sun, Moon,
 } from 'lucide-react'
-import LandingHero   from './landing/LandingHero'
-import LandingProof  from './landing/LandingProof'
-import LandingTour   from './landing/LandingTour'
+import LandingHero        from './landing/LandingHero'
+import LandingTrustBar    from './landing/LandingTrustBar'
+import LandingProof       from './landing/LandingProof'
+import LandingStories     from './landing/LandingStories'
+import LandingROI         from './landing/LandingROI'
+import LandingTour        from './landing/LandingTour'
+import LandingCompare     from './landing/LandingCompare'
+import LandingCompliance  from './landing/LandingCompliance'
 import useScrollReveal from '../hooks/useScrollReveal'
 import { useTheme } from '../hooks/useTheme'
+import { trackEvent } from '../utils/analytics'
 
 /* ── Data ───────────────────────────────────────────────────────────────── */
 
@@ -85,36 +91,36 @@ const makeDotBg = (dark, base) => ({
 
 const FAQ_ITEMS = [
   {
-    q: '¿Requiere instalación o configuración técnica compleja?',
-    a: 'No. KausalIA es 100% SaaS — accedes desde el navegador sin instalar nada. La configuración inicial de tu tenant (usuarios, roles, datos de empresa) se hace en menos de un día.',
+    q: '¿Cómo se integra KausalIA con nuestros sistemas actuales (HCE, nómina, ERP)?',
+    a: 'Ofrecemos API REST documentada con autenticación JWT para integrar con sistemas de historia clínica, nómina y plataformas de EPS/ARL. También soportamos carga masiva por CSV y webhooks salientes para notificar eventos (evaluación completada, alerta activada). El plan Enterprise incluye acompañamiento técnico en la integración.',
   },
   {
-    q: '¿Cómo se integra con nuestros sistemas actuales?',
-    a: 'Ofrecemos API REST documentada para integrar con sistemas de nómina, HCE y plataformas de EPS. También soportamos carga masiva por CSV para equipos que no tienen integración técnica.',
+    q: '¿Dónde residen los datos y cómo se tratan? ¿Cumplen normativa colombiana?',
+    a: 'Los datos se almacenan en servidores con aislamiento por tenant — cada cliente tiene su espacio separado. Cumplimos Ley 1581/2012 (Habeas Data): consentimiento informado por caso, gestión de derechos ARCO, y log de accesos a datos sensibles. Los datos de salud no se comparten ni usan para entrenar modelos externos.',
   },
   {
-    q: '¿Cumple con la Ley 1581 de Habeas Data y normativa de datos en salud?',
-    a: 'Sí. Cada tenant tiene datos aislados, los datos sensibles de salud nunca salen de servidores colombianos, y la plataforma incluye gestión de consentimientos y trazabilidad de accesos.',
+    q: '¿Cuánto tiempo toma la implementación inicial?',
+    a: 'Entre 1 y 3 días hábiles para cuentas estándar: creación del tenant, carga de usuarios con roles, configuración de empresa y capacitación básica. Integraciones API con sistemas externos pueden tomar más tiempo según la complejidad. El plan Enterprise incluye gerente de cuenta para acompañar el onboarding.',
   },
   {
-    q: '¿Qué pasa si la normativa laboral cambia?',
-    a: 'El corpus RAG Legal se actualiza cuando el marco normativo cambia. Las evaluaciones ya emitidas quedan archivadas con la versión de normativa vigente en el momento de emitirlas.',
+    q: '¿Quién es responsable de la decisión clínica? ¿La IA reemplaza al médico?',
+    a: 'No. KausalIA es una herramienta de apoyo a la decisión — genera una recomendación con sustento normativo, pero el profesional de salud es quien emite el concepto final. El sistema documenta quién tomó la decisión, cuándo y con qué información, lo que refuerza la posición de la organización ante auditorías.',
   },
   {
-    q: '¿El portal individual tiene costo para quienes acceden directamente?',
-    a: 'Cuando una empresa contrata un plan B2B, el acceso al portal individual está incluido sin costo adicional para el número de usuarios del plan. Quien accede directamente, sin pasar por una empresa, puede gestionar su caso por $49.900 COP por caso — sin suscripción mensual.',
+    q: '¿Qué SLA ofrecen y cómo manejan incidentes en producción?',
+    a: 'El plan Enterprise incluye SLA de 99,9% de uptime con monitoreo continuo. Para incidentes críticos, el tiempo de respuesta inicial es de 1 hora. Los planes Básico y Profesional tienen soporte por email con respuesta en 1 día hábil. Ante un incidente, la plataforma puede continuar operando en modo degradado sin pérdida de datos.',
   },
   {
-    q: '¿Cuánto tiempo toma estar operativos?',
-    a: 'Entre 1 y 3 días hábiles para cuentas estándar: creación de tenant, carga de usuarios y capacitación básica. Integraciones API toman más tiempo según la complejidad del sistema destino.',
+    q: '¿Qué pasa si la normativa laboral colombiana cambia?',
+    a: 'El corpus RAG Legal (Ley 100, Decreto 1507, Ley 776 y complementarios) se actualiza cuando el marco normativo cambia. Las evaluaciones ya emitidas quedan archivadas con la versión de normativa vigente en el momento de emitirlas — esto es crítico para auditorías posteriores.',
   },
   {
-    q: '¿Qué significa "causalidad real" y por qué importa?',
-    a: 'La mayoría de sistemas usan correlaciones estadísticas: si X ocurre, probablemente Y. KausalIA usa redes causales (algoritmo PC + bayesiano) que modelan por qué X causa Y, lo que da recomendaciones más precisas y defendibles ante una auditoría.',
+    q: '¿El portal individual tiene costo adicional para los trabajadores?',
+    a: 'Cuando una empresa contrata un plan B2B, el acceso al portal individual está incluido sin costo adicional para el cupo de usuarios del plan. Quien accede directamente sin pasar por una empresa puede gestionar su caso por $49.900 COP por caso, sin suscripción mensual.',
   },
   {
-    q: '¿Puedo exportar los casos para auditorías externas?',
-    a: 'Sí. Cada evaluación se puede exportar en PDF con trazabilidad completa (fecha, usuario, normativa aplicada, score). Los planes Profesional y Enterprise también permiten exportación masiva en Excel y por API.',
+    q: '¿Puedo exportar los casos para auditorías externas o entes de control?',
+    a: 'Sí. Cada evaluación se puede exportar en PDF con trazabilidad completa: fecha, usuario, normativa aplicada, score de riesgo y recomendación. Los planes Profesional y Enterprise permiten exportación masiva en Excel y acceso por API. El historial es inmutable — no se pueden borrar ni modificar evaluaciones pasadas.',
   },
 ]
 
@@ -296,8 +302,17 @@ export default function Landing() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <LandingHero />
 
+      {/* ── Trust strip (B) ─────────────────────────────────────────────── */}
+      <LandingTrustBar />
+
       {/* ── Proof ───────────────────────────────────────────────────────── */}
       <LandingProof />
+
+      {/* ── Casos de uso (C) ─────────────────────────────────────────────── */}
+      <LandingStories />
+
+      {/* ── ROI 6 meses (D) ──────────────────────────────────────────────── */}
+      <LandingROI />
 
       {/* ── ¿Para quién? ────────────────────────────────────────────────── */}
       <section
@@ -383,8 +398,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Product Tour ────────────────────────────────────────────────── */}
-      <LandingTour />
+      {/* ── Product Tour (E) ────────────────────────────────────────────── */}
+      <div id="tour-section"><LandingTour /></div>
+
+      {/* ── Comparativa Manual vs KausalIA (F) ──────────────────────────── */}
+      <LandingCompare />
 
       {/* ── Portal Cliente Final ─────────────────────────────────────────── */}
       <section
@@ -858,7 +876,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      {/* ── Seguridad y cumplimiento (G) ────────────────────────────────── */}
+      <LandingCompliance />
+
+      {/* ── FAQ enterprise (H) ──────────────────────────────────────────── */}
       <section
         className="py-24 px-4 border-b"
         style={{
@@ -872,10 +893,10 @@ export default function Landing() {
               Preguntas frecuentes
             </span>
             <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Lo que más nos preguntan
+              Preguntas de compradores enterprise
             </h2>
             <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Si no encuentras tu respuesta, escríbenos y te contestamos en menos de un día hábil.
+              Las objeciones más comunes de equipos de TI, Legal y Operaciones. Si necesitas más detalle, escríbenos.
             </p>
           </div>
           <div
@@ -939,27 +960,28 @@ export default function Landing() {
         <div ref={ctaRef} className="relative max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 mb-6">
             <span className="inline-flex items-center gap-1.5 bg-white/8 text-white/70 text-xs font-semibold px-4 py-1.5 rounded-full border border-white/15">
-              <Sparkles className="w-3 h-3 text-yellow-400" /> Demo 30 minutos, sin costo
+              <Sparkles className="w-3 h-3 text-yellow-400" /> Demo guiada 30 min · Caso real de tu industria
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display mb-4 leading-tight">
-            ¿Listo para automatizar tu gestión<br className="hidden sm:block" /> de incapacidades?
+            Agenda una demo de 30 minutos<br className="hidden sm:block" /> con un caso tipo de tu operación.
           </h2>
           <p className="text-white/50 mb-10 max-w-xl mx-auto">
-            Agenda una demo para tu equipo o accede directamente al portal individual.
+            Te mostramos un flujo completo — desde la evaluación causal hasta el documento listo para radicar.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
+              href="mailto:rafamaza56@gmail.com?subject=Demo B2B KausalIA"
+              onClick={() => trackEvent('landing_final_cta_click', { cta: 'demo_b2b' })}
               className="btn-glow inline-flex items-center justify-center gap-2 bg-white text-gray-900 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl transition-all shadow-2xl shadow-black/40 text-base"
             >
-              Solicitar demo gratuita <ArrowUpRight className="w-5 h-5" />
+              Solicitar demo B2B <ArrowUpRight className="w-5 h-5" />
             </a>
             <button
-              onClick={() => navigate('/login?type=trabajador')}
+              onClick={() => { trackEvent('landing_final_cta_click', { cta: 'portal_individual' }); navigate('/login?type=trabajador') }}
               className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold px-8 py-4 rounded-xl transition-all text-base"
             >
-              <UserCheck className="w-5 h-5" /> Acceder al portal individual
+              <UserCheck className="w-5 h-5" /> Entrar al portal individual
             </button>
           </div>
         </div>
