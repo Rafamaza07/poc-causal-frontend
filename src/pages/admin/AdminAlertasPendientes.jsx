@@ -1,9 +1,48 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShieldAlert, RefreshCw, ChevronRight } from 'lucide-react'
+import { ShieldAlert, RefreshCw, ChevronRight, FileCheck, Eye, AlertCircle } from 'lucide-react'
 import API from '../../api/client'
 import { SkeletonTable } from '../../Components/Skeleton'
 import { timeAgo } from '../../utils/formatters'
+
+// ── Widget Governance (UI-5) ─────────────────────────────────────────────────
+// Datos mock con indicador visual (sin nueva DB)
+const GOVERNANCE_MOCK = [
+  { label: 'Consentimientos pendientes', value: 3,  icon: FileCheck, tone: 'amber',  hint: 'mock' },
+  { label: 'Accesos sensibles hoy',      value: 12, icon: Eye,       tone: 'violet', hint: 'mock' },
+  { label: 'Incidentes abiertos',        value: 1,  icon: AlertCircle, tone: 'red',  hint: 'mock' },
+]
+
+const TONE_STYLES = {
+  amber:  { card: 'bg-amber-50 border-amber-200',   value: 'text-amber-700',  label: 'text-amber-600'  },
+  violet: { card: 'bg-violet-50 border-violet-200', value: 'text-violet-700', label: 'text-violet-600' },
+  red:    { card: 'bg-red-50 border-red-200',       value: 'text-red-700',    label: 'text-red-600'    },
+}
+
+function GovernanceWidget() {
+  return (
+    <div className="card p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Governance</h3>
+        <span className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">
+          datos indicativos
+        </span>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {GOVERNANCE_MOCK.map(({ label, value, icon: Icon, tone }) => {
+          const s = TONE_STYLES[tone]
+          return (
+            <div key={label} className={`rounded-xl border ${s.card} p-3 text-center space-y-1`}>
+              <Icon className={`w-4 h-4 mx-auto ${s.value}`} />
+              <p className={`text-2xl font-bold ${s.value}`}>{value}</p>
+              <p className={`text-[10px] font-medium leading-tight ${s.label}`}>{label}</p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 const ROL_LABEL = {
   medico:     'Médico',
@@ -43,6 +82,9 @@ export default function AdminAlertasPendientes() {
 
   return (
     <div className="space-y-6">
+      {/* Governance widget (UI-5) */}
+      <GovernanceWidget />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
