@@ -83,14 +83,20 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
         setUnread(sumRes.value.data?.unread ?? 0)
       if (listRes.status === 'fulfilled')
         setRecentAlerts(listRes.value.data?.alerts ?? listRes.value.data?.alertas ?? [])
-    } catch { /* no-op */ }
+    } catch { /* no-op — alerta no crítica para UX */ }
   }, [])
 
-  useEffect(() => { fetchSummary() }, [fetchSummary])
-
-  // Debounced search
+  // Cargar alertas al montar — fetchSummary es estable (useCallback sin deps)
   useEffect(() => {
-    if (!debouncedQuery || debouncedQuery.length < 2) { setResults([]); return }
+    fetchSummary() // eslint-disable-line react-hooks/set-state-in-effect
+  }, [fetchSummary])
+
+  // Debounced search — setResults en callback de Promise, no directo en effect
+  useEffect(() => {
+    if (!debouncedQuery || debouncedQuery.length < 2) {
+      setResults([]) // eslint-disable-line react-hooks/set-state-in-effect
+      return
+    }
     setSearchBusy(true)
     API.get(`/api/historial?busqueda=${encodeURIComponent(debouncedQuery)}&limite=5`)
       .then(r => setResults(r.data.casos?.slice(0, 5) ?? []))

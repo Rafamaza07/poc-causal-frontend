@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw, Zap } from 'lucide-react'
 import API from '../api/client'
@@ -178,7 +178,7 @@ function TimelinePanel({ idCaso }) {
   const [error, setError]   = useState('')
 
   useEffect(() => {
-    setLoad(true)
+    setLoad(true) // eslint-disable-line react-hooks/set-state-in-effect
     API.get(`/api/casos/${idCaso}/timeline`)
       .then(r => setData(r.data))
       .catch(() => setError('No hay historial de evaluaciones anteriores para este caso.'))
@@ -462,7 +462,7 @@ export default function Historial() {
   const puedeEditar   = user?.permisos?.includes('editar_caso')
   const puedeExportar = user?.permisos?.includes('exportar')
 
-  const cargar = () => {
+  const cargar = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams({ limite: 50 })
     if (busqueda)     params.append('busqueda',     busqueda)
@@ -472,9 +472,9 @@ export default function Historial() {
       .then(r => setCasos(r.data.casos || []))
       .catch(() => toast('Error al cargar el historial', 'error'))
       .finally(() => setLoading(false))
-  }
+  }, [busqueda, filtroRiesgo, filtroRec, toast])
 
-  useEffect(() => { cargar() }, [])
+  useEffect(() => { cargar() }, [cargar])
 
   const verDetalle = async (id_caso) => {
     setShowComparar(false)
