@@ -7,6 +7,7 @@ import {
 import {
   ClipboardList, AlertTriangle, Bell, Calendar,
   Plus, ChevronRight, Clock, Sparkles, TrendingDown,
+  Zap, CheckSquare, ArrowRight,
 } from 'lucide-react'
 import API from '../api/client'
 import StatCard from '../Components/StatCard'
@@ -291,6 +292,113 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* ── Fila 1b: Acciones rápidas por rol (UI-2) ───── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <button
+          onClick={() => navigate('/evaluar')}
+          className="flex items-center gap-3 p-4 rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-sm transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+        >
+          <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold leading-tight">Evaluar caso</p>
+            <p className="text-xs text-violet-200">Nuevo caso clínico</p>
+          </div>
+          <ArrowRight className="w-4 h-4 ml-auto opacity-70" />
+        </button>
+
+        <button
+          onClick={() => navigate('/historial')}
+          className="flex items-center gap-3 p-4 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-800 shadow-sm transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+        >
+          <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold leading-tight">Casos críticos</p>
+            <p className="text-xs text-red-600">{casosCriticos} requieren atención</p>
+          </div>
+          <ArrowRight className="w-4 h-4 ml-auto opacity-50" />
+        </button>
+
+        <button
+          onClick={() => navigate('/aprobaciones')}
+          className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 shadow-sm transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+        >
+          <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <CheckSquare className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold leading-tight">Aprobaciones</p>
+            <p className="text-xs text-emerald-700">Pendientes de revisión</p>
+          </div>
+          <ArrowRight className="w-4 h-4 ml-auto opacity-50" />
+        </button>
+      </div>
+
+      {/* ── Fila 1c: Riesgos del día + Casos urgentes (UI-2) ── */}
+      {(casosCriticos > 0 || alertPending > 0 || casos.length > 0) && (
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {/* Casos que requieren decisión hoy */}
+          <div className="xl:col-span-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-card overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-gray-50 dark:border-gray-800/60 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Casos que requieren decisión hoy</h3>
+              <button onClick={() => navigate('/historial')} className="text-xs text-brand-600 hover:text-brand-800 font-medium flex items-center gap-0.5 transition-colors">
+                Ver todos <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {casos.filter(c => c.es_critico || c.nivel_riesgo === 'ALTO' || c.nivel_riesgo === 'CRÍTICO').length === 0 ? (
+              <div className="px-5 py-6 text-center text-sm text-gray-400">Sin casos urgentes en este momento</div>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                {casos.filter(c => c.es_critico || c.nivel_riesgo === 'ALTO' || c.nivel_riesgo === 'CRÍTICO').slice(0, 4).map(c => (
+                  <div
+                    key={c.id}
+                    onClick={() => navigate('/historial')}
+                    className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/80 dark:hover:bg-gray-800/60 cursor-pointer transition-colors"
+                  >
+                    {c.es_critico && <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100 flex-1 truncate">{c.id_caso}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${RISK_STYLES[c.nivel_riesgo] || 'bg-gray-100 text-gray-700'}`}>
+                      {c.nivel_riesgo}
+                    </span>
+                    <button
+                      onClick={e => { e.stopPropagation(); navigate('/historial') }}
+                      className="text-xs text-brand-600 hover:text-brand-800 font-medium transition-colors flex-shrink-0"
+                    >
+                      Abrir
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Panel Riesgos de hoy */}
+          <aside className="bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800/40 rounded-xl p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-violet-900 dark:text-violet-200">Riesgos de hoy</h3>
+            <div className="space-y-2">
+              {[
+                { label: 'CRÍTICO', count: stats?.casos_criticos ?? 0, color: 'bg-red-100 text-red-800 border-red-200' },
+                { label: 'ALTO', count: casos.filter(c => c.nivel_riesgo === 'ALTO').length, color: 'bg-orange-100 text-orange-800 border-orange-200' },
+                { label: 'MODERADO', count: casos.filter(c => c.nivel_riesgo === 'MODERADO').length, color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+              ].map(({ label, count, color }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${color}`}>{label}</span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-100 tabular-nums">{count}</span>
+                </div>
+              ))}
+            </div>
+            <div className="pt-2 border-t border-violet-200 dark:border-violet-800/40">
+              <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
+                Alertas pendientes: <span className="font-bold text-violet-900 dark:text-violet-100">{alertPending}</span>
+              </p>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* ── Fila 2: Stat cards ─────────────────────────── */}
       <div className="flex items-center gap-2">
