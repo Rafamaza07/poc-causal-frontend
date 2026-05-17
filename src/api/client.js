@@ -3,11 +3,15 @@ import { handleUnauthorized } from '../services/authRefresh'
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  withCredentials: true, // envía y recibe cookies HttpOnly
 })
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  // El access_token viaja en cookie HttpOnly — no se leen desde JS.
+  // Para endpoints que aún necesiten Bearer (compat. con versiones antiguas),
+  // se usa el token en memoria expuesto por authRefresh si está disponible.
+  const memToken = window.__kausalia_mem_token__
+  if (memToken) config.headers.Authorization = `Bearer ${memToken}`
   config.headers['Content-Type'] = config.headers['Content-Type'] || 'application/json'
   return config
 })

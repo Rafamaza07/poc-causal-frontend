@@ -137,7 +137,7 @@ export default function Dashboard() {
   const [semaforo, setSemaforo]       = useState(null)
 
   const user = useMemo(() => {
-    try { return JSON.parse(localStorage.getItem('user') || '{}') } catch { return {} }
+    try { return JSON.parse(sessionStorage.getItem('kausal_user') || '{}') } catch { return {} }
   }, [])
 
   useEffect(() => {

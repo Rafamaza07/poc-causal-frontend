@@ -1,65 +1,54 @@
 /**
- * Shared JWT refresh logic for both axios instances.
- * Uses a queue to avoid parallel refresh attempts.
+ * Shared auth refresh logic — usa cookies HttpOnly.
+ * El refresh_token viaja en cookie (no accesible desde JS).
+ * Usa una cola para evitar múltiples refresh paralelos.
  */
 
 let _isRefreshing = false
 let _failedQueue  = []
 
-function processQueue(error, token = null) {
-  _failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token)))
+function processQueue(error) {
+  _failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve()))
   _failedQueue = []
 }
 
 function clearSession() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('refresh_token')
-  localStorage.removeItem('user')
+  // Limpiar solo datos no sensibles de sessionStorage/memoria
+  delete window.__kausalia_mem_token__
+  // Redirigir al login — el backend borrará las cookies al hacer logout
   window.location.href = '/login'
 }
 
 /**
- * Call from a response interceptor on 401.
- * Returns the new access_token string, or throws if refresh failed.
+ * Llama al endpoint de refresh cookie-based.
+ * El refresh_token se envía automáticamente como cookie HttpOnly.
+ * El nuevo access_token queda en cookie HttpOnly (no accesible desde JS).
  */
 export async function handleUnauthorized(originalRequest, axiosInstance) {
-  const refreshToken = localStorage.getItem('refresh_token')
-
-  if (!refreshToken) {
-    clearSession()
-    return Promise.reject(new Error('No refresh token'))
-  }
-
   if (_isRefreshing) {
     return new Promise((resolve, reject) => {
       _failedQueue.push({ resolve, reject })
-    }).then((token) => {
-      originalRequest.headers.Authorization = `Bearer ${token}`
-      return axiosInstance(originalRequest)
-    })
+    }).then(() => axiosInstance(originalRequest))
+      .catch((err) => Promise.reject(err))
   }
 
   _isRefreshing = true
 
   try {
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const resp = await fetch(`${baseURL}/api/auth/refresh`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ refresh_token: refreshToken }),
+    const resp = await fetch(`${baseURL}/api/auth/refresh-cookie`, {
+      method:      'POST',
+      credentials: 'include', // incluye cookies HttpOnly en el request
+      headers:     { 'Content-Type': 'application/json' },
     })
 
     if (!resp.ok) throw new Error('Refresh failed')
 
-    const data  = await resp.json()
-    const token = data.access_token
-    localStorage.setItem('token', token)
-    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
-    processQueue(null, token)
-    originalRequest.headers.Authorization = `Bearer ${token}`
+    processQueue(null)
+    // Reintentar la request original — el nuevo access_token está en cookie
     return axiosInstance(originalRequest)
   } catch (err) {
-    processQueue(err, null)
+    processQueue(err)
     clearSession()
     return Promise.reject(err)
   } finally {

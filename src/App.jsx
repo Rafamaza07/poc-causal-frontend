@@ -154,19 +154,35 @@ function AppRoutes({ user, login, logout }) {
 
 export default function App() {
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
+    // Solo el perfil público del usuario (no tokens) en sessionStorage
+    try { return JSON.parse(sessionStorage.getItem('kausal_user')) } catch { return null }
   })
 
-  const login = (u, token) => {
-    localStorage.setItem('user', JSON.stringify(u))
-    localStorage.setItem('token', token)
+  const login = (u) => {
+    // Tokens van en cookies HttpOnly (gestionadas por backend)
+    // Solo el perfil público del usuario se guarda en sesión de browser
+    sessionStorage.setItem('kausal_user', JSON.stringify(u))
+    // Limpiar cualquier token residual de versiones anteriores
+    localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user')
     setUser(u)
   }
 
-  const logout = () => {
-    localStorage.removeItem('user')
+  const logout = async () => {
+    // Revocar refresh_token y borrar cookies HttpOnly en el backend
+    try {
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      await fetch(`${baseURL}/api/auth/logout-cookie`, {
+        method:      'POST',
+        credentials: 'include',
+      })
+    } catch { /* ignorar error de red — limpiar sesión de todas formas */ }
+    sessionStorage.removeItem('kausal_user')
     localStorage.removeItem('token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user')
+    delete window.__kausalia_mem_token__
     setUser(null)
   }
 
@@ -174,7 +190,7 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <TitleManager />
-        <AppRoutes user={user} login={login} logout={logout} />
+        <AppRoutes user={user} login={(u) => login(u)} logout={logout} />
       </BrowserRouter>
     </ToastProvider>
   )

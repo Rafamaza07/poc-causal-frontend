@@ -124,9 +124,7 @@ export default function Header({ user, onLogout, mode = 'light', onSetMode }) {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    localStorage.removeItem('refresh_token')
+    // Limpieza local — el backend invalida las cookies HttpOnly via App.logout()
     onLogout()
   }
 

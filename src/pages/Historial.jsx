@@ -458,7 +458,7 @@ export default function Historial() {
   const [exportando, setExportando]     = useState(false)
   const [reevaluando, setReevaluando]   = useState(false)
 
-  const user = (() => { try { return JSON.parse(localStorage.getItem('user')) } catch { return null } })()
+  const user = (() => { try { return JSON.parse(sessionStorage.getItem('kausal_user')) } catch { return null } })()
   const puedeEditar   = user?.permisos?.includes('editar_caso')
   const puedeExportar = user?.permisos?.includes('exportar')
 

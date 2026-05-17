@@ -37,8 +37,8 @@ export default function Login({ onLogin }) {
     setLoading(true)
     setError('')
     try {
-      const { data } = await API.post('/api/login', form)
-      if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
+      // Usa el endpoint cookie-based: tokens en HttpOnly, no en JS
+      const { data } = await API.post('/api/auth/login-cookie', form)
       onLogin({
         usuario:    data.usuario,
         nombre:     data.nombre,
@@ -47,7 +47,7 @@ export default function Login({ onLogin }) {
         tenant:     data.tenant,
         superadmin: data.superadmin ?? false,
         sub_id:     data.sub_id ?? null,
-      }, data.access_token)
+      }, null)
     } catch (err) {
       setError(err.response?.data?.detail || 'Credenciales inválidas')
       triggerShake()
