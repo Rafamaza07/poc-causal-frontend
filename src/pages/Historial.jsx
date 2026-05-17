@@ -446,6 +446,8 @@ function EditarNotas({ idCaso, notasIniciales, onGuardado }) {
 }
 
 // ─── Página principal ─────────────────────────────────────────────────────────
+const PAGE_SIZE = 20
+
 export default function Historial() {
   const toast = useToast()
   const [casos, setCasos]               = useState([])
@@ -457,6 +459,12 @@ export default function Historial() {
   const [showComparar, setShowComparar] = useState(false)
   const [exportando, setExportando]     = useState(false)
   const [reevaluando, setReevaluando]   = useState(false)
+  // Pagination & sort (F5-3)
+  const [page, setPage]                 = useState(1)
+  const [totalCasos, setTotalCasos]     = useState(0)
+  const [totalPages, setTotalPages]     = useState(1)
+  const [sortBy, setSortBy]             = useState('fecha')
+  const [sortDir, setSortDir]           = useState('desc')
 
   const user = (() => { try { return JSON.parse(sessionStorage.getItem('kausal_user')) } catch { return null } })()
   const puedeEditar   = user?.permisos?.includes('editar_caso')
@@ -464,15 +472,24 @@ export default function Historial() {
 
   const cargar = useCallback(() => {
     setLoading(true)
-    const params = new URLSearchParams({ limite: 50 })
+    const params = new URLSearchParams({
+      page,
+      page_size: PAGE_SIZE,
+      sort_by:   sortBy,
+      sort_dir:  sortDir,
+    })
     if (busqueda)     params.append('busqueda',     busqueda)
     if (filtroRiesgo) params.append('nivel_riesgo', filtroRiesgo)
     if (filtroRec)    params.append('recomendacion', filtroRec)
     API.get(`/api/historial?${params}`)
-      .then(r => setCasos(r.data.casos || []))
+      .then(r => {
+        setCasos(r.data.casos || [])
+        setTotalCasos(r.data.total_casos ?? 0)
+        setTotalPages(r.data.total_pages ?? 1)
+      })
       .catch(() => toast('Error al cargar el historial', 'error'))
       .finally(() => setLoading(false))
-  }, [busqueda, filtroRiesgo, filtroRec, toast])
+  }, [busqueda, filtroRiesgo, filtroRec, toast, page, sortBy, sortDir])
 
   useEffect(() => { cargar() }, [cargar])
 
@@ -524,7 +541,7 @@ export default function Historial() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Historial de Casos</h1>
-          <p className="text-gray-500 text-sm mt-1">{casos.length} casos</p>
+          <p className="text-gray-500 text-sm mt-1">{totalCasos} casos en total</p>
         </div>
         <div className="flex gap-2">
           {puedeExportar && (
@@ -541,20 +558,20 @@ export default function Historial() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros + orden (F5-3) */}
       <div className="card p-4 flex gap-3 flex-wrap items-center">
-        <Filter className="w-4 h-4 text-gray-400" />
+        <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
         <input type="text" value={busqueda} onChange={e => setBusqueda(e.target.value)}
           placeholder="Buscar por ID..." className="input !w-auto"
-          onKeyDown={e => { if (e.key === 'Enter') cargar() }} />
-        <select value={filtroRiesgo} onChange={e => setFiltroRiesgo(e.target.value)} className="input !w-auto">
+          onKeyDown={e => { if (e.key === 'Enter') { setPage(1); cargar() } }} />
+        <select value={filtroRiesgo} onChange={e => { setFiltroRiesgo(e.target.value); setPage(1) }} className="input !w-auto">
           <option value="">Todos los niveles</option>
           <option value="BAJO">Bajo</option>
           <option value="MODERADO">Moderado</option>
           <option value="ALTO">Alto</option>
           <option value="CRÍTICO">Crítico</option>
         </select>
-        <select value={filtroRec} onChange={e => setFiltroRec(e.target.value)} className="input !w-auto">
+        <select value={filtroRec} onChange={e => { setFiltroRec(e.target.value); setPage(1) }} className="input !w-auto">
           <option value="">Todas las recomendaciones</option>
           <option value="CALIFICA_PENSION_INVALIDEZ">Pensión</option>
           <option value="CONTINUAR_INCAPACIDAD">Continuar</option>
@@ -562,7 +579,22 @@ export default function Historial() {
           <option value="REINCORPORACION_CON_RECOMENDACIONES_MEDICAS">Restricciones médicas</option>
           <option value="FORZAR_CALIFICACION_PCL">Forzar PCL</option>
         </select>
-        <button onClick={cargar} className="btn-primary text-sm px-4 py-2">
+        <div className="flex items-center gap-1.5 ml-auto">
+          <select value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1) }} className="input !w-auto text-xs">
+            <option value="fecha">Fecha</option>
+            <option value="score_riesgo">Score</option>
+            <option value="id_caso">ID</option>
+            <option value="recomendacion">Recomendación</option>
+          </select>
+          <button
+            onClick={() => { setSortDir(d => d === 'desc' ? 'asc' : 'desc'); setPage(1) }}
+            title={sortDir === 'desc' ? 'Descendente' : 'Ascendente'}
+            className="input !w-auto px-2.5 py-1 text-xs font-medium select-none cursor-pointer"
+          >
+            {sortDir === 'desc' ? '↓' : '↑'}
+          </button>
+        </div>
+        <button onClick={() => { setPage(1); cargar() }} className="btn-primary text-sm px-4 py-2">
           Filtrar
         </button>
       </div>
@@ -609,6 +641,47 @@ export default function Historial() {
                 ))}
               </tbody>
             </table>
+
+            {/* Paginación server-side (F5-3) */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500">
+                  Página {page} de {totalPages} · {totalCasos} casos
+                </p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ← Anterior
+                  </button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const p = Math.max(1, Math.min(totalPages - 4, page - 2)) + i
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                          p === page
+                            ? 'bg-brand-600 text-white border-brand-600'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  })}
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
