@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   Sparkles, FileText, ArrowRight, ArrowLeft,
@@ -279,6 +279,118 @@ function ChecklistItem({ label, checked, onChange }) {
         {label}
       </span>
     </label>
+  )
+}
+
+// ── Sticky footer del wizard (UI-3) ──────────────────────────────────────────
+function WizardStickyFooter({
+  onPrev, onNext, onSubmit, onDraft,
+  isPrevDisabled, isNextDisabled, isSubmitDisabled,
+  isLastStep, isLoading,
+}) {
+  return (
+    <div className="sticky bottom-0 z-20 border-t border-gray-200 bg-white/95 backdrop-blur px-4 py-3 flex items-center gap-2 rounded-b-xl">
+      <button
+        type="button"
+        onClick={onDraft}
+        className="px-4 py-2 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+      >
+        Guardar borrador
+      </button>
+      <div className="flex-1" />
+      {onPrev && (
+        <button
+          type="button"
+          onClick={onPrev}
+          disabled={isPrevDisabled}
+          className="px-5 py-2 text-sm font-semibold rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Atrás
+        </button>
+      )}
+      {isLastStep ? (
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={isSubmitDisabled || isLoading}
+          className="px-6 py-2 text-sm font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+        >
+          <Sparkles className="w-4 h-4" />
+          {isLoading ? 'Evaluando...' : 'Evaluar caso'}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isNextDisabled}
+          className="px-6 py-2 text-sm font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+        >
+          Siguiente <ArrowRight className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Sidebar checklist del paso actual (UI-3) ─────────────────────────────────
+function StepChecklist({ step, form }) {
+  const fields = useMemo(() => {
+    if (step === 'identificacion') return [
+      { label: 'Empresa seleccionada', ok: !!form.empresa_id },
+      { label: 'Edad ingresada', ok: form.edad !== '' },
+      { label: 'Nombre del trabajador', ok: !!form.nombre_trabajador },
+      { label: 'Cargo', ok: !!form.cargo },
+      { label: 'Descripción clínica', ok: !!form.texto_clinico },
+      { label: 'Código CIE-10', ok: !!form.codigo_cie10 },
+    ]
+    if (step === 'temporal') return [
+      { label: 'Fecha inicio incapacidad', ok: !!form.fecha_inicio_incapacidad },
+      { label: 'Días acumulados', ok: !!form.dias_incapacidad_acumulados },
+      { label: 'Concepto rehabilitación', ok: !!form.concepto_rehabilitacion && form.concepto_rehabilitacion !== '' },
+    ]
+    if (step === 'documentacion') return CHECKLIST_ITEMS.slice(0, 6).map(i => ({
+      label: i.label,
+      ok: !!form[i.key],
+    }))
+    if (step === 'calificacion') return [
+      { label: 'Estado PCL definido', ok: true },
+      { label: 'Estado ocupacional', ok: true },
+      { label: 'Flags jurídicos revisados', ok: true },
+    ]
+    if (step === 'revision') return [
+      { label: 'Confirmación de datos', ok: false },
+    ]
+    return []
+  }, [step, form])
+
+  const completed = fields.filter(f => f.ok).length
+  const pct = fields.length ? Math.round((completed / fields.length) * 100) : 100
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 space-y-3 sticky top-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Completitud del paso</p>
+        <span className={`text-xs font-bold tabular-nums ${pct === 100 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
+          {pct}%
+        </span>
+      </div>
+      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${pct === 100 ? 'bg-emerald-500' : pct >= 60 ? 'bg-amber-400' : 'bg-red-400'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <ul className="space-y-1.5 mt-1">
+        {fields.map(({ label, ok }) => (
+          <li key={label} className="flex items-center gap-2 text-xs">
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${ok ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-300'}`}>
+              {ok ? <CheckCircle className="w-3 h-3" /> : <span className="w-1.5 h-1.5 rounded-full bg-gray-300 inline-block" />}
+            </span>
+            <span className={ok ? 'text-gray-700' : 'text-gray-400'}>{label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
@@ -933,7 +1045,7 @@ export default function EvaluarPaciente() {
 
   // ── Wizard ───────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Evaluar caso</h1>
 
       {/* Stepper + Estado chip */}
@@ -942,9 +1054,12 @@ export default function EvaluarPaciente() {
         <StepCasoEstado form={form} />
       </div>
 
+      {/* Layout: form principal + sidebar checklist (UI-3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+
       {/* ── STEP: Identificación ─────────────────────────────────────────── */}
       {step === 'identificacion' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-5">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-5">
           <h2 className="text-base font-semibold text-gray-800">Identificación del caso</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1080,18 +1195,18 @@ export default function EvaluarPaciente() {
               showDetails placeholder="Buscar código CIE-10..." />
           </Field>
 
-          <div className="flex justify-end pt-2">
-            <button type="button" onClick={goNext} disabled={!step0Valid}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
-              Siguiente <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onNext={goNext}
+            isNextDisabled={!step0Valid}
+            isLastStep={false}
+          />
         </div>
       )}
 
       {/* ── STEP: Línea temporal ─────────────────────────────────────────── */}
       {step === 'temporal' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Línea temporal</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1147,19 +1262,18 @@ export default function EvaluarPaciente() {
             </div>
           )}
 
-          <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={goNext}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
-              Siguiente <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onPrev={goPrev}
+            onNext={goNext}
+            isLastStep={false}
+          />
         </div>
       )}
 
       {/* ── STEP: Documentación clínica + SST ───────────────────────────── */}
       {step === 'documentacion' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Documentación clínica y SST</h2>
 
           {/* Checklist documental */}
@@ -1244,19 +1358,18 @@ export default function EvaluarPaciente() {
             </Field>
           </div>
 
-          <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={goNext}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
-              Siguiente <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onPrev={goPrev}
+            onNext={goNext}
+            isLastStep={false}
+          />
         </div>
       )}
 
       {/* ── STEP: Consentimiento informado (condicional — solo si hay PDF) ── */}
       {step === 'consentimiento' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Consentimiento informado</h2>
 
           <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -1299,20 +1412,19 @@ export default function EvaluarPaciente() {
             </span>
           </label>
 
-          <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={goNext}
-              disabled={!stepConsentValid}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
-              Siguiente <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onPrev={goPrev}
+            onNext={goNext}
+            isNextDisabled={!stepConsentValid}
+            isLastStep={false}
+          />
         </div>
       )}
 
       {/* ── STEP: Calificación ───────────────────────────────────────────── */}
       {step === 'calificacion' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Estado de calificación</h2>
 
           <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
@@ -1408,19 +1520,18 @@ export default function EvaluarPaciente() {
             )}
           </div>
 
-          <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={goNext}
-              className="btn-primary flex items-center gap-2 px-6 py-2.5 text-sm">
-              Siguiente <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onPrev={goPrev}
+            onNext={goNext}
+            isLastStep={false}
+          />
         </div>
       )}
 
       {/* ── STEP: Revisión + confirmación ────────────────────────────────── */}
       {step === 'revision' && (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
           <h2 className="text-base font-semibold text-gray-800">Revisión y confirmación</h2>
 
           {/* Estado auto-clasificado prominente */}
@@ -1464,17 +1575,23 @@ export default function EvaluarPaciente() {
             </span>
           </label>
 
-          <div className="flex justify-between pt-2">
-            <BtnSecondary onClick={goPrev}><ArrowLeft className="w-4 h-4" /> Anterior</BtnSecondary>
-            <button type="button" onClick={handleSubmit}
-              disabled={!revisionValid || loading}
-              className="btn-primary flex items-center gap-2 px-7 py-2.5 text-base font-semibold disabled:opacity-50">
-              <Sparkles className="w-5 h-5" />
-              {loading ? 'Evaluando...' : 'Evaluar caso'}
-            </button>
-          </div>
+          <WizardStickyFooter
+            onDraft={() => toast('Borrador guardado localmente', 'info')}
+            onPrev={goPrev}
+            onSubmit={handleSubmit}
+            isSubmitDisabled={!revisionValid}
+            isLastStep={true}
+            isLoading={loading}
+          />
         </div>
       )}
+
+      {/* ── Sidebar checklist (UI-3) — col 3 ──────────────────────────────── */}
+      <div className="hidden lg:block lg:col-span-1">
+        <StepChecklist step={step} form={form} />
+      </div>
+
+      </div>{/* end grid */}
     </div>
   )
 }
