@@ -12,6 +12,8 @@ import API, { getGrafoCausalCaso } from '../api/client'
 import CasoCausalGraph from '../Components/charts/CasoCausalGraph'
 import { useToast } from '../Components/Toast'
 import Stepper from '../Components/ui/Stepper'
+import Button from '../Components/ui/Button'
+import Card from '../Components/ui/Card'
 import ScoreGauge from '../Components/charts/ScoreGauge'
 import MilestoneBar from '../Components/charts/MilestoneBar'
 import CIE10Search from '../Components/CIE10Search'
@@ -246,31 +248,20 @@ function SummaryRow({ label, value }) {
   )
 }
 
+// BtnSecondary y BtnGhost — alias semánticos del kit UI centralizado (F5-1)
 function BtnSecondary({ children, onClick, disabled, className = '' }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium
-        text-gray-700 bg-white border border-gray-300 rounded-lg
-        hover:bg-gray-50 transition-colors disabled:opacity-50 ${className}`}
-    >
+    <Button variant="secondary" onClick={onClick} disabled={disabled} className={`px-6 ${className}`}>
       {children}
-    </button>
+    </Button>
   )
 }
 
 function BtnGhost({ children, onClick }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium
-        text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-    >
+    <Button variant="ghost" onClick={onClick} className="px-5">
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -635,17 +626,66 @@ export default function EvaluarPaciente() {
           </div>
         )}
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Resultado de evaluación</h1>
-          <p className="text-gray-500 text-sm mt-1">Caso {result.id_caso}</p>
-        </div>
+        {/* ── Executive header (F5-2) ── */}
+        <Card variant="elevated" padding="none" className="overflow-hidden">
+          <div className={`px-6 py-4 border-b-2 ${recStyle.card}`}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest opacity-60 mb-1">
+                  Resultado · Caso {result.id_caso}
+                </p>
+                <h1 className="text-2xl font-bold leading-tight flex items-center gap-2.5">
+                  {RecIcon && <RecIcon className={`w-7 h-7 flex-shrink-0 ${recStyle.icon}`} />}
+                  {rec?.label ?? result.recomendacion?.replace(/_/g, ' ')}
+                </h1>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {result.confianza && (
+                  <div className="text-right">
+                    <p className="text-3xl font-black leading-none">
+                      {(result.confianza * 100).toFixed(0)}
+                      <span className="text-lg font-bold">%</span>
+                    </p>
+                    <p className="text-xs opacity-60 font-medium">Confianza del modelo</p>
+                  </div>
+                )}
+                {result.capa && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/10">
+                    {result.capa === 'reglas_normativas' ? 'Capa normativa' : 'Modelo causal'}
+                  </span>
+                )}
+              </div>
+            </div>
+            {rec && (
+              <p className="mt-3 text-sm opacity-75 leading-relaxed max-w-2xl">
+                {result.analisis_ia
+                  ? result.analisis_ia.slice(0, 160) + (result.analisis_ia.length > 160 ? '…' : '')
+                  : `Acción recomendada basada en el perfil clínico-ocupacional del caso evaluado.`}
+              </p>
+            )}
+          </div>
+          <div className="px-6 py-3 bg-white flex flex-wrap gap-4 text-sm text-gray-500">
+            <span>
+              Score de riesgo:{' '}
+              <strong className="text-gray-800">{Math.round(result.score_riesgo ?? 0)}/100</strong>
+            </span>
+            {result.es_critico && (
+              <span className="flex items-center gap-1 text-red-600 font-semibold">
+                <AlertTriangle className="w-3.5 h-3.5" /> Caso crítico
+              </span>
+            )}
+            {result.caso_existente && (
+              <span className="text-blue-600">Caso existente — actualizado</span>
+            )}
+          </div>
+        </Card>
 
         {/* Score ML + Recomendación clínica */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
+          <Card variant="default" padding="md" className="flex flex-col items-center justify-center">
             <ScoreGauge score={result.score_riesgo} size={240} />
-          </div>
-          <div className={`p-6 rounded-xl border-2 flex flex-col justify-center ${recStyle.card}`}>
+          </Card>
+          <Card variant="outlined" padding="md" className={`flex flex-col justify-center border-2 ${recStyle.card}`}>
             <p className="text-xs font-medium uppercase tracking-wider opacity-70 mb-2">Recomendación clínica</p>
             <div className="flex items-start gap-3">
               {RecIcon && <RecIcon className={`w-8 h-8 flex-shrink-0 mt-0.5 ${recStyle.icon}`} />}
@@ -661,7 +701,7 @@ export default function EvaluarPaciente() {
                 )}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Grafo causal del caso */}
@@ -856,7 +896,7 @@ export default function EvaluarPaciente() {
         </div>
 
         {result.caso_existente && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
+          <Card variant="outlined" padding="sm" className="bg-blue-50 border-blue-200 flex items-center gap-3">
             <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />
             <p className="text-sm text-blue-800 flex-1">
               Este caso ya tiene evaluaciones previas.{' '}
@@ -867,18 +907,20 @@ export default function EvaluarPaciente() {
                 Ver historial
               </button>
             </p>
-          </div>
+          </Card>
         )}
 
         <div className="flex flex-wrap gap-3">
-          <button
+          <Button
+            variant="primary"
+            icon={FileText}
             onClick={descargarPDF}
+            loading={pdfLoading}
             disabled={pdfLoading}
-            className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm"
+            className="px-5"
           >
-            <FileText className="w-4 h-4" />
             {pdfLoading ? 'Generando...' : 'Descargar PDF'}
-          </button>
+          </Button>
           <BtnSecondary onClick={() => navigate('/historial')}>Ver en historial</BtnSecondary>
           <BtnGhost onClick={resetWizard}>
             <RotateCcw className="w-4 h-4" />
