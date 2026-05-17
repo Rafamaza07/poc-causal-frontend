@@ -1,11 +1,144 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw, Zap } from 'lucide-react'
+import { RefreshCw, Download, X, Scale, Send, Save, MessageSquare, FileText, TrendingUp, Filter, Activity, RotateCcw, Zap, MoreVertical, LayoutGrid, List, Clock, AlertCircle } from 'lucide-react'
 import API from '../api/client'
 import Gauge from '../Components/Gauge'
 import { SkeletonTable } from '../Components/Skeleton'
 import { useToast } from '../Components/Toast'
 import EmptyState from '../Components/EmptyState'
+
+// ── Helpers SLA / aging (UI-4) ────────────────────────────────────────────────
+const SLA_DIAS_CRITICO = 5   // vencido si quedan ≤5 días en ventana de 90 días
+const SLA_VENTANA_DIAS = 90  // ventana SLA por defecto
+
+function calcDiasAging(fecha) {
+  if (!fecha) return null
+  const diff = (Date.now() - new Date(fecha).getTime()) / (1000 * 60 * 60 * 24)
+  return Math.floor(diff)
+}
+
+function calcSlaRestante(fecha) {
+  const aging = calcDiasAging(fecha)
+  if (aging === null) return null
+  return SLA_VENTANA_DIAS - aging
+}
+
+function SlaBadge({ fecha }) {
+  const restante = calcSlaRestante(fecha)
+  if (restante === null) return <span className="text-gray-300">—</span>
+  const vencido = restante <= 0
+  const critico = restante <= SLA_DIAS_CRITICO && restante > 0
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold ${
+      vencido  ? 'bg-red-100 text-red-800 border border-red-200' :
+      critico  ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+      'bg-gray-100 text-gray-600 border border-gray-200'
+    }`}>
+      {vencido ? <AlertCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+      {vencido ? 'Vencido' : `${restante}d`}
+    </span>
+  )
+}
+
+// ── Menú contextual por fila (UI-4) ──────────────────────────────────────────
+function RowMenu({ caso, onVerDetalle }) {
+  const [open, setOpen] = useState(false)
+  const toast = useToast()
+
+  const exportarCaso = async () => {
+    setOpen(false)
+    try {
+      const res = await API.get(`/api/casos/${caso.id_caso}/reporte-pdf`, { responseType: 'blob' })
+      const url  = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href  = url
+      link.setAttribute('download', `caso-${caso.id_caso}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast('PDF exportado', 'success')
+    } catch {
+      toast('Error al exportar', 'error')
+    }
+  }
+
+  return (
+    <div className="relative" onClick={e => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        title="Acciones"
+      >
+        <MoreVertical className="w-4 h-4" />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-8 z-20 bg-white border border-gray-200 rounded-xl shadow-elevated w-36 py-1 text-sm">
+            <button
+              onClick={() => { setOpen(false); onVerDetalle(caso.id_caso) }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 transition-colors"
+            >
+              Ver detalle
+            </button>
+            <button
+              onClick={exportarCaso}
+              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 transition-colors"
+            >
+              Exportar caso
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Vista Kanban (UI-4) ───────────────────────────────────────────────────────
+const KANBAN_COLS = [
+  { key: 'CRÍTICO',  label: 'Crítico',  cls: 'border-red-200 bg-red-50',    hdr: 'bg-red-100 text-red-800' },
+  { key: 'ALTO',     label: 'Alto',     cls: 'border-orange-200 bg-orange-50', hdr: 'bg-orange-100 text-orange-800' },
+  { key: 'MODERADO', label: 'Moderado', cls: 'border-yellow-200 bg-yellow-50', hdr: 'bg-yellow-100 text-yellow-800' },
+  { key: 'BAJO',     label: 'Bajo',     cls: 'border-green-200 bg-green-50',   hdr: 'bg-green-100 text-green-800' },
+]
+
+function KanbanView({ casos, onVerDetalle }) {
+  return (
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      {KANBAN_COLS.map(col => {
+        const colCasos = casos.filter(c => c.nivel_riesgo === col.key)
+        return (
+          <div key={col.key} className={`rounded-xl border ${col.cls} overflow-hidden`}>
+            <div className={`px-3 py-2 flex items-center justify-between ${col.hdr}`}>
+              <span className="text-xs font-bold uppercase tracking-wide">{col.label}</span>
+              <span className="text-xs font-semibold">{colCasos.length}</span>
+            </div>
+            <div className="p-2 space-y-2 max-h-[480px] overflow-y-auto">
+              {colCasos.length === 0 && (
+                <p className="text-xs text-center text-gray-400 py-4">Sin casos</p>
+              )}
+              {colCasos.map(c => (
+                <div
+                  key={c.id}
+                  onClick={() => onVerDetalle(c.id_caso)}
+                  className="bg-white rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-sm transition-shadow space-y-1"
+                >
+                  <p className="text-xs font-semibold text-gray-800 truncate">{c.id_caso}</p>
+                  <p className="text-xs text-gray-500">{REC_LABELS[c.recomendacion] || c.recomendacion}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-600">Score: {c.score_riesgo}</span>
+                    <SlaBadge fecha={c.fecha} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 const RISK_STYLES = {
   BAJO:     'bg-green-100 text-green-800',
@@ -465,6 +598,7 @@ export default function Historial() {
   const [totalPages, setTotalPages]     = useState(1)
   const [sortBy, setSortBy]             = useState('fecha')
   const [sortDir, setSortDir]           = useState('desc')
+  const [vistaKanban, setVistaKanban]   = useState(false)  // UI-4
 
   const user = (() => { try { return JSON.parse(sessionStorage.getItem('kausal_user')) } catch { return null } })()
   const puedeEditar   = user?.permisos?.includes('editar_caso')
@@ -544,6 +678,23 @@ export default function Historial() {
           <p className="text-gray-500 text-sm mt-1">{totalCasos} casos en total</p>
         </div>
         <div className="flex gap-2">
+          {/* Toggle tabla / kanban (UI-4) */}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setVistaKanban(false)}
+              title="Vista tabla"
+              className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${!vistaKanban ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setVistaKanban(true)}
+              title="Vista kanban"
+              className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${vistaKanban ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
           {puedeExportar && (
             <button onClick={exportarCSV} disabled={exportando}
               className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:shadow-md">
@@ -600,8 +751,14 @@ export default function Historial() {
       </div>
 
       <div className={`grid gap-6 ${detalle ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-        {/* Tabla */}
-        {loading ? (
+        {/* Vista kanban (UI-4) */}
+        {vistaKanban ? (
+          loading ? (
+            <SkeletonTable rows={7} />
+          ) : (
+            <KanbanView casos={casos} onVerDetalle={verDetalle} />
+          )
+        ) : loading ? (
           <SkeletonTable rows={7} />
         ) : casos.length === 0 ? (
           <div className="card">
@@ -613,10 +770,10 @@ export default function Historial() {
           </div>
         ) : (
           <div className="card overflow-hidden overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full min-w-[700px]">
               <thead className="bg-gray-50/80 border-b border-gray-200">
                 <tr>
-                  {['ID', 'Fecha', 'Recomendación', 'Score', 'Riesgo', 'Evaluado por'].map(h => (
+                  {['ID', 'Fecha', 'Recomendación', 'Score', 'Riesgo', 'Días', 'SLA', 'Evaluado por', ''].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -636,7 +793,19 @@ export default function Historial() {
                         {c.nivel_riesgo}
                       </span>
                     </td>
+                    {/* Días aging (UI-4) */}
+                    <td className="px-4 py-3 text-xs text-gray-500 tabular-nums">
+                      {calcDiasAging(c.fecha) !== null ? `${calcDiasAging(c.fecha)}d` : '—'}
+                    </td>
+                    {/* SLA badge (UI-4) */}
+                    <td className="px-4 py-3">
+                      <SlaBadge fecha={c.fecha} />
+                    </td>
                     <td className="px-4 py-3 text-xs text-gray-500">{c.evaluado_por || '—'}</td>
+                    {/* Menú contextual (UI-4) */}
+                    <td className="px-3 py-3">
+                      <RowMenu caso={c} onVerDetalle={verDetalle} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
