@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { User, Lock, Eye, EyeOff, Shield, Brain, Scale, ClipboardList, Bell, Download } from 'lucide-react'
+import { User, Lock, Eye, EyeOff, Shield, Brain, Scale, ClipboardList, Bell, Download, CheckCircle } from 'lucide-react'
 import API from '../api/client'
 import KausalIALogo from '../Components/KausalIALogo'
+
+// ── Trust rail bullets (UI-1) ──
+const TRUST_BULLETS = [
+  { icon: CheckCircle, text: 'Ley 1581/2012 + trazabilidad por tenant' },
+  { icon: CheckCircle, text: 'SLA operativo y alertas proactivas' },
+  { icon: CheckCircle, text: 'Fundamentación legal por caso' },
+]
 
 const B2B_FEATURES = [
   { icon: Shield,         text: 'Aislamiento de datos por organización' },
@@ -151,6 +158,22 @@ export default function Login({ onLogin }) {
               </div>
             ))}
           </div>
+
+          {/* Trust rail B2B (UI-1) — solo visible para acceso empresarial */}
+          {!isWorker && (
+            <div className="mt-8 rounded-2xl border border-violet-400/20 bg-violet-950/60 p-5 backdrop-blur-sm">
+              <p className="text-[10px] uppercase tracking-widest text-violet-300 font-semibold mb-1">Confianza B2B</p>
+              <p className="text-sm font-bold text-white mb-3">Evaluación médico-legal auditada</p>
+              <ul className="space-y-2">
+                {TRUST_BULLETS.map(({ icon: TIcon, text }) => (
+                  <li key={text} className="flex items-center gap-2 text-xs text-violet-100">
+                    <TIcon className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -229,36 +252,49 @@ export default function Login({ onLogin }) {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 flex items-center justify-center gap-2 text-sm mt-2 rounded-xl text-white font-bold transition-all duration-200 btn-glow disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})` }}
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
-                    Ingresando...
-                  </>
-                ) : isWorker ? 'Entrar a mi portal →' : 'Iniciar sesión →'}
-              </button>
+              {/* CTA doble (UI-1) */}
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 h-12 flex items-center justify-center gap-2 text-sm rounded-xl text-white font-bold transition-all duration-200 btn-glow disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})` }}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      Ingresando...
+                    </>
+                  ) : isWorker ? 'Entrar →' : 'Entrar →'}
+                </button>
+                {!isWorker && (
+                  <a
+                    href="mailto:ventas@kausal.ia?subject=Solicitud%20de%20demo%20KausalIA"
+                    className="h-12 px-4 flex items-center justify-center text-sm rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition-colors whitespace-nowrap"
+                  >
+                    Solicitar demo
+                  </a>
+                )}
+              </div>
             </div>
           </form>
 
-          <p className="text-xs text-gray-400 text-center mt-12">
-            {isWorker
-              ? 'Acceso personal al portal individual'
-              : 'Sistema exclusivo para entidades autorizadas'}
-          </p>
-          <p className="text-xs text-gray-400 text-center mt-2">
-            <Link to="/politica-tratamiento" className="text-brand-600 hover:underline">
-              Política de Tratamiento de Datos Personales
-            </Link>
-            {' '}—{' '}Ley 1581/2012
-          </p>
+          {/* Footer legal compacto (UI-1) */}
+          <div className="mt-8 pt-5 border-t border-gray-100">
+            <p className="text-xs text-gray-400 text-center">
+              <Link to="/politica-tratamiento" className="hover:text-brand-600 transition-colors">Privacidad</Link>
+              {' · '}
+              <a href="#" className="hover:text-brand-600 transition-colors">Términos</a>
+              {' · '}
+              <a href="mailto:soporte@kausal.ia" className="hover:text-brand-600 transition-colors">Soporte</a>
+            </p>
+            <p className="text-xs text-gray-400 text-center mt-1">
+              {isWorker ? 'Acceso personal al portal individual' : 'Sistema exclusivo para entidades autorizadas'} · Ley 1581/2012
+            </p>
+          </div>
         </div>
       </div>
     </div>
