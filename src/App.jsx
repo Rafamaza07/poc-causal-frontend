@@ -71,6 +71,33 @@ function TitleManager() {
   return null
 }
 
+// ── Transición de ruta suave (UI-8) ──────────────────────────────────────────
+// Usa CSS transition directa — sin setState en useEffect para evitar lint warning
+function PageTransition({ children }) {
+  const location = useLocation()
+  const [key, setKey] = useState(location.pathname)
+
+  // Solo actualiza key cuando cambia la ruta; CSS hace el fade vía animation
+  useEffect(() => {
+    setKey(location.pathname)
+  }, [location.pathname])
+
+  return (
+    <div
+      key={key}
+      style={{ animation: 'pageEnter 150ms ease both' }}
+    >
+      <style>{`
+        @keyframes pageEnter {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      {children}
+    </div>
+  )
+}
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -121,6 +148,7 @@ function AppRoutes({ user, login, logout }) {
   return (
     <Layout user={user} onLogout={logout}>
       <Suspense fallback={<PageLoader />}>
+        <PageTransition>
         <Routes>
           <Route path="/"          element={<Navigate to="/dashboard" />} />
           <Route path="/login"     element={<Navigate to="/dashboard" />} />
@@ -147,6 +175,7 @@ function AppRoutes({ user, login, logout }) {
           <Route path="/admin/biblioteca"        element={['admin','superadmin'].includes(user?.rol) ? <BibliotecaAdmin /> : <NoPermiso />} />
           <Route path="*"                         element={<NotFound />} />
         </Routes>
+        </PageTransition>
       </Suspense>
     </Layout>
   )
