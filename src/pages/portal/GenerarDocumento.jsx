@@ -145,20 +145,77 @@ export default function GenerarDocumento() {
         </div>
       )}
 
-      {/* Document preview */}
+      {/* Document preview — A4 tipográfico (F5-4) */}
       {doc && (
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {/* Barra de estado */}
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Documento generado</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Vista previa del documento</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doc.estado === 'enviado' ? 'bg-emerald-100 text-emerald-700' : c.badge}`}>
                 {doc.estado === 'enviado' ? 'Enviado' : 'Borrador'}
               </span>
             </div>
-            <div className="p-5">
-              <pre className="whitespace-pre-wrap text-xs text-gray-700 font-mono leading-relaxed max-h-96 overflow-y-auto bg-gray-50 rounded-xl p-4 border border-gray-100">
-                {doc.contenido}
-              </pre>
+
+            {/* Contenedor scroll — simula hoja A4 */}
+            <div className="p-4 sm:p-6 bg-gray-100 max-h-[70vh] overflow-y-auto">
+              <div
+                className="bg-white mx-auto shadow-lg border border-gray-200"
+                style={{ maxWidth: '210mm', minHeight: '297mm', fontFamily: 'Georgia, serif' }}
+              >
+                {/* Membrete */}
+                <div className="border-b-2 border-gray-800 px-10 pt-8 pb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-0.5">
+                        Generado por
+                      </p>
+                      <p className="text-base font-extrabold text-gray-900 tracking-tight">KausalIA</p>
+                      <p className="text-[10px] text-gray-500">
+                        Motor de inferencia médico-laboral · Colombia
+                      </p>
+                    </div>
+                    <div className="text-right text-[10px] text-gray-500 space-y-0.5">
+                      <p className="font-semibold text-gray-700">{meta.label.toUpperCase()}</p>
+                      <p>Ref. caso: <span className="font-mono">{id_caso}</span></p>
+                      <p>Fecha: {new Date(doc.created_at || new Date().toISOString()).toLocaleDateString('es-CO', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                      })}</p>
+                      <p>Pág. <span className="font-semibold">1</span></p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cuerpo del documento */}
+                <div className="px-10 py-8">
+                  <pre
+                    className="whitespace-pre-wrap text-[11.5px] text-gray-800 leading-relaxed"
+                    style={{ fontFamily: 'Georgia, serif' }}
+                  >
+                    {doc.contenido}
+                  </pre>
+                </div>
+
+                {/* Bloque de firma */}
+                <div className="px-10 pb-10 pt-4 border-t border-gray-200 mt-8">
+                  <div className="grid grid-cols-2 gap-12">
+                    <div>
+                      <div className="h-10 border-b border-gray-400 mb-1" />
+                      <p className="text-[10px] text-gray-500">Firma del titular / representante</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Nombre:</p>
+                    </div>
+                    <div>
+                      <div className="h-10 border-b border-gray-400 mb-1" />
+                      <p className="text-[10px] text-gray-500">Firma del profesional responsable</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Nombre:</p>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-gray-400 mt-6 text-center leading-relaxed">
+                    Documento generado automáticamente por KausalIA con base en normativa colombiana vigente
+                    (Ley 100/1993, Decreto 2463/2001, Decreto 1333/2021). No sustituye asesoría jurídica.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
