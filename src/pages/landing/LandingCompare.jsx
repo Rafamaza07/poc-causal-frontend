@@ -3,13 +3,13 @@ import useScrollReveal from '../../hooks/useScrollReveal'
 import { useTheme } from '../../hooks/useTheme'
 
 const ROWS = [
-  { label: 'Tiempo de respuesta por caso',    manual: '3–5 días hábiles',          kausal: '< 2 segundos' },
-  { label: 'Consistencia médico-legal',       manual: 'Varía por profesional',      kausal: 'Criterio IA estandarizado' },
-  { label: 'Evidencia para auditoría',        manual: 'Documentos dispersos',       kausal: 'Historial inmutable por caso' },
-  { label: 'Seguimiento SLA / hitos legales', manual: 'Manual o sin seguimiento',   kausal: 'Alertas 90/120/180/540 días' },
-  { label: 'Sustento normativo',              manual: 'Revisión manual de normas',  kausal: 'RAG legal automático (Ley 100, D.1507)' },
-  { label: 'Escalabilidad multi-tenant',      manual: 'No disponible',              kausal: 'Aislamiento por cliente / tenant' },
-  { label: 'Portal para el trabajador',       manual: 'No disponible',              kausal: 'Portal individual incluido' },
+  { label: 'Tiempo de cierre del caso completo', manual: '6–18 meses',              kausal: 'Días a semanas' },
+  { label: 'Tiempo de evaluación por caso',      manual: '3–5 días hábiles',        kausal: '< 2 segundos' },
+  { label: 'Consistencia médico-legal',          manual: 'Varía por profesional',   kausal: 'Criterio IA estandarizado' },
+  { label: 'Evidencia para auditoría',           manual: 'Documentos dispersos',    kausal: 'Historial inmutable por caso' },
+  { label: 'Detección de vacíos documentales',   manual: 'Solo al momento de litigio', kausal: 'Alerta proactiva antes de que cueste' },
+  { label: 'Seguimiento SLA / hitos legales',    manual: 'Manual o sin seguimiento', kausal: 'Alertas 90/120/180/540 días' },
+  { label: 'Sustento normativo',                 manual: 'Revisión manual de normas', kausal: 'Ley 100, D.1507, Ley 776 automático' },
 ]
 
 export default function LandingCompare() {

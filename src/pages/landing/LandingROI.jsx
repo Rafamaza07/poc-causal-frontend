@@ -70,7 +70,7 @@ export default function LandingROI() {
             Impacto operativo estimado
           </h2>
           <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Tres KPIs que los decisores de operaciones y legal revisan primero.
+            El ciclo completo de un caso pasa de meses a días. Estos son los tres indicadores que los decisores de operaciones y legal revisan primero.
           </p>
         </div>
 

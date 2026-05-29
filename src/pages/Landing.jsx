@@ -43,20 +43,6 @@ const PORTAL_BENEFITS = [
   { icon: Gavel,         title: 'Derechos de petición y tutelas', desc: 'Genera automáticamente documentos legales personalizados listos para radicar ante EPS, ARL o empleador.',   color: 'text-rose-600',   bg: 'bg-rose-50 dark:bg-rose-900/30' },
 ]
 
-const PROFILES = [
-  {
-    tag: 'Para empresas y profesionales', title: 'Plataforma B2B', subtitle: 'Equipos de RRHH, SST, Jurídico y Médicos Laborales',
-    border: 'border-brand-200 dark:border-brand-800', bg: 'bg-brand-50/50 dark:bg-brand-900/20', badgeBg: 'bg-brand-100 text-brand-700 dark:bg-brand-800/50 dark:text-brand-300', icon: Building2,
-    features: ['Evaluación individual y en lote (CSV)', 'Dashboard de analytics y tendencias', 'Pipeline de aprobaciones médicas', 'Alertas operativas multi-caso', 'Exportación PDF / Excel / API', 'Roles granulares por equipo'],
-    cta: 'Solicitar demo B2B', ctaHref: 'mailto:rafamaza56@gmail.com?subject=Demo B2B KausalIA', ctaStyle: 'bg-gray-900 text-white hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100',
-  },
-  {
-    tag: 'Para cualquier persona', title: 'Portal Individual', subtitle: 'Médico, abogado, trabajador o cualquier persona',
-    border: 'border-emerald-200 dark:border-emerald-800', bg: 'bg-emerald-50/50 dark:bg-emerald-900/20', badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300', icon: UserCheck,
-    features: ['Consulta el estado de tu caso en tiempo real', 'Historial de evaluaciones con fechas y resultados', 'Alertas antes de que venzan tus plazos', 'Descarga tu resumen médico-legal en PDF', 'Genera derechos de petición y tutelas', 'Acceso seguro con tus credenciales'],
-    cta: 'Acceder al portal', ctaHref: '/login?type=trabajador', ctaStyle: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700', isInternal: true,
-  },
-]
 
 
 const PROBLEMS = [
@@ -159,7 +145,6 @@ export default function Landing() {
   const targetsRef  = useScrollReveal({ threshold: 0.1, delay: 0 })
   const howRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
   const portalRef   = useScrollReveal({ threshold: 0.08, delay: 0 })
-  const profilesRef = useScrollReveal({ threshold: 0.1, delay: 0 })
   const problemsRef = useScrollReveal({ threshold: 0.1, delay: 0 })
   const featuresRef = useScrollReveal({ threshold: 0.1, delay: 0 })
   const ctaRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
@@ -295,25 +280,174 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
+      {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
       <LandingHero />
 
-      {/* ── El costo real del problema ──────────────────────────────────── */}
+      {/* ── 2. Costo real del problema ──────────────────────────────────── */}
       <LandingCostoReal />
 
-      {/* ── Trust strip (B) ─────────────────────────────────────────────── */}
+      {/* ── 3. Trust strip ──────────────────────────────────────────────── */}
       <LandingTrustBar />
 
-      {/* ── Proof ───────────────────────────────────────────────────────── */}
-      <LandingProof />
+      {/* ── 4. Cómo funciona ────────────────────────────────────────────── */}
+      <section className="py-24 px-4 overflow-hidden" style={dotBgLight}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
+              Proceso
+            </span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
+              Cómo funciona
+            </h2>
+            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+              Del caso a la ruta médico-legal trazable en tres pasos. Sin configuración compleja.
+            </p>
+          </div>
+          <div ref={howRef} className="relative">
+            <div className={`hidden md:block absolute top-[28px] left-[16.5%] right-[16.5%] h-px border-t-2 border-dashed z-0 ${dark ? 'border-gray-700' : 'border-gray-200'}`} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+              {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent }) => (
+                <div key={n} className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0"
+                    style={{ backgroundColor: accent, boxShadow: `0 8px 24px ${accent}40` }}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className={`text-[10px] font-medium uppercase tracking-[0.12em] mb-2 ${dark ? 'text-gray-600' : 'text-gray-300'}`}>{n}</span>
+                  <h3 className={`font-bold mb-2 text-[15px] ${dark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+                  <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* ── Casos de uso (C) ─────────────────────────────────────────────── */}
-      <LandingStories />
+      {/* ── 5. Before/After: Problema + Comparativa ─────────────────────── */}
+      <section
+        className="py-24 px-4"
+        style={{
+          background: dark
+            ? 'linear-gradient(135deg, #0f172a 0%, #1a0a3d 50%, #0f2a1a 100%)'
+            : 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
+              El problema
+            </span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
+              Del proceso manual al criterio automatizado
+            </h2>
+            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+              Tres problemas críticos que KausalIA resuelve desde el día uno.
+            </p>
+          </div>
+          <div ref={problemsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {PROBLEMS.map(({ icon: Icon, before, after }) => (
+              <div
+                key={before}
+                className="rounded-2xl p-6 border transition-all duration-200 group hover:-translate-y-0.5"
+                style={{
+                  backgroundColor: dark ? '#1e293b' : '#ffffff',
+                  borderColor: dark ? 'rgba(51,65,85,0.8)' : 'rgba(229,231,235,0.8)',
+                  boxShadow: dark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = dark
+                    ? '0 12px 36px rgba(0,0,0,0.35)'
+                    : '0 12px 36px rgba(0,0,0,0.08)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = dark
+                    ? '0 2px 12px rgba(0,0,0,0.2)'
+                    : '0 2px 12px rgba(0,0,0,0.04)'
+                }}
+              >
+                <div className="w-11 h-11 icon-gradient-blue rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                  <Icon className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <span className="text-red-400 mt-0.5 text-xs flex-shrink-0 font-bold">✕</span>
+                    <p className={`text-sm line-through leading-snug ${dark ? 'text-gray-500' : 'text-gray-400'}`}>{before}</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-emerald-500 mt-0.5 text-xs flex-shrink-0 font-bold">✓</span>
+                    <p className={`text-sm font-semibold leading-snug ${dark ? 'text-white' : 'text-gray-900'}`}>{after}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <LandingCompare />
 
-      {/* ── ROI 6 meses (D) ──────────────────────────────────────────────── */}
+      {/* ── 6. Product Tour ─────────────────────────────────────────────── */}
+      <div id="tour-section"><LandingTour /></div>
+
+      {/* ── 7. ROI 6 meses ──────────────────────────────────────────────── */}
       <LandingROI />
 
-      {/* ── ¿Para quién? ────────────────────────────────────────────────── */}
+      {/* ── 8. Proof ────────────────────────────────────────────────────── */}
+      <LandingProof />
+
+      {/* ── 9. Casos de uso ─────────────────────────────────────────────── */}
+      <LandingStories />
+
+      {/* ── 10. Features (beneficios en lenguaje de negocio) ────────────── */}
+      <section className="py-24 px-4" style={dotBg}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
+              Funcionalidades
+            </span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
+              Todo lo que necesitas, integrado
+            </h2>
+            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+              De la gestión documental al cierre del caso, sin sistemas dispersos ni información perdida.
+            </p>
+          </div>
+          <div ref={featuresRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURES.map(({ icon: Icon, title, desc, iconColor }, idx) => (
+              <div
+                key={title}
+                className="group relative p-6 rounded-2xl border transition-all duration-200 cursor-default hover:-translate-y-0.5"
+                style={{
+                  backgroundColor: dark ? '#1f2937' : '#ffffff',
+                  borderColor: dark ? 'rgba(55,65,81,0.8)' : 'rgba(229,231,235,0.8)',
+                  boxShadow: dark ? '0 2px 12px rgba(0,0,0,0.15)' : '0 2px 12px rgba(0,0,0,0.04)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = dark
+                    ? '0 10px 32px rgba(0,0,0,0.3)'
+                    : '0 10px 32px rgba(0,0,0,0.08)'
+                  e.currentTarget.style.borderColor = dark ? 'rgba(75,85,99,1)' : 'rgba(209,213,219,1)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = dark
+                    ? '0 2px 12px rgba(0,0,0,0.15)'
+                    : '0 2px 12px rgba(0,0,0,0.04)'
+                  e.currentTarget.style.borderColor = dark ? 'rgba(55,65,81,0.8)' : 'rgba(229,231,235,0.8)'
+                }}
+              >
+                <span className={`absolute top-4 right-5 text-[11px] font-medium tabular-nums select-none ${dark ? 'text-gray-700' : 'text-gray-200'}`}>
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 transition-colors duration-200 ${dark ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-50 group-hover:bg-gray-100'}`}>
+                  <Icon className={`w-4.5 h-4.5 ${iconColor}`} style={{ width: '18px', height: '18px' }} />
+                </div>
+                <h3 className={`font-semibold mb-2 text-[15px] ${dark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+                <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 11. ¿Para quién? ────────────────────────────────────────────── */}
       <section
         className="py-20 px-4 border-b"
         style={{
@@ -364,46 +498,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Cómo funciona ───────────────────────────────────────────────── */}
-      <section className="py-24 px-4 overflow-hidden" style={dotBgLight}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
-              Proceso
-            </span>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Cómo funciona
-            </h2>
-            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Del caso a la ruta médico-legal trazable en tres pasos. Sin configuración compleja.
-            </p>
-          </div>
-          <div ref={howRef} className="relative">
-            <div className={`hidden md:block absolute top-[28px] left-[16.5%] right-[16.5%] h-px border-t-2 border-dashed z-0 ${dark ? 'border-gray-700' : 'border-gray-200'}`} />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-              {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent }) => (
-                <div key={n} className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0"
-                    style={{ backgroundColor: accent, boxShadow: `0 8px 24px ${accent}40` }}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <span className={`text-[10px] font-medium uppercase tracking-[0.12em] mb-2 ${dark ? 'text-gray-600' : 'text-gray-300'}`}>{n}</span>
-                  <h3 className={`font-bold mb-2 text-[15px] ${dark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
-                  <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Product Tour (E) ────────────────────────────────────────────── */}
-      <div id="tour-section"><LandingTour /></div>
-
-      {/* ── Comparativa Manual vs KausalIA (F) ──────────────────────────── */}
-      <LandingCompare />
-
-      {/* ── Portal Cliente Final ─────────────────────────────────────────── */}
+      {/* ── 12. Portal Cliente Final ─────────────────────────────────────── */}
       <section
         id="portal"
         className="py-24 px-4 overflow-hidden"
@@ -454,7 +549,7 @@ export default function Landing() {
                       : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
                   }`}
                 >
-                  Solicitar demo <ChevronRight className="w-4 h-4" />
+                  Agenda una demo (30 min) <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
             </div>
@@ -547,218 +642,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Dos perfiles ────────────────────────────────────────────────── */}
-      <section className="py-24 px-4" style={{ backgroundColor: sectionBg }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
-              Perfiles
-            </span>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Dos perfiles, una plataforma
-            </h2>
-            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              KausalIA sirve tanto al equipo operativo de la empresa como a cualquier persona afectada.
-            </p>
-          </div>
-          <div ref={profilesRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {PROFILES.map(({ tag, title, subtitle, border, bg, badgeBg, icon: Icon, features, cta, ctaHref, ctaStyle, isInternal }) => (
-              <div
-                key={title}
-                className={`relative flex flex-col rounded-2xl border ${border} ${bg} p-7 transition-all duration-300 hover:-translate-y-1`}
-                style={{
-                  boxShadow: dark
-                    ? '0 2px 16px rgba(0,0,0,0.2)'
-                    : '0 2px 16px rgba(0,0,0,0.04)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 12px 40px rgba(0,0,0,0.35)'
-                    : '0 12px 40px rgba(0,0,0,0.10)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 2px 16px rgba(0,0,0,0.2)'
-                    : '0 2px 16px rgba(0,0,0,0.04)'
-                }}
-              >
-                <span className={`self-start text-xs font-bold px-3 py-1 rounded-full mb-5 ${badgeBg}`}>{tag}</span>
-                <div className="flex items-center gap-3 mb-3">
-                  <Icon className={`w-6 h-6 ${dark ? 'text-gray-300' : 'text-gray-700'}`} />
-                  <h3 className={`text-xl font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
-                </div>
-                <p className={`text-sm mb-6 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{subtitle}</p>
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {features.map(f => (
-                    <li key={f} className={`flex items-start gap-2 text-sm ${dark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                {isInternal ? (
-                  <button onClick={() => navigate(ctaHref)} className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm ${ctaStyle}`}>
-                    {cta} <span className="ml-1">→</span>
-                  </button>
-                ) : (
-                  <a href={ctaHref} className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm ${ctaStyle}`}>
-                    {cta} <span className="ml-1">→</span>
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Problema / Solución ─────────────────────────────────────────── */}
-      <section
-        className="py-24 px-4"
-        style={{
-          background: dark
-            ? 'linear-gradient(135deg, #0f172a 0%, #1a0a3d 50%, #0f2a1a 100%)'
-            : 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)',
-        }}
-      >
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
-              El problema
-            </span>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Del proceso manual al criterio automatizado
-            </h2>
-            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Tres problemas críticos que KausalIA resuelve desde el día uno.
-            </p>
-          </div>
-          <div ref={problemsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {PROBLEMS.map(({ icon: Icon, before, after }) => (
-              <div
-                key={before}
-                className="rounded-2xl p-6 border transition-all duration-200 group hover:-translate-y-0.5"
-                style={{
-                  backgroundColor: dark ? '#1e293b' : '#ffffff',
-                  borderColor: dark ? 'rgba(51,65,85,0.8)' : 'rgba(229,231,235,0.8)',
-                  boxShadow: dark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 12px 36px rgba(0,0,0,0.35)'
-                    : '0 12px 36px rgba(0,0,0,0.08)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 2px 12px rgba(0,0,0,0.2)'
-                    : '0 2px 12px rgba(0,0,0,0.04)'
-                }}
-              >
-                <div className="w-11 h-11 icon-gradient-blue rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <Icon className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5 text-xs flex-shrink-0 font-bold">✕</span>
-                    <p className={`text-sm line-through leading-snug ${dark ? 'text-gray-500' : 'text-gray-400'}`}>{before}</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-emerald-500 mt-0.5 text-xs flex-shrink-0 font-bold">✓</span>
-                    <p className={`text-sm font-semibold leading-snug ${dark ? 'text-white' : 'text-gray-900'}`}>{after}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ────────────────────────────────────────────────────── */}
-      <section className="py-24 px-4" style={dotBg}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
-              Funcionalidades
-            </span>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Todo lo que necesitas, integrado
-            </h2>
-            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              De la gestión documental al cierre del caso, sin sistemas dispersos ni información perdida.
-            </p>
-          </div>
-          <div ref={featuresRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FEATURES.map(({ icon: Icon, title, desc, iconColor }, idx) => (
-              <div
-                key={title}
-                className="group relative p-6 rounded-2xl border transition-all duration-200 cursor-default hover:-translate-y-0.5"
-                style={{
-                  backgroundColor: dark ? '#1f2937' : '#ffffff',
-                  borderColor: dark ? 'rgba(55,65,81,0.8)' : 'rgba(229,231,235,0.8)',
-                  boxShadow: dark ? '0 2px 12px rgba(0,0,0,0.15)' : '0 2px 12px rgba(0,0,0,0.04)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 10px 32px rgba(0,0,0,0.3)'
-                    : '0 10px 32px rgba(0,0,0,0.08)'
-                  e.currentTarget.style.borderColor = dark ? 'rgba(75,85,99,1)' : 'rgba(209,213,219,1)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.boxShadow = dark
-                    ? '0 2px 12px rgba(0,0,0,0.15)'
-                    : '0 2px 12px rgba(0,0,0,0.04)'
-                  e.currentTarget.style.borderColor = dark ? 'rgba(55,65,81,0.8)' : 'rgba(229,231,235,0.8)'
-                }}
-              >
-                <span className={`absolute top-4 right-5 text-[11px] font-medium tabular-nums select-none ${dark ? 'text-gray-700' : 'text-gray-200'}`}>
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 transition-colors duration-200 ${dark ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-50 group-hover:bg-gray-100'}`}>
-                  <Icon className={`w-4.5 h-4.5 ${iconColor}`} style={{ width: '18px', height: '18px' }} />
-                </div>
-                <h3 className={`font-semibold mb-2 text-[15px] ${dark ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
-                <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Trust strip ─────────────────────────────────────────────────── */}
-      <section className="relative py-16 px-4 overflow-hidden" style={{ background: dark ? '#030712' : '#0f172a' }}>
-        {/* Ambient glow */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(59,118,246,0.07) 0%, transparent 70%)' }} />
-        <div className="relative max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-500 mb-8">
-            Construido sobre el marco normativo colombiano
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: 'Ley 100 de 1993',   sub: 'Sistema de Seguridad Social',   icon: Shield },
-              { label: 'Decreto 1507/2014', sub: 'Manual Único de Calificación',   icon: FileText },
-              { label: 'Ley 776 de 2002',   sub: 'Normas prestaciones económicas', icon: Scale },
-              { label: 'Ley 1581/2012',     sub: 'Habeas Data — protección datos', icon: Lock },
-            ].map(({ label, sub, icon: Icon }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center text-center p-5 rounded-2xl border border-white/8 transition-all duration-200 hover:border-white/15 hover:-translate-y-0.5"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
-                }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center mb-3">
-                  <Icon className="w-5 h-5 text-brand-400" />
-                </div>
-                <div className="text-xs font-bold text-white mb-1">{label}</div>
-                <div className="text-[10px] text-gray-500 leading-snug">{sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Segmentos + lead form (reemplaza pricing) ───────────────────── */}
+      {/* ── 13. Segmentos + lead form ───────────────────────────────────── */}
       <LandingSegmentos />
 
       {/* ── Seguridad y cumplimiento (G) ────────────────────────────────── */}
