@@ -4,7 +4,7 @@ import KausalIALogo from '../Components/KausalIALogo'
 import {
   Brain, Shield, Scale, FileText, Bell,
   Users, CheckCircle, ArrowRight, Activity, Zap, Lock,
-  Sparkles, ArrowUpRight, Star, Building2, Briefcase,
+  Sparkles, ArrowUpRight, Building2, Briefcase,
   TrendingUp, ChevronRight, Award, UserCheck, ChevronDown,
   ClipboardList, MessageSquare, Download, Gavel,
   Sun, Moon,
@@ -17,6 +17,9 @@ import LandingROI         from './landing/LandingROI'
 import LandingTour        from './landing/LandingTour'
 import LandingCompare     from './landing/LandingCompare'
 import LandingCompliance  from './landing/LandingCompliance'
+import LandingSegmentos   from './landing/LandingSegmentos'
+import LandingCostoReal   from './landing/LandingCostoReal'
+import LandingArquitectura from './landing/LandingArquitectura'
 import useScrollReveal from '../hooks/useScrollReveal'
 import { useTheme } from '../hooks/useTheme'
 import { trackEvent } from '../utils/analytics'
@@ -24,12 +27,12 @@ import { trackEvent } from '../utils/analytics'
 /* ── Data ───────────────────────────────────────────────────────────────── */
 
 const FEATURES = [
-  { icon: Brain,    title: 'Motor causal IA',       desc: 'Algoritmo PC con inferencia bayesiana — no correlaciones, causalidad real.',           iconColor: 'text-blue-600' },
-  { icon: Bell,     title: 'Alertas proactivas',     desc: 'Hitos legales EPS/ARL/AFP monitoreados automáticamente (90/120/180/540 días).',          iconColor: 'text-orange-500' },
-  { icon: Scale,    title: 'RAG Legal normativo',    desc: 'Ley 100, Decreto 1507, Ley 776 y más — sustento jurídico en cada evaluación.',           iconColor: 'text-violet-600' },
-  { icon: Users,    title: 'Multi-tenant',           desc: 'Cada EPS o empleador tiene su espacio aislado con control de roles granular.',            iconColor: 'text-teal-600' },
-  { icon: Shield,   title: 'Trazabilidad inmutable', desc: 'Cada evaluación es un INSERT; historial completo para auditorías legales.',               iconColor: 'text-emerald-600' },
-  { icon: FileText, title: 'Export PDF / Excel',     desc: 'Reportes individuales y portafolios consolidados con un clic.',                           iconColor: 'text-gray-500' },
+  { icon: Brain,    title: 'Aprende de cada caso',           desc: 'Mejora su criterio con el tiempo — cada evaluación alimenta el siguiente análisis.',                 iconColor: 'text-blue-600' },
+  { icon: Bell,     title: 'Detecta vencimientos a tiempo',  desc: 'Te avisa antes de que venza un plazo crítico con EPS, ARL o AFP. Evita que el caso se extienda.',     iconColor: 'text-orange-500' },
+  { icon: Scale,    title: 'Entiende el lenguaje legal',     desc: 'Sustenta cada decisión en la normativa colombiana vigente (Ley 100, Decreto 1507, Ley 776).',          iconColor: 'text-violet-600' },
+  { icon: Users,    title: 'Tus datos no se mezclan',        desc: 'Espacio aislado por organización — privacidad garantizada con control de acceso por rol.',              iconColor: 'text-teal-600' },
+  { icon: Shield,   title: 'Registro legal que no cambia',   desc: 'Historial inmutable, completo y defendible en juzgado o ante juntas de calificación.',                 iconColor: 'text-emerald-600' },
+  { icon: FileText, title: 'Auditoría y ruta documental',    desc: 'Genera automáticamente la documentación y la ruta de lo que necesita cada etapa del proceso.',         iconColor: 'text-gray-500' },
 ]
 
 const PORTAL_BENEFITS = [
@@ -55,11 +58,6 @@ const PROFILES = [
   },
 ]
 
-const PLANS = [
-  { name: 'Básico', price: '$990.000', period: 'mes', desc: 'Para empleadores medianos con gestión interna de incapacidades.', features: ['Hasta 100 casos/mes', '3 usuarios', 'PDF por caso', 'Alertas básicas', 'Portal individual — 50 accesos', 'Soporte por email'], cta: 'Solicitar demo', highlight: false },
-  { name: 'Profesional', price: '$2.490.000', period: 'mes', desc: 'Para ARL y EPS con volumen alto y equipos médicos.', features: ['Hasta 500 casos/mes', '15 usuarios', 'Evaluación en lote (CSV)', 'Alertas avanzadas + RAG legal', 'Analytics completo', 'Portal individual ilimitado', 'Soporte prioritario'], cta: 'Solicitar demo', highlight: true },
-  { name: 'Enterprise', price: 'A convenir', period: '', desc: 'Para grandes aseguradoras o ministerios con integración HR.', features: ['Casos ilimitados', 'Usuarios ilimitados', 'API + webhooks salientes', 'SLA 99.9%', 'Gerente de cuenta dedicado', 'Factura electrónica DIAN'], cta: 'Hablar con ventas', highlight: false },
-]
 
 const PROBLEMS = [
   { icon: Activity, before: 'Horas revisando expedientes a mano',            after: 'Evaluación causal en menos de 2 segundos' },
@@ -77,10 +75,9 @@ const TARGETS = [
 ]
 
 const HOW_IT_WORKS = [
-  { n: '01', title: 'Ingresa el caso',     desc: 'Carga diagnóstico CIE-10, contingencia y datos del paciente en un formulario guiado.', icon: FileText, accent: '#2563eb' },
-  { n: '02', title: 'Análisis causal IA',  desc: 'Motor PC + Bayesiano evalúa causalidad y calcula score de riesgo en < 2 segundos.',      icon: Brain,    accent: '#9333ea' },
-  { n: '03', title: 'Sustento legal RAG',  desc: 'El corpus normativo (Ley 100, Decreto 1507) respalda cada recomendación con citas exactas.', icon: Scale, accent: '#059669' },
-  { n: '04', title: 'Exporta y archiva',   desc: 'Genera PDF trazable o exporta al sistema de nómina. Historial inmutable para auditorías.', icon: Award, accent: '#ea580c' },
+  { n: '01', title: 'Carga el caso',          desc: 'Diagnóstico, contingencia y documentos en un formulario guiado. Sin configuración compleja.', icon: FileText, accent: '#2563eb' },
+  { n: '02', title: 'KausalIA analiza y detecta vacíos', desc: 'Organiza la información, identifica lo que tienes y lo que te falta antes de que te haga perder el caso.', icon: Brain, accent: '#9333ea' },
+  { n: '03', title: 'Obtienes la ruta trazable', desc: 'Recomendación, sustento normativo y documento listo para radicar. Registro inmutable para auditorías.', icon: Award, accent: '#059669' },
 ]
 
 const makeDotBg = (dark, base) => ({
@@ -116,7 +113,7 @@ const FAQ_ITEMS = [
   },
   {
     q: '¿El portal individual tiene costo adicional para los trabajadores?',
-    a: 'Cuando una empresa contrata un plan B2B, el acceso al portal individual está incluido sin costo adicional para el cupo de usuarios del plan. Quien accede directamente sin pasar por una empresa puede gestionar su caso por $49.900 COP por caso, sin suscripción mensual.',
+    a: 'Cuando una empresa contrata el servicio B2B, el acceso al portal individual está incluido sin costo adicional. Quien accede directamente sin pasar por una empresa puede gestionar su caso de forma independiente; el detalle de costos se coordina en la conversación de evaluación. No hay suscripción mensual obligatoria.',
   },
   {
     q: '¿Puedo exportar los casos para auditorías externas o entes de control?',
@@ -165,7 +162,6 @@ export default function Landing() {
   const profilesRef = useScrollReveal({ threshold: 0.1, delay: 0 })
   const problemsRef = useScrollReveal({ threshold: 0.1, delay: 0 })
   const featuresRef = useScrollReveal({ threshold: 0.1, delay: 0 })
-  const pricingRef  = useScrollReveal({ threshold: 0.08, delay: 0 })
   const ctaRef      = useScrollReveal({ threshold: 0.1, delay: 0 })
 
   const sectionBg = dark ? '#111827' : '#ffffff'
@@ -302,6 +298,9 @@ export default function Landing() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <LandingHero />
 
+      {/* ── El costo real del problema ──────────────────────────────────── */}
+      <LandingCostoReal />
+
       {/* ── Trust strip (B) ─────────────────────────────────────────────── */}
       <LandingTrustBar />
 
@@ -376,12 +375,12 @@ export default function Landing() {
               Cómo funciona
             </h2>
             <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              De la carga del caso al resultado legal en cuatro pasos. Sin configuración compleja.
+              Del caso a la ruta médico-legal trazable en tres pasos. Sin configuración compleja.
             </p>
           </div>
           <div ref={howRef} className="relative">
-            <div className={`hidden md:block absolute top-[28px] left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed z-0 ${dark ? 'border-gray-700' : 'border-gray-200'}`} />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
+            <div className={`hidden md:block absolute top-[28px] left-[16.5%] right-[16.5%] h-px border-t-2 border-dashed z-0 ${dark ? 'border-gray-700' : 'border-gray-200'}`} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
               {HOW_IT_WORKS.map(({ n, title, desc, icon: Icon, accent }) => (
                 <div key={n} className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0"
@@ -683,7 +682,7 @@ export default function Landing() {
               Todo lo que necesitas, integrado
             </h2>
             <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Desde la evaluación causal hasta la exportación DIAN, en una sola plataforma.
+              De la gestión documental al cierre del caso, sin sistemas dispersos ni información perdida.
             </p>
           </div>
           <div ref={featuresRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -759,122 +758,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Planes ──────────────────────────────────────────────────────── */}
-      <section
-        className="py-24 px-4"
-        style={{
-          background: dark
-            ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)'
-            : 'linear-gradient(180deg, #f8faff 0%, #f0f4ff 100%)',
-        }}
-      >
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <span className={`inline-block text-[11px] font-medium uppercase tracking-[0.12em] mb-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
-              Precios
-            </span>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-display mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>
-              Planes y precios
-            </h2>
-            <p className={`max-w-xl mx-auto ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Precios en COP + IVA. Sin permanencia mínima. Portal cliente incluido en todos los planes.
-            </p>
-          </div>
-          <div ref={pricingRef} className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative flex flex-col rounded-2xl p-7 transition-all duration-200 ${
-                  plan.highlight ? '' : 'hover:-translate-y-0.5'
-                }`}
-                style={{
-                  backgroundColor: dark ? (plan.highlight ? '#1e293b' : '#1a2332') : '#ffffff',
-                  border: plan.highlight
-                    ? `2px solid ${dark ? 'rgba(99,102,241,0.5)' : 'rgba(99,102,241,0.4)'}`
-                    : `1px solid ${dark ? 'rgba(51,65,85,0.8)' : 'rgba(229,231,235,0.8)'}`,
-                  boxShadow: plan.highlight
-                    ? dark ? '0 8px 32px rgba(99,102,241,0.2)' : '0 8px 32px rgba(99,102,241,0.12)'
-                    : dark ? '0 2px 12px rgba(0,0,0,0.2)' : '0 2px 12px rgba(0,0,0,0.04)',
-                }}
-              >
-                {plan.highlight && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-[0.12em] mb-4">
-                    <Star className="w-3 h-3 fill-current" /> Más popular
-                  </span>
-                )}
-                <h3 className={`text-xl font-bold mb-1 ${dark ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                <div className="flex items-end gap-1 mb-2">
-                  <span className={`text-3xl font-extrabold tabular-nums ${dark ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
-                  {plan.period && <span className={`text-sm mb-1 ${dark ? 'text-gray-500' : 'text-gray-400'}`}>/{plan.period}</span>}
-                </div>
-                <p className={`text-sm mb-6 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>{plan.desc}</p>
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map(f => (
-                    <li key={f} className={`flex items-start gap-2 text-sm ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-brand-500" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="mailto:rafamaza56@gmail.com?subject=Plan KausalIA"
-                  className={`block text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
-                    plan.highlight
-                      ? 'bg-brand-600 text-white hover:bg-brand-700'
-                      : dark
-                        ? 'bg-white text-gray-900 hover:bg-gray-100'
-                        : 'bg-gray-900 text-white hover:bg-gray-700'
-                  }`}
-                >
-                  {plan.cta} <span className="ml-1">→</span>
-                </a>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Plan Individual ─────────────────────────────────────────── */}
-          <div
-            className="mt-6 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-2 transition-all duration-200"
-            style={{
-              backgroundColor: dark ? '#0a1f12' : '#f0fdf4',
-              borderColor: dark ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.3)',
-              boxShadow: dark ? '0 4px 24px rgba(16,185,129,0.1)' : '0 4px 24px rgba(16,185,129,0.07)',
-            }}
-          >
-            <div className="flex-1 min-w-0">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 uppercase tracking-[0.12em] mb-2 block" style={{ color: dark ? '#34d399' : '#059669' }}>
-                <UserCheck className="w-3.5 h-3.5 inline -mt-0.5" /> Para cualquier persona
-              </span>
-              <h3 className={`text-xl font-bold mb-1 ${dark ? 'text-white' : 'text-gray-900'}`}>Plan Por Caso</h3>
-              <div className="flex items-end gap-1 mb-4">
-                <span className={`text-3xl font-extrabold tabular-nums ${dark ? 'text-white' : 'text-gray-900'}`}>$49.900</span>
-                <span className={`text-sm mb-1 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>&nbsp;COP / caso gestionado</span>
-              </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-2">
-                {[
-                  'Evaluación IA + score de riesgo',
-                  'Sustento legal normativo',
-                  'Derecho de petición o tutela lista para radicar',
-                  'Acceso al portal por 30 días',
-                ].map(f => (
-                  <span key={f} className={`flex items-center gap-1.5 text-sm ${dark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {f}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={() => navigate('/login?type=trabajador')}
-              className="flex-shrink-0 inline-flex items-center gap-2 font-semibold px-7 py-3.5 rounded-xl transition-all text-sm whitespace-nowrap text-white"
-              style={{
-                background: 'linear-gradient(135deg, #059669, #0d9488)',
-                boxShadow: '0 4px 16px rgba(5,150,105,0.3)',
-              }}
-            >
-              Acceder al portal <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* ── Segmentos + lead form (reemplaza pricing) ───────────────────── */}
+      <LandingSegmentos />
 
       {/* ── Seguridad y cumplimiento (G) ────────────────────────────────── */}
       <LandingCompliance />
@@ -969,7 +854,7 @@ export default function Landing() {
           <p className="text-white/50 mb-10 max-w-xl mx-auto">
             Te mostramos un flujo completo — desde la evaluación causal hasta el documento listo para radicar.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
             <a
               href="mailto:rafamaza56@gmail.com?subject=Demo B2B KausalIA"
               onClick={() => trackEvent('landing_final_cta_click', { cta: 'demo_b2b' })}
@@ -981,9 +866,12 @@ export default function Landing() {
               onClick={() => { trackEvent('landing_final_cta_click', { cta: 'portal_individual' }); navigate('/login?type=trabajador') }}
               className="inline-flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold px-8 py-4 rounded-xl transition-all text-base"
             >
-              <UserCheck className="w-5 h-5" /> Entrar al portal individual
+              <UserCheck className="w-5 h-5" /> Orientarme sobre mi caso
             </button>
           </div>
+          <p className="text-white/30 text-xs">
+            Sin compromiso · Respuesta en 24 horas · Totalmente confidencial
+          </p>
         </div>
       </section>
 
@@ -998,25 +886,28 @@ export default function Landing() {
         >
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
             <p className="text-white/80 text-sm font-medium hidden sm:block">
-              ¿Listo para automatizar tu gestión de incapacidades?
+              Elimina pérdidas económicas gestionando eficientemente las incapacidades de tus empleados.
             </p>
             <div className="flex items-center gap-3 mx-auto sm:mx-0">
               <a
                 href="mailto:rafamaza56@gmail.com?subject=Demo KausalIA"
                 className="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-gray-100 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg"
               >
-                Solicitar demo <ArrowRight className="w-4 h-4" />
+                Agenda una demo (30 min) <ArrowRight className="w-4 h-4" />
               </a>
               <button
                 onClick={() => navigate('/login?type=trabajador')}
                 className="inline-flex items-center gap-2 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/15 font-medium px-5 py-2.5 rounded-xl text-sm transition-all"
               >
-                <UserCheck className="w-4 h-4" /> Portal
+                <UserCheck className="w-4 h-4" /> Portal individual
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Arquitectura técnica (colapsable, al fondo) ─────────────────── */}
+      <LandingArquitectura />
 
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer
@@ -1027,10 +918,15 @@ export default function Landing() {
         }}
       >
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-          <div className="flex items-center gap-2.5">
-            <KausalIALogo size={14} />
-            <span className={dark ? 'text-gray-500' : 'text-gray-400'}>
-              © {new Date().getFullYear()} KausalIA — Colombia
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2.5">
+              <KausalIALogo size={14} />
+              <span className={dark ? 'text-gray-500' : 'text-gray-400'}>
+                © {new Date().getFullYear()} KausalIA — Colombia
+              </span>
+            </div>
+            <span className={`text-[10px] font-medium ${dark ? 'text-gray-600' : 'text-gray-400'}`}>
+              Cumple Ley 1581 · Alineado con Decreto 1507/2014 · MUCI + CIE-10 integrado
             </span>
           </div>
           <div className="flex items-center gap-6">

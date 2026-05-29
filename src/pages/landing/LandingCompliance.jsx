@@ -6,29 +6,29 @@ import { trackEvent } from '../../utils/analytics'
 const PILLARS = [
   {
     icon: Shield,
-    title: 'Seguridad de datos',
-    desc: 'Datos de salud almacenados con aislamiento por tenant. Sin commingling entre clientes. Acceso con JWT y roles granulares.',
+    title: 'Encriptación y acceso por roles',
+    desc: '100% de los datos cifrados en tránsito y en reposo. Aislamiento por tenant — tus datos nunca se mezclan con los de otra organización. Acceso solo por perfiles autorizados.',
     color: 'text-violet-500',
     bg: { light: 'rgba(124,58,237,0.08)', dark: 'rgba(124,58,237,0.12)' },
   },
   {
     icon: Eye,
-    title: 'Cumplimiento Ley 1581',
-    desc: 'Consentimiento informado por caso (Art. 9). Gestión de derechos ARCO. Responsable del tratamiento definido por tenant.',
+    title: 'Cumplimiento Ley 1581 · Decreto 1507/2014',
+    desc: 'Habeas Data (Art. 9): consentimiento informado por caso y gestión de derechos ARCO. Criterios alineados con el Manual Único de Calificación (MUCI) y la normativa PCL vigente.',
     color: 'text-blue-500',
     bg: { light: 'rgba(37,99,235,0.08)', dark: 'rgba(37,99,235,0.12)' },
   },
   {
     icon: Lock,
-    title: 'Privacidad de tratamiento',
-    desc: 'Datos clínicos nunca usados para entrenar modelos externos. Política de retención configurable. Sin transferencias a terceros no autorizados.',
+    title: 'Entiende el lenguaje legal colombiano',
+    desc: 'Integra MUCI + CIE-10 para leer historias clínicas en el lenguaje que entienden las juntas de calificación. Datos clínicos nunca usados para entrenar modelos externos.',
     color: 'text-emerald-500',
     bg: { light: 'rgba(5,150,105,0.08)', dark: 'rgba(5,150,105,0.12)' },
   },
   {
     icon: FileSearch,
     title: 'Auditabilidad completa',
-    desc: 'Log inmutable de cada evaluación con usuario, timestamp, normativa aplicada y score. Exportable para auditorías externas o entes de control.',
+    desc: 'Log inmutable de cada evaluación: usuario, timestamp, normativa aplicada y score. Exportable para auditorías externas o entes de control. Defendible en juzgado.',
     color: 'text-orange-500',
     bg: { light: 'rgba(234,88,12,0.08)', dark: 'rgba(234,88,12,0.12)' },
   },
@@ -86,6 +86,20 @@ export default function LandingCompliance() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Piloto en proceso */}
+        <div
+          className="mb-5 rounded-2xl px-6 py-4 flex items-center gap-3 border"
+          style={{
+            background: 'rgba(16,185,129,0.06)',
+            borderColor: 'rgba(16,185,129,0.2)',
+          }}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+          <p className={`text-sm font-medium`} style={{ color: '#10b981' }}>
+            Actualmente en piloto con empresas del sector minero y salud en Colombia.
+          </p>
         </div>
 
         {/* Due diligence CTA */}
