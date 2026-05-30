@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-label="KausalIA">
+  <title>KausalIA — versión blanca</title>
+  <defs>
+    
+  </defs>
+  <text x="30" y="155" class="k-white">Kausal</text>
+  <text x="530" y="155" class="k-white">A</text>
+  <g fill="#ffffff">
+    <circle cx="500" cy="50" r="10"></circle>
+    <rect x="495" y="70" width="10" height="74" rx="1.5"></rect>
+    <path d="M500 144 L486 162" stroke="#ffffff" stroke-width="6" stroke-linecap="round"></path>
+    <path d="M500 144 L514 162" stroke="#ffffff" stroke-width="6" stroke-linecap="round"></path>
+    <circle cx="500" cy="168" r="11"></circle>
+  </g>
+</svg>

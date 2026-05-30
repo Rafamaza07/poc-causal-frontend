@@ -1,0 +1,64 @@
+<!-- 
+  KausalIA logo — HTML + CSS + inline SVG
+  
+  SIMPLE USAGE:
+    1. In your <head>, load Inter:
+       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+    2. Paste the <div class="kausalia-logo"> below wherever you want the logo.
+    3. Scale with inline style:  style="--logo-size: 40px"   (any px value)
+-->
+<style>
+.kausalia-logo{
+  --logo-size: 60px;
+  --k-gray: #2B2F36;
+  display: inline-flex;
+  align-items: baseline;
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  font-size: var(--logo-size);
+  line-height: 1;
+  letter-spacing: -0.047em;
+  color: var(--k-gray);
+  user-select: none;
+}
+.kausalia-logo .k-part{ color: var(--k-gray); }
+.kausalia-logo .a-part{
+  background: linear-gradient(135deg,#0E1A44 0%,#1E3A8A 50%,#3B7BD9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.kausalia-logo .i-svg{
+  /* Width tuned to match the width of an "i" glyph in Inter 600 at the same size */
+  width: 0.34em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: baseline;
+  /* pull slightly left/right to close gaps from letter-spacing */
+  margin: 0 -0.02em;
+  overflow: visible;
+}
+</style>
+
+<div class="kausalia-logo">
+  <span class="k-part">Kausal</span><svg class="i-svg" viewBox="0 0 34 100" xmlns="http://www.w3.org/2000/svg" aria-label="i">
+    <defs>
+      <linearGradient id="kausalia-i-grad" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stop-color="#0E1A44"/>
+        <stop offset="50%" stop-color="#1E3A8A"/>
+        <stop offset="100%" stop-color="#3B7BD9"/>
+      </linearGradient>
+    </defs>
+    <g fill="url(#kausalia-i-grad)">
+      <!-- top dot (where an i's tittle would be) -->
+      <circle cx="17" cy="20" r="7"/>
+      <!-- stem -->
+      <rect x="14" y="34" width="6" height="48" rx="1"/>
+      <!-- Y branches splaying down-left and down-right -->
+      <path d="M17 82 L9 92" stroke="url(#kausalia-i-grad)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M17 82 L25 92" stroke="url(#kausalia-i-grad)" stroke-width="4" stroke-linecap="round"/>
+      <!-- bottom node (just below baseline) -->
+      <circle cx="17" cy="95" r="7"/>
+    </g>
+  </svg><span class="a-part">A</span>
+</div>

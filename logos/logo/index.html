@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Logo KausalIA — archivos para tu web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f7f6;--panel:#fff;--ink:#1a1d22;--muted:#6b7280;--line:#e8e8e6;--accent:#1E3A8A}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:56px 32px 96px}
+  .hero{margin-bottom:48px}
+  h1{font-size:28px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+  p.lede{color:var(--muted);margin:0;font-size:15px;max-width:64ch;line-height:1.5}
+  .section{margin-top:48px}
+  h2{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:780px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .card .preview{padding:44px 32px;display:flex;align-items:center;justify-content:center;min-height:180px}
+  .card.dark .preview{background:#0f1115}
+  .card.checker .preview{
+    background-image:linear-gradient(45deg,#f0f0ee 25%,transparent 25%),linear-gradient(-45deg,#f0f0ee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f0f0ee 75%),linear-gradient(-45deg,transparent 75%,#f0f0ee 75%);
+    background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0;background-color:#fff}
+  .card img,.card svg{max-width:100%;height:auto;display:block}
+  .meta{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid var(--line);font-size:13px;gap:12px}
+  .meta .name{font-weight:600;font-size:13px}
+  .meta .sub{color:var(--muted);font-size:12px;margin-top:2px}
+  .meta a{color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap}
+  .meta a:hover{text-decoration:underline}
+
+  /* Inline logo styles (same as logo/kausalia-logo.html) */
+  .kausalia-logo{--logo-size:60px;--k-gray:#2B2F36;display:inline-flex;align-items:baseline;font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:600;font-size:var(--logo-size);line-height:1;letter-spacing:-0.047em;color:var(--k-gray)}
+  .kausalia-logo .k-part{color:var(--k-gray)}
+  .kausalia-logo .a-part{background:linear-gradient(135deg,#0E1A44 0%,#1E3A8A 50%,#3B7BD9 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kausalia-logo .i-svg{width:0.34em;height:1em;display:inline-block;vertical-align:baseline;margin:0 -0.02em;overflow:visible}
+  .kausalia-logo.white .k-part,.kausalia-logo.white .a-part{color:#fff;background:none;-webkit-background-clip:unset;background-clip:unset}
+
+  pre{background:#0f1115;color:#e7e9ec;padding:18px;border-radius:10px;overflow-x:auto;font-size:12.5px;line-height:1.55;font-family:"SF Mono",ui-monospace,monospace}
+  pre .cmt{color:#8b949e}
+  pre .tag{color:#79c0ff}
+  pre .atr{color:#ffa657}
+  pre .str{color:#a5d6ff}
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Logo KausalIA</h1>
+      <p class="lede">Tu logo en varios formatos listos para usar. Lo mejor es entregarle a Sonnet el <strong>SVG</strong> o el componente <strong>HTML</strong> — escalan a cualquier tamaño sin perder calidad.</p>
+    </div>
+
+    <div class="section">
+      <h2>Vista previa · HTML/CSS (escalable)</h2>
+      <div class="card">
+        <div class="preview" style="flex-direction:column;gap:32px">
+          <div class="kausalia-logo" style="--logo-size:32px">
+            <span class="k-part">Kausal</span><svg class="i-svg" viewBox="0 0 34 100"><defs><linearGradient id="gx1" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#0E1A44"/><stop offset="50%" stop-color="#1E3A8A"/><stop offset="100%" stop-color="#3B7BD9"/></linearGradient></defs><g fill="url(#gx1)"><circle cx="17" cy="20" r="7"/><rect x="14" y="34" width="6" height="48" rx="1"/><path d="M17 82 L9 92" stroke="url(#gx1)" stroke-width="4" stroke-linecap="round"/><path d="M17 82 L25 92" stroke="url(#gx1)" stroke-width="4" stroke-linecap="round"/><circle cx="17" cy="95" r="7"/></g></svg><span class="a-part">A</span>
+          </div>
+          <div class="kausalia-logo" style="--logo-size:64px">
+            <span class="k-part">Kausal</span><svg class="i-svg" viewBox="0 0 34 100"><defs><linearGradient id="gx2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#0E1A44"/><stop offset="50%" stop-color="#1E3A8A"/><stop offset="100%" stop-color="#3B7BD9"/></linearGradient></defs><g fill="url(#gx2)"><circle cx="17" cy="20" r="7"/><rect x="14" y="34" width="6" height="48" rx="1"/><path d="M17 82 L9 92" stroke="url(#gx2)" stroke-width="4" stroke-linecap="round"/><path d="M17 82 L25 92" stroke="url(#gx2)" stroke-width="4" stroke-linecap="round"/><circle cx="17" cy="95" r="7"/></g></svg><span class="a-part">A</span>
+          </div>
+          <div class="kausalia-logo" style="--logo-size:120px">
+            <span class="k-part">Kausal</span><svg class="i-svg" viewBox="0 0 34 100"><defs><linearGradient id="gx3" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#0E1A44"/><stop offset="50%" stop-color="#1E3A8A"/><stop offset="100%" stop-color="#3B7BD9"/></linearGradient></defs><g fill="url(#gx3)"><circle cx="17" cy="20" r="7"/><rect x="14" y="34" width="6" height="48" rx="1"/><path d="M17 82 L9 92" stroke="url(#gx3)" stroke-width="4" stroke-linecap="round"/><path d="M17 82 L25 92" stroke="url(#gx3)" stroke-width="4" stroke-linecap="round"/><circle cx="17" cy="95" r="7"/></g></svg><span class="a-part">A</span>
+          </div>
+        </div>
+        <div class="meta">
+          <div><div class="name">kausalia-logo.html</div><div class="sub">Componente HTML+CSS+SVG · calidad perfecta a cualquier tamaño</div></div>
+          <a href="kausalia-logo.html" download>Descargar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Archivos PNG (transparente)</h2>
+      <div class="grid">
+        <div class="card checker">
+          <div class="preview"><img src="kausalia-logo-800.png" style="max-width:420px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo-800.png</div><div class="sub">800px ancho · transparente</div></div><a href="kausalia-logo-800.png" download>Descargar</a></div>
+        </div>
+        <div class="card checker">
+          <div class="preview"><img src="kausalia-logo-1600.png" style="max-width:420px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo-1600.png</div><div class="sub">1600px ancho · transparente</div></div><a href="kausalia-logo-1600.png" download>Descargar</a></div>
+        </div>
+        <div class="card checker">
+          <div class="preview"><img src="kausalia-logo-3200.png" style="max-width:420px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo-3200.png</div><div class="sub">3200px ancho · alta resolución</div></div><a href="kausalia-logo-3200.png" download>Descargar</a></div>
+        </div>
+        <div class="card dark">
+          <div class="preview"><img src="kausalia-logo-white-1600.png" style="max-width:420px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo-white-1600.png</div><div class="sub">Versión blanca · fondos oscuros</div></div><a href="kausalia-logo-white-1600.png" download>Descargar</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>SVG standalone</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="preview"><img src="kausalia-logo.svg" style="max-width:440px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo.svg</div><div class="sub">Vector · Inter embebida · escala infinita</div></div><a href="kausalia-logo.svg" download>Descargar</a></div>
+        </div>
+        <div class="card dark">
+          <div class="preview"><img src="kausalia-logo-white.svg" style="max-width:440px"/></div>
+          <div class="meta"><div><div class="name">kausalia-logo-white.svg</div><div class="sub">Para fondos oscuros</div></div><a href="kausalia-logo-white.svg" download>Descargar</a></div>
+        </div>
+        <div class="card">
+          <div class="preview" style="gap:28px">
+            <img src="kausalia-favicon.svg" width="32" height="32">
+            <img src="kausalia-favicon.svg" width="64" height="64">
+            <img src="kausalia-favicon.svg" width="128" height="128">
+          </div>
+          <div class="meta"><div><div class="name">kausalia-favicon.svg</div><div class="sub">Favicon / icono</div></div><a href="kausalia-favicon.svg" download>Descargar</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Cómo usarlo en tu web (pásaselo a Sonnet)</h2>
+      <pre><span class="cmt">&lt;!-- 1. En el &lt;head&gt; de tu web --&gt;</span>
+<span class="tag">&lt;link</span> <span class="atr">href</span>=<span class="str">"https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap"</span> <span class="atr">rel</span>=<span class="str">"stylesheet"</span><span class="tag">&gt;</span>
+
+<span class="cmt">&lt;!-- 2. Para usar el SVG (lo más simple): --&gt;</span>
+<span class="tag">&lt;img</span> <span class="atr">src</span>=<span class="str">"/logo/kausalia-logo.svg"</span> <span class="atr">alt</span>=<span class="str">"KausalIA"</span> <span class="atr">height</span>=<span class="str">"40"</span><span class="tag">&gt;</span>
+
+<span class="cmt">&lt;!-- 3. Como favicon: --&gt;</span>
+<span class="tag">&lt;link</span> <span class="atr">rel</span>=<span class="str">"icon"</span> <span class="atr">href</span>=<span class="str">"/logo/kausalia-favicon.svg"</span> <span class="atr">type</span>=<span class="str">"image/svg+xml"</span><span class="tag">&gt;</span>
+
+<span class="cmt">&lt;!-- 4. Para calidad máxima: pega el componente HTML
+     (ver archivo kausalia-logo.html) y ajusta tamaño con
+     style="--logo-size: 80px" --&gt;</span></pre>
+    </div>
+
+    <div class="section" style="color:var(--muted);font-size:13px;line-height:1.6">
+      <strong>Notas:</strong><br>
+      • Tipografía: <strong>Inter 600</strong> (gratis, Google Fonts) · Color gris <code>#2B2F36</code> · Degradado azul <code>#0E1A44 → #1E3A8A → #3B7BD9</code>.<br>
+      • Área de seguridad mínima: igual a la altura de la letra “K”.<br>
+      • Si necesitas un SVG con la tipografía convertida a curvas (sin depender de Google Fonts), dímelo y lo preparo.
+    </div>
+  </div>
+</body></html>
