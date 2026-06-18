@@ -13,9 +13,11 @@ function processQueue(error) {
 }
 
 function clearSession() {
-  // Limpiar solo datos no sensibles de sessionStorage/memoria
   delete window.__kausalia_mem_token__
-  // Redirigir al login — el backend borrará las cookies al hacer logout
+  sessionStorage.removeItem('kausal_user')
+  localStorage.removeItem('token')
+  localStorage.removeItem('refresh_token')
+  localStorage.removeItem('user')
   window.location.href = '/login'
 }
 
@@ -38,14 +40,18 @@ export async function handleUnauthorized(originalRequest, axiosInstance) {
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     const resp = await fetch(`${baseURL}/api/auth/refresh-cookie`, {
       method:      'POST',
-      credentials: 'include', // incluye cookies HttpOnly en el request
+      credentials: 'include',
       headers:     { 'Content-Type': 'application/json' },
     })
 
     if (!resp.ok) throw new Error('Refresh failed')
 
+    const body = await resp.json().catch(() => ({}))
+    if (body.access_token) {
+      window.__kausalia_mem_token__ = body.access_token
+    }
+
     processQueue(null)
-    // Reintentar la request original — el nuevo access_token está en cookie
     return axiosInstance(originalRequest)
   } catch (err) {
     processQueue(err)

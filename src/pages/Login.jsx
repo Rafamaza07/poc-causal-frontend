@@ -46,6 +46,9 @@ export default function Login({ onLogin }) {
     try {
       // Usa el endpoint cookie-based: tokens en HttpOnly, no en JS
       const { data } = await API.post('/api/auth/login-cookie', form)
+      if (data.access_token) {
+        window.__kausalia_mem_token__ = data.access_token
+      }
       onLogin({
         usuario:    data.usuario,
         nombre:     data.nombre,
