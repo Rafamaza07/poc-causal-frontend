@@ -420,14 +420,20 @@ export default function EvaluarPaciente() {
 
   const [empresas, setEmpresas]               = useState([])
   const [empresasLoading, setEmpresasLoading] = useState(false)
+  const [empresasError, setEmpresasError]     = useState(false)
   const [previewId, setPreviewId]             = useState('')
   const [previewLoading, setPreviewLoading]   = useState(false)
 
   useEffect(() => {
     setEmpresasLoading(true)
+    setEmpresasError(false)
     API.get('/api/empresas')
       .then(r => setEmpresas(r.data))
-      .catch(() => setEmpresas([]))
+      .catch(() => {
+        setEmpresas([])
+        setEmpresasError(true)
+        toast('No se pudieron cargar las empresas. Verifica la conexión o contacta al administrador.', 'error')
+      })
       .finally(() => setEmpresasLoading(false))
   }, [])
 
@@ -1076,7 +1082,13 @@ export default function EvaluarPaciente() {
                 disabled={empresasLoading}
               >
                 <option value="">
-                  {empresasLoading ? 'Cargando empresas…' : empresas.length === 0 ? 'Sin empresas registradas' : '— Seleccionar empresa —'}
+                  {empresasLoading
+                    ? 'Cargando empresas…'
+                    : empresasError
+                    ? 'Error al cargar empresas'
+                    : empresas.length === 0
+                    ? 'Sin empresas registradas'
+                    : '— Seleccionar empresa —'}
                 </option>
                 {empresas.map(emp => (
                   <option key={emp.id} value={emp.id}>{emp.nombre}</option>
